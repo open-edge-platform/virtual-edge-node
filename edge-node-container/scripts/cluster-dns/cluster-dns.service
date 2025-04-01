@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+[Unit]
+Description=cluster-dns
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/cluster-dns/env
+ExecStart=/usr/bin/cluster-dns service
+User=root
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

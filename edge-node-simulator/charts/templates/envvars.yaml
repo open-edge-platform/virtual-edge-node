@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Note that the agent values are coming from the bma_values.yaml
+# no default values are defined for them
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-vars-{{ include "ensim.fullname" . }}
+data:
+  {{- if .Values.proxy.enabled }}
+  HTTP_PROXY: "{{ .Values.proxy.http_proxy }}"
+  HTTPS_PROXY: "{{ .Values.proxy.https_proxy }}"
+  NO_PROXY: "{{ .Values.proxy.no_proxy }}"
+  http_proxy: "{{ .Values.proxy.http_proxy }}"
+  https_proxy: "{{ .Values.proxy.https_proxy }}"
+  no_proxy: "{{ .Values.proxy.no_proxy }}"
+  {{- end }}

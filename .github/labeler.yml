@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+CI 🤖:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+root:
+  - changed-files:
+      - any-glob-to-any-file: "*"
+
+edge-node-simulator:
+  - changed-files:
+    - any-glob-to-any-file: "edge-node-simulator/**"
+
+edge-node-container:
+  - changed-files:
+    - any-glob-to-any-file: "edge-node-container/**"

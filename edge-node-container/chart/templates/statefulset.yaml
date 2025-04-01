@@ -1,0 +1,176 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+
+{{- $registryEnic := .Values.global.registry -}}
+{{- $registryUtils := .Values.global.registry -}}
+{{- if .Values.images.enic.registry -}}
+{{- $registryEnic = .Values.images.enic.registry -}}
+{{- end }}
+{{- if .Values.images.utils.registry -}}
+{{- $registryUtils = .Values.images.utils.registry -}}
+{{- end }}
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "enic.fullname" . }}
+  labels:
+    {{- include "enic.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: enic
+      app: enic
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/envvars: {{ include (print $.Template.BasePath "/envvars.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/part-of: enic
+        app: enic
+        release: {{ .Release.Name }}
+    spec:
+      {{- with .Values.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "enic.serviceAccountName" . }}
+      hostAliases:
+      {{- if  .Values.param.orch_ip }}
+      - ip: "{{ .Values.param.orch_ip }}"
+        hostnames:
+        - "{{ .Values.param.orch_fqdn }}"
+        - "app-orch.{{ .Values.param.orch_fqdn }}"
+        - "api-proxy.{{ .Values.param.orch_fqdn }}"
+        - "api.{{ .Values.param.orch_fqdn }}"
+        - "app-service-proxy.{{ .Values.param.orch_fqdn }}"
+        - "cluster-orch-node.{{ .Values.param.orch_fqdn }}"
+        - "cluster-orch-edge-node.{{ .Values.param.orch_fqdn }}"
+        - "fleet.{{ .Values.param.orch_fqdn }}"
+        - "gitea.{{ .Values.param.orch_fqdn }}"
+        - "infra-node.{{ .Values.param.orch_fqdn }}"
+        - "onboarding-node.{{ .Values.param.orch_fqdn }}"
+        - "onboarding-stream.{{ .Values.param.orch_fqdn }}"
+        - "tinkerbell-server.{{ .Values.param.orch_fqdn }}"
+        - "keycloak.{{ .Values.param.orch_fqdn }}"
+        - "log-query.{{ .Values.param.orch_fqdn }}"
+        - "logs-node.{{ .Values.param.orch_fqdn }}"
+        - "metrics-node.{{ .Values.param.orch_fqdn }}"
+        - "observability-admin.{{ .Values.param.orch_fqdn }}"
+        - "observability-ui.{{ .Values.param.orch_fqdn }}"
+        - "rancher.{{ .Values.param.orch_fqdn }}"
+        - "registry.{{ .Values.param.orch_fqdn }}"
+        - "release.{{ .Values.param.orch_fqdn }}"
+        - "rsproxy.{{ .Values.param.orch_fqdn }}"
+        - "rsproxy-files.{{ .Values.param.orch_fqdn }}"
+        - "telemetry-node.{{ .Values.param.orch_fqdn }}"
+        - "update-node.{{ .Values.param.orch_fqdn }}"
+        - "vault-edge-node.{{ .Values.param.orch_fqdn }}"
+        - "vault.{{ .Values.param.orch_fqdn }}"
+        - "vnc.{{ .Values.param.orch_fqdn }}"
+        - "web-ui.{{ .Values.param.orch_fqdn }}"
+        - "ws-app-service-proxy.{{ .Values.param.orch_fqdn }}"
+        - "connect-gateway.{{ .Values.param.orch_fqdn }}"
+      {{- end }}
+      - ip: "127.0.0.1"
+        hostnames:
+        - "localhost.internal"
+      initContainers:
+        - name: fake-uuid
+          {{- if hasKey $registryUtils "name" }}
+          image: "{{ $registryUtils.name }}{{ .Values.images.utils.repository }}:{{ .Values.images.utils.tag | default .Chart.AppVersion }}"
+          {{- else }}
+          image: "{{ .Values.images.utils.repository }}:{{ .Values.images.utils.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.images.utils.pullPolicy }}
+          command: ["/opt/enic/bin/fake-uuid.sh", "/opt/enic/bin/dmiTemplate/dmi","/opt/enic/bin/dmiTemplate/dmi-dump", "/edgeinit", ""]
+          securityContext:
+            readOnlyRootFilesystem: true
+          volumeMounts:
+          - name: edge-init-vol
+            mountPath: /edgeinit
+      containers:
+        - name: edge-node
+          envFrom:
+            - configMapRef:
+                name: env-vars
+          securityContext:
+            privileged: true
+          {{- if hasKey $registryEnic "name" }}
+          image: "{{ $registryEnic.name }}{{ .Values.images.enic.repository }}:{{ .Values.images.enic.tag | default .Chart.AppVersion }}"
+          {{- else }}
+          image: "{{ .Values.images.enic.repository }}:{{ .Values.images.enic.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.images.enic.pullPolicy }}
+          {{- if .Values.param.oamServerAddress }}
+          {{- $oamservport:= (splitList ":" .Values.param.oamServerAddress) | last | atoi }}
+          livenessProbe:
+            grpc:
+              port: {{ $oamservport }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            grpc:
+              port: {{ $oamservport }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          {{- end}}
+          volumeMounts:
+          - name: edge-init-vol
+            mountPath: /sys/firmware/dmi/tables/DMI
+            subPath: dmi
+          - name: orch-ca
+            mountPath: "/usr/local/share/ca-certificates/ca.crt"
+            subPath: ca.crt
+            readOnly: true
+          - name: rancher-vol
+            mountPath: /var/lib/rancher
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+      {{/* This is a shared volume to store the FakeUUID generated files */}}
+      - name: edge-init-vol
+        emptyDir: {}
+      {{/* Mount the orch CA certificate if it is an in-cluster deployment mount the secret tls-orch */}}
+      - name: orch-ca
+        secret:
+          secretName: {{ .Values.tlsSecretName }}
+          items:
+            - key: ca.crt
+              path: ca.crt
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: rancher-vol
+    spec:
+      storageClassName: {{ .Values.storage.storageClassName }}
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi

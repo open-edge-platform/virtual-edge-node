@@ -1,0 +1,405 @@
+#!/usr/bin/expect -f
+
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+#exp_internal 1
+
+set username_hook $env(USERNAME_HOOK)
+set password_hook $env(PASSWORD_HOOK)
+set username_linux $env(USERNAME_LINUX)
+set password_linux $env(PASSWORD_LINUX)
+set ci_config $env(CI_CONFIG)
+
+# Define the signal handler
+proc cleanup {} {
+    puts "Caught signal, cleaning up..."
+    if {[exp_pid] > 0} {
+        # Send SIGTERM to the child process
+        exec kill -TERM [exp_pid]
+    }
+    # Ensure the script itself exits gracefully
+}
+
+# Trap SIGINT (Ctrl+C) and SIGTERM to call the cleanup procedure
+trap cleanup SIGINT
+trap cleanup SIGTERM
+
+# Disable logging of user input for security reasons
+log_user 1
+
+# Set variables from command line arguments
+set socket_path [lindex $argv 0]
+set vm_name [lindex $argv 1]
+set output_filename [lindex $argv 2]_log.txt
+
+# log file
+set log_dir "out/logs"
+set log_file "$log_dir/$output_filename"
+
+set log [open $log_file "a"]
+puts $log "[timestamp -format {%Y-%m-%d %H:%M:%S}] Starting new session: $vm_name"
+flush $log
+
+# Function to log the time difference
+proc log_time { start_time comment } {
+    global log
+    set end_time [clock seconds]
+    set time_diff [expr {$end_time - $start_time}]
+    puts $log "[timestamp -format {%Y-%m-%d %H:%M:%S}] $comment: $time_diff seconds"
+}
+
+set start_time [clock seconds]
+
+set min_sleep 3
+set max_sleep 120
+set sleep_time [expr {int($min_sleep + rand() * ($max_sleep - $min_sleep - 7)) + 10}]
+
+set exit_status 255
+# ranges
+### 1-10 - before http boot
+### 11- 20 -- hook boot
+### 31-70 -- hook, linux, Microvisor login
+### 35-> hook login attempt
+### 45 - 50 -- linux login
+### 51 - 55 -- Microvisor login
+### (51 - 55) + 10  OR (45 - 50) + 10-- Microvisor login
+
+### 100-120 -- linux post boot
+### 130-150 -- Microvisor post boot
+
+
+# Set a longer timeout for each expect command
+set timeout 700
+
+# Check the number of arguments
+if { $argc <= 4 && $ci_config == "false" } {
+    spawn minicom -D unix\#$socket_path
+} else {
+    spawn  nc -U $socket_path
+}
+
+#spawn nc -U $socket_path
+#spawn minicom -D unix\#$socket_path
+
+# signed_ipxe.efi -> boot.ipxe -> vmlinuz-x86_64 -> initramfs-x86_64 ->linux boot
+#Start HTTP Boot over IPv4....
+#Loading the Tinkerbell Hook iPXE script...
+#tink-stack/boot.ipxe....
+#tink-stack/vmlinuz-x86_64... ok
+#tink-stack/initramfs-x86_64... ok
+#BdsDxe: loading Boot0001
+
+set domain_regex "https://.*"
+
+# Construct the pattern to match the variable domain with the regex and the fixed part exactly
+set pattern_ipxe "${domain_regex}/tink-stack/signed_ipxe.efi"
+set pattern_bootipxe "${domain_regex}/tink-stack/boot.ipxe"
+set pattern_vmlinuz "${domain_regex}/tink-stack/vmlinuz-x86_64"
+set pattern_initramfs "${domain_regex}/tink-stack/initramfs-x86_64"
+
+set reset_txt "Reset System.*"
+
+
+set exit_status 1
+expect {
+    -ex "Start HTTP Boot over IPv4" {
+        log_time $start_time "Start ipxe http IFWI"
+        flush $log
+        set start_time [clock seconds]
+        expect "Station IP address is"
+        set timeout 800
+        set exit_status 2
+        log_time $start_time "Station ip detected"
+        puts $log "to wait for pattern $pattern_ipxe"
+        flush $log
+        expect {
+            -re ${pattern_ipxe} {
+                log_time $start_time "Time start to dload signed_ipxe.efi"
+                set start_time [clock seconds]
+                flush $log
+                set exit_status 3
+                expect "100%"
+                log_time $start_time "Time taken to dload signed_ipxe.efi"
+                set start_time [clock seconds]
+                flush $log
+            }
+            timeout {
+                #TODO Time start to dload signed_ipxe.efi download failue -- IFWI issue
+                # send_user "Error: Start HTTP Boot over IP4 next timeout period.\n"
+                log_time $start_time "Error: Recover Start HTTP Boot over .\n"
+                flush $log
+                # Timeout error, call cleanup
+                cleanup
+                exit 4
+                ###### expect "Shell>"
+                ###### send "reset"
+                ###### send "\r"
+                ###### set timeout 600
+                ###### exp_continue
+            }
+        }
+        set start_time [clock seconds]
+        flush $log
+    }
+    timeout {
+        send_user "Error: Initial message not received within the timeout period.\n"
+        # Timeout error, call cleanup
+        cleanup
+        exit 5
+    }
+}
+
+set timeout 1200
+set exit_status 10
+# Unexpected network error.
+expect {
+    -re ${pattern_bootipxe} {
+        log_time $start_time "Time taken to load signed_ipxe.efi"
+        set start_time [clock seconds]
+        set exit_status 11
+        expect "ok"
+        log_time $start_time "Time taken to dload boot.ipxe"
+        flush $log
+        set timeout 1200
+        exp_continue
+    }
+    -re $pattern_vmlinuz {
+        set start_time [clock seconds]
+        set timeout 1200
+        set exit_status 12
+        expect "ok"
+        log_time $start_time "Time taken to dload vmlinuz-x86_64"
+        exp_continue
+    }
+    -re $pattern_initramfs {
+        set timeout 1200
+        set exit_status 13
+        set start_time [clock seconds]
+        expect "ok"
+        log_time $start_time "Time taken to dload initramfs-x86_64"
+        set start_time [clock seconds]
+        flush $log
+        set timeout 900
+#        exp_continue
+    }
+    -ex "Retry with UEFI HTTP Boot again." {
+        set timeout 30
+        set exit_status 14
+        # Now expect iPxe prompt
+        expect "iPXE>"
+        # Recover from ipxe prompt
+        send "reboot\r"
+        set timeout 6000
+        log_time $start_time "Reset---Recover from iPXE shell prompt stage 2"
+        flush $log
+        set start_time [clock seconds]
+        exp_continue
+    }
+    -ex "Shell>" {
+        set timeout 30
+        set exit_status 15
+        send "reset\r"
+        set timeout 6000
+        log_time $start_time "Reset---Recover from UEFI shell prompt stage 2"
+        flush $log
+        exp_continue
+    }
+    timeout {
+        # send_user "Error: Initial message not received within the timeout period.\n"
+        # Timeout error, call cleanup
+        puts $log "Efi boot Error: timeout failure"
+        set exit_status 17
+    #    set exit_status [expr {$exit_status + 1}]
+        cleanup
+        exit $exit_status
+    }
+}
+
+puts $log "After Hook init ramfs exit stat $exit_status"
+
+## to capture if its io or nio make it
+set exit_status 30
+set timeout 1800
+
+expect {
+    -re "EFI stub: Loaded initrd" {
+        log_time $start_time "Time start hookOS boot"
+        set start_time [clock seconds]
+        set exit_status 31
+        exp_continue
+    }
+    -ex "Provide User" {
+        set start_time [clock seconds]
+        log_time $start_time "Time taken to load IO path waiting for credentials"
+        flush $log
+        # Now expect the username prompt
+        expect "Username:"
+        set exit_status 35
+        set timeout 300
+        puts $log "---- IO flow happening  ----"
+        # Send the username
+        send "$username_hook\r"
+        # Now expect the password prompt
+        log_user 0
+        expect "Password:"
+        # Send the password
+        send "$password_hook\r"
+        log_user 1
+        # 36 -- password entered
+        set exit_status 36
+        log_time $start_time "KC creds taken to HookOS"
+        set start_time [clock seconds]
+        flush $log
+        set timeout 3600
+        exp_continue
+    }
+    -ex "Secure Boot Status" {
+        log_time $start_time "Secure Boot Status matched"
+        if { $exit_status == 36 } {
+	    puts $log "---- IO flow happening  ----"
+            log_time $start_time "Workflow Running"
+            set exit_status 37
+        } else {
+            puts $log "---- NIO flow happening  ----"
+            log_time $start_time "Workflow Running"
+            set exit_status [expr {$exit_status + 1}]
+        }
+	flush $log
+#        exp_continue
+    }
+#    -ex "Restarting system" {
+#        if { $exit_status == 37 } {
+#            log_time $start_time "Reset HookOS, workflow completed"
+#        } else {
+#            log_time $start_time "its NIO completed"
+#        }
+#        set exit_status 38
+#        set start_time [clock seconds]
+        # Exit the loop if "Reset System" is encountered
+    #    break
+#    }
+    timeout {
+        puts $log "Linux Error: timeout failure"
+        set exit_status [expr {$exit_status + 10}]
+        cleanup
+        exit $exit_status
+    }
+}
+
+puts $log "---- In between - hookOS to OS ----"
+flush $log
+
+expect {
+    -re {BdsDxe: starting Boot[0-9A-F]+} {
+	log_time $start_time "Reset HookOS, workflow completed"
+        set timeout 60
+        set exit_status 130
+        exp_continue
+     }
+
+     -re "Reset System" {
+            log_time $start_time "Ubuntu boot detected"
+            set exit_status 38
+            # Handle Ubuntu booting logic here if needed
+            exp_continue
+     }
+     -re {BdsDxe: starting Boot[0-9A-F]+ "ubuntu"} {
+            log_time $start_time "Multi-line pattern detected: Ubuntu boot detected"
+            set exit_status 38
+            # Handle Ubuntu booting logic here if needed
+            exp_continue
+     }
+     -re "Ubuntu 22.04" {
+          log_time $start_time "Time taken to start Ubuntu"
+          set exit_status 46
+          flush $log
+          set timeout 120
+          # Now expect the username prompt
+          expect "login:"
+          # Send the username
+          send "$username_linux\r"
+          # Now expect the password prompt
+          log_user 0
+          expect "Password:"
+          # Send the password
+          send "$password_linux\r"
+          log_user 1
+          set timeout 300
+          set start_time [clock seconds]
+          puts $log "Ubuntu Login success, waiting for agent installer done"
+          set exit_status 100
+    }
+    timeout {
+        if {$exit_status == 130} {
+	   log_time $start_time "Edge Microvisor boot detected"
+	} else {
+            puts $log "OS Error: timeout failure"
+            set exit_status [expr {$exit_status + 10}]
+            cleanup
+            exit $exit_status
+	}
+    }
+}
+
+set timeout 3600
+puts $log "After OS flashing exit_code ${exit_status}"
+flush $log
+
+if { $exit_status >= 100 && $exit_status < 130 } {
+    expect "$ "
+    sleep 30
+    set timeout 3600
+    puts $log "Starting Node agents Installations"
+    flush $log
+send "tail -f /home/postinstall/Setup/.success_install_status\r"
+
+    set exit_status 101
+expect {
+    -re "delete_invalid_ubuntu_boot_menuoptions done" {
+        # Perform any actions you want after the pattern is found
+        # For example, to stop tailing the file, you could send a Ctrl-C:
+        send "\x03"
+        # Or to exit the session:
+        send "exit\r"
+        log_time $start_time "Time taken to provision node installer"
+            log_time $start_time "Finished Provisioning Ubuntu ready to use ------"
+            set exit_status 120
+        flush $log
+    }
+    -ex "No space left on device" {
+        log_time $start_time "------ DISK IS OUT OF SPACE ---------"
+        log_time $start_time "Failure happened, vm in bad shape  ---------"
+            set exit_status [expr {$exit_status + 1}]
+        flush $log
+        send "\x03"
+        exit $exit_status
+    }
+    timeout {
+            puts $log "Installer Script some failure happened, timeout\n"
+        send "\x03"
+            set exit_status [expr {$exit_status + 3}]
+        cleanup
+        exit $exit_status
+    }
+}
+} elseif { $exit_status >= 130 && $exit_status < 150 } {
+    set exit_status 131
+    puts "In Microvisor status check: $exit_status"
+} else {
+    puts "Unexpected exit status: $exit_status"
+}
+
+puts $log "----  OS Ready to use exit_code ${exit_status}  ----"
+
+flush $log
+close $log
+
+# Hand over control to the user
+#interact
+
+# End the expect script
+# expect eof
+
+cleanup
+exit $exit_status

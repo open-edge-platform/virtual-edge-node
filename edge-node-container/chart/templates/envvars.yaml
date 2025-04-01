@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Note that the agent values are coming from the bma_values.yaml
+# no default values are defined for them
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-vars
+data:
+  {{- if .Values.proxy.enabled }}
+  HTTP_PROXY: "{{ .Values.proxy.http_proxy }}"
+  HTTPS_PROXY: "{{ .Values.proxy.https_proxy }}"
+  NO_PROXY: "{{ .Values.proxy.no_proxy }}"
+  http_proxy: "{{ .Values.proxy.http_proxy }}"
+  https_proxy: "{{ .Values.proxy.https_proxy }}"
+  no_proxy: "{{ .Values.proxy.no_proxy }}"
+  {{- end }}
+  PATH: "{{ .Values.param.path}}"
+  DEBUG: "{{ .Values.param.debug }}"
+  _ORCH_IP_: "{{ .Values.param.orch_ip }}"
+  _ORCH_FQDN_: "{{ .Values.param.orch_fqdn }}"
+  _ORCH_USER_: "{{ .Values.param.orchUser }}"
+  _ORCH_PASS_: "{{ .Values.param.orchPass }}"
+  _ORCH_ORG_: "{{ .Values.param.orchOrg }}"
+  _ORCH_PROJECT_: "{{ .Values.param.orchProject }}"
+  _ENABLE_NIO_: "{{ .Values.param.enableNIO }}"
+  _OAM_SERVER_ADDRESS_: "{{ .Values.param.oamServerAddress }}"
+  _NODE_AGENT_VERSION_: "{{ .Values.bma_versions.node_agent_version }}"
+  _CLUSTER_AGENT_VERSION_: "{{ .Values.bma_versions.cluster_agent_version }}"
+  _HDA_AGENT_VERSION_: "{{ .Values.bma_versions.hardware_discovery_agent_version }}"
+  _POA_AGENT_VERSION_: "{{ .Values.bma_versions.platform_observability_agent_version }}"
+  _TRTL_VERSION_: "{{ .Values.bma_versions.trtl_version }}"
+  _INBM_CLOUDADAPTER_AGENT_VERSION_: "{{ .Values.bma_versions.inbm_cloudadapter_agent_version }}"
+  _INBM_DISPATCHER_AGENT_VERSION_: "{{ .Values.bma_versions.inbm_dispatcher_agent_version }}"
+  _INBM_CONFIGURATION_AGENT_VERSION_: "{{ .Values.bma_versions.inbm_configuration_agent_version }}"
+  _INBM_TELEMETRY_AGENT_VERSION_: "{{ .Values.bma_versions.inbm_telemetry_agent_version }}"
+  _INBM_DIAGNOSTIC_AGENT_VERSION_: "{{ .Values.bma_versions.inbm_diagnostic_agent_version }}"
+  _INBM_DISPATCHER_AGENT_VERSION_: "{{ .Values.bma_versions.inbm_dispatcher_agent_version }}"
+  _INBC_PROGRAM_VERSION_: "{{ .Values.bma_versions.inbc_program_version }}"
+  _MQTT_VERSION_: "{{ .Values.bma_versions.mqtt_version }}"
+  _TPM_PROVISION_VERSION_: "{{ .Values.bma_versions.tpm_provision_version }}"
+  _PLATFORM_UPDATE_AGENT_VERSION_: "{{ .Values.bma_versions.platform_update_agent_version }}"
+  _PLATFORM_TELEMETRY_AGENT_VERSION_: "{{ .Values.bma_versions.platform_telemetry_agent_version }}"
+  _CADDY_VERSION_: "{{ .Values.bma_versions.caddy_version }}"

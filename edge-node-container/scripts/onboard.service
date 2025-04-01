@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+[Unit]
+Description=Service running edge node provisioning
+After=network-online.target containerd.service
+Wants=network-online.target
+ConditionPathExists=!/var/edge_node/edge_node_onboarded
+
+[Service]
+User=root
+Restart=on-failure
+RestartSec=5s
+WorkingDirectory=/opt/enic/bin
+EnvironmentFile=/etc/environment
+
+ExecStart=/bin/bash /opt/enic/bin/onboard.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+FROM debian:12.9-slim
+
+ARG REPO_URL
+ARG VERSION
+ARG REVISION
+ARG BUILD_DATE
+
+LABEL org.opencontainers.image.version=${VERSION} \
+      org.opencontainers.image.source=${REPO_URL} \
+      org.opencontainers.image.revision=${REVISION} \
+      org.opencontainers.image.created=${BUILD_DATE}
+
+# Install base dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    --no-install-recommends \
+    curl \
+    uuid-runtime \
+    dmidecode \
+    gettext-base \
+    jq \
+    lsb-release \
+    sudo && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+RUN mkdir -p enic/bin
+
+# Copy fake-uuid.sh and dmiTemplate files to enic/bin
+COPY ./scripts/fake-uuid.sh ./enic/bin
+COPY ./scripts/dmiTemplate ./enic/bin/dmiTemplate
+
+ENV PATH="${PATH}:/opt/enic/bin"
+
+ENTRYPOINT  [""]

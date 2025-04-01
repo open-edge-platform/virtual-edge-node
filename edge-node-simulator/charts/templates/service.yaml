@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "ensim.fullname" . }}
+  labels:
+    {{- include "ensim.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "ensim.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: grpc
+      targetPort: grpc
+      protocol: TCP
+      port: {{ .Values.service.port}}
+
+{{- if .Values.service.nodePort.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "ensim.fullname" . }}-nodeport
+  labels:
+    {{- include "ensim.labels" . | nindent 4 }}
+spec:
+  type: NodePort
+  selector:
+    name: {{ template "ensim.fullname" . }}-nodeport
+    app: ensim
+    resource: {{ template "ensim.fullname" . }}
+  {{- include "ensim.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: grpc
+      port: {{ .Values.service.port }}
+      nodePort: {{ .Values.service.nodePort.port }}
+      protocol: TCP
+{{- end }}

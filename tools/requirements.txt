@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# lint yaml
+yamllint~=1.27.1
+
+# license check
+python-debian==0.1.44
+reuse~=1.0.0

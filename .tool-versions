@@ -1,0 +1,9 @@
+golangci-lint 1.63.4
+golang 1.24.1
+yq 4.34.2
+oras 1.2.0
+kind 0.17.0
+helm 3.11.1
+jq 1.6
+ginkgo 2.23.3
+gomega 1.36.2

@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# lint yaml
+yamllint~=1.35.1
+
+# license check
+reuse~=3.0.1
+
+# utils
+certifi==2023.7.22
+charset-normalizer==3.3.0
+idna==3.4
+PyYAML==6.0.1
+requests==2.31.0
+urllib3==2.0.6

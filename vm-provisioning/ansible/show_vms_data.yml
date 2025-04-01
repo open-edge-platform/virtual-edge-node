@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+
+- name: Run Show_vms_data script on Ansible controller
+  hosts: localhost
+  become: yes
+  vars_files:
+    - "{{ ansible_secret_file_path }}"
+  tasks:
+    - name: Gather list of servers
+      set_fact:
+        servers: >
+          {%- set server_list = [] -%}
+          {%- for host in groups['all'] -%}
+          {%- set _ = server_list.append({'user': hostvars[host]['ansible_user'], 'host': hostvars[host]['ansible_host'], 'copy_path': hostvars[host]['copy_path']}) -%}
+          {%- endfor -%}
+          {{ server_list }}
+
+    - name: Copy Show_vms_data script to controller
+      copy:
+        content: |
+          #!/bin/bash
+
+          # Define the SSH connections for each server
+          servers=(
+          {% for server in servers %}
+              "{{ server.user }}@{{ server.host }} {{ server.copy_path }}"
+          {% endfor %}
+          )
+
+          # Create the temporary log directory if it doesn't exist
+          mkdir -p {{ playbook_dir }}/logs
+
+          # Remove older log files before collecting new logs
+          rm -f {{ playbook_dir }}/logs/logfile_*.log
+          rm -f {{ playbook_dir }}/logs/merged_log.log
+
+          # Start background jobs to collect logs
+          for server in "${servers[@]}"; do
+              user=$(echo $server | cut -d' ' -f1 | cut -d'@' -f1)
+              hostname=$(echo $server | cut -d' ' -f1 | cut -d'@' -f2)
+              copy_path=$(echo $server | cut -d' ' -f2)
+              octet=$(echo $hostname | awk -F. '{print $4}')
+              logFile="$copy_path/logs/master_log_$octet.log"
+              tempLog="{{ playbook_dir }}/logs/logfile_$octet.log"
+
+              ssh $user@$hostname "tail -f $logFile" > $tempLog &
+          done
+
+          # Continuously merge the collected logs into a single output
+          while true; do
+              cat {{ playbook_dir }}/logs/logfile_*.log > {{ playbook_dir }}/logs/merged_log.log
+              sleep 1
+          done
+        dest: /tmp/Show_vms_data.sh
+        mode: '0755'
+
+    - name: Run Show_vms_data script
+      shell: /tmp/Show_vms_data.sh
+      async: 0
+      poll: 0
+      register: show_vms_data_job
+
+    - name: Wait for Show_vms_data script to finish
+      async_status:
+        jid: "{{ show_vms_data_job.ansible_job_id }}"
+      register: job_result
+      until: job_result.finished
+      retries: 30
+      delay: 10

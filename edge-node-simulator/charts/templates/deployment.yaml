@@ -1,0 +1,151 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+
+{{- $registry := .Values.global.registry -}}
+{{- if .Values.image.registry -}}
+{{- $registry = .Values.image.registry -}}
+{{- end }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ensim.fullname" . }}
+  labels:
+    {{- include "ensim.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ensim.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/envvars: {{ include (print $.Template.BasePath "/envvars.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ensim.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if hasKey $registry "name" }}
+      {{- with $registry.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      serviceAccountName: {{ include "ensim.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      hostAliases:
+      {{- if  .Values.configArgs.server.orchIP }}
+      - ip: "{{ .Values.configArgs.server.orchIP }}"
+        hostnames:
+        - "{{ .Values.configArgs.server.orchFQDN }}"
+        - "app-orch.{{ .Values.configArgs.server.orchFQDN }}"
+        - "api-proxy.{{ .Values.configArgs.server.orchFQDN }}"
+        - "app-service-proxy.{{ .Values.configArgs.server.orchFQDN }}"
+        - "cluster-orch-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "cluster-orch-edge-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "fleet.{{ .Values.configArgs.server.orchFQDN }}"
+        - "gitea.{{ .Values.configArgs.server.orchFQDN }}"
+        - "infra-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "onboarding-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "onboarding-stream.{{ .Values.configArgs.server.orchFQDN }}"
+        - "tinkerbell-server.{{ .Values.configArgs.server.orchFQDN }}"
+        - "keycloak.{{ .Values.configArgs.server.orchFQDN }}"
+        - "license-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "log-query.{{ .Values.configArgs.server.orchFQDN }}"
+        - "logs-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "metrics-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "observability-admin.{{ .Values.configArgs.server.orchFQDN }}"
+        - "observability-ui.{{ .Values.configArgs.server.orchFQDN }}"
+        - "rancher.{{ .Values.configArgs.server.orchFQDN }}"
+        - "registry.{{ .Values.configArgs.server.orchFQDN }}"
+        - "release.{{ .Values.configArgs.server.orchFQDN }}"
+        - "rsproxy.{{ .Values.configArgs.server.orchFQDN }}"
+        - "rsproxy-files.{{ .Values.configArgs.server.orchFQDN }}"
+        - "telemetry-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "update-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "vault-edge-node.{{ .Values.configArgs.server.orchFQDN }}"
+        - "vault.{{ .Values.configArgs.server.orchFQDN }}"
+        - "vnc.{{ .Values.configArgs.server.orchFQDN }}"
+        - "web-ui.{{ .Values.configArgs.server.orchFQDN }}"
+        - "ws-app-service-proxy.{{ .Values.configArgs.server.orchFQDN }}"
+      {{- end }}
+      - ip: "127.0.0.1"
+        hostnames:
+        - "localhost.internal"
+      containers:
+        - name: edge-node-simulator
+          envFrom:
+            - configMapRef:
+                name: env-vars-{{ include "ensim.fullname" . }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if hasKey $registry "name" }}
+          image: "{{ $registry.name }}{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- else }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- range $key, $value := .Values.configArgs.server }}
+            - {{ print "-" $key | toYaml -}}={{- $value }}
+            {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- if .Values.configArgs.server.oamServerAddress }}
+          {{- $oamservport:= (splitList ":" .Values.configArgs.server.oamServerAddress) | last | atoi }}
+          livenessProbe:
+            grpc:
+              port: {{ $oamservport }}
+            initialDelaySeconds: 30
+            periodSeconds: 300
+          readinessProbe:
+            grpc:
+              port: {{ $oamservport }}
+            initialDelaySeconds: 1
+            periodSeconds: 3
+            failureThreshold: 3
+          {{- end}}
+          volumeMounts:
+          - name: orch-ca
+            mountPath: "/usr/local/share/ca-certificates/orch-ca.crt"
+            subPath: ca.crt
+            readOnly: true
+          - name: tmp
+            mountPath: /tmp
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+      {{/* Mount the orch-CA certificate if it is an in-cluster deployment mount the secret tls-orch */}}
+      - name: orch-ca
+        secret:
+          secretName: {{ .Values.tlsSecretName }}
+          items:
+            - key: ca.crt
+              path: ca.crt
+      - emptyDir: {}
+        name: tmp
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

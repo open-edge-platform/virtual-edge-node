@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+[Unit]
+Description=Service running edge node provisioning
+After=network-online.target containerd.service
+Wants=network-online.target
+ConditionPathExists=!/var/edge_node/edge_node_provisioned
+
+[Service]
+User=root
+Restart=on-failure
+RestartSec=5s
+WorkingDirectory=/opt/enic/bin
+EnvironmentFile=/etc/environment
+
+ExecStart=/bin/bash /opt/enic/bin/agents.sh
+# Platform Update Agent makes use of bindfs which needs to be running for binding required files.
+# lpagent for PUA runs it but if lpke service becomes inactive the binding is lost. So, it needs
+# to be alive even after a successful execution/exit.
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

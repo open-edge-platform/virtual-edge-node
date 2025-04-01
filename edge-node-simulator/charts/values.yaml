@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for edge-node-simulator (ensim).
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+---
+replicaCount: 1
+global:
+  registry:
+    name: null
+    imagePullSecrets:
+      - name: ""
+
+image:
+  repository: infra/ensim
+  pullPolicy: IfNotPresent
+  # Image specific takes precedence
+  # registry:
+  #   name: null
+  #   imagePullSecrets:
+  #     - name: ""
+
+nameOverride: ""
+fullnameOverride: "ensim"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+podAnnotations: {}
+
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 65534
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+nodeSelector: {}
+storage: {}
+tolerations: []
+affinity: {}
+tlsSecretName: "tls-orch"
+
+configArgs:
+  server:
+    oamServerAddress: "0.0.0.0:2379"
+    globalLogLevel: "info"
+    gRPCPort: 3196
+    orchCAPath: "/usr/local/share/ca-certificates/orch-ca.crt"
+    orchFQDN: "kind.internal"
+    orchIP: ""
+
+service:
+  port: 3196
+  nodePort:
+    enabled: false
+    port: 31961
+
+resources:
+  requests:
+    memory: "4Gi"
+    cpu: "2"
+  limits:
+    memory: "16Gi"
+    cpu: 8
+proxy:
+  enabled: false
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""

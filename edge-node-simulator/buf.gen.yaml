@@ -1,0 +1,31 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# buf.gen.yaml
+# docs: https://docs.buf.build/configuration/v1/buf-gen-yaml
+
+version: v1
+
+plugins:
+
+  # go - https://pkg.go.dev/google.golang.org/protobuf
+  - plugin: buf.build/protocolbuffers/go:v1.33.0
+    out: pkg/api
+    opt:
+      - paths=source_relative
+
+  # go grpc - https://pkg.go.dev/google.golang.org/grpc
+  - plugin: buf.build/grpc/go:v1.3.0
+    out: pkg/api
+    opt:
+      - paths=source_relative
+      - require_unimplemented_servers=false
+
+  # validation:
+  #  - https://github.com/bufbuild/protovalidate
+  #  - https://github.com/bufbuild/protovalidate-go
+  - plugin: buf.build/bufbuild/validate-go:v1.0.1
+    out: pkg/api
+    opt:
+      - paths=source_relative

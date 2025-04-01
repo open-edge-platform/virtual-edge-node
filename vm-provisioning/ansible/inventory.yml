@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+
+all:
+  vars:
+    # add path before run ansible playbook e.g. ansible_vm_deploy_scripts: /home/intel/multivm_spawn_v7/
+    # add path of all dependent file or folder space separated e.g. ansible_vm_deploy_scripts: /home/intel/folder1 /home/intel/folder2 /home/intel/file1 /home/intel/file2
+    ansible_vm_deploy_scripts: ""
+    ansible_secret_file_path: ""   # add path before run ansible playbook e.g. /home/intel/ansible/secret.yml
+    ansible_timeout_for_create_vm_script: 14400   # The value is provided in seconds
+    ansible_timeout_for_install_vm_dependencies: 6000   # The value is provided in seconds
+  hosts:
+    host1:
+      ansible_host:   # add correct ip address e.g. 10.49.76.113
+      ansible_user:   # add correct ip user e.g. intel
+      ansible_password: "{{ host1_sudo_password }}"
+      ansible_become: yes
+      ansible_become_pass: "{{ host1_sudo_password }}"
+      ansible_become_method: sudo
+      ansible_become_user: root
+      copy_path: "/home/{{ ansible_user }}/ansible_scripts"
+      number_of_vms: 0
+      install_packages: 0   # non-sezo value for installing packages on remote host
+      nio_flow:   # true for NIO flow, false for IO_flow
+    host2:
+      ansible_host:    # add correct ip address e.g. 10.49.76.157
+      ansible_user:    # add correct ip user e.g. intel
+      ansible_password: "{{ host2_sudo_password }}"
+      ansible_become: yes
+      ansible_become_pass: "{{ host2_sudo_password }}"
+      ansible_become_method: sudo
+      ansible_become_user: root
+      copy_path: "/home/{{ ansible_user }}/ansible_scripts"
+      number_of_vms: 0
+      install_packages: 0   # non-sezo value for installing packages on remote host
+      nio_flow:   # true for NIO flow, false for IO_flow
+    host3:
+      ansible_host:    # add correct ip address e.g. 10.49.76.140
+      ansible_user:    # add correct ip user e.g. intel
+      ansible_password: "{{ host3_sudo_password }}"
+      ansible_become: yes
+      ansible_become_pass: "{{ host3_sudo_password }}"
+      ansible_become_method: sudo
+      ansible_become_user: root
+      copy_path: "/home/{{ ansible_user }}/ansible_scripts"
+      number_of_vms: 0
+      install_packages: 0   # non-sezo value for installing packages on remote host
+      nio_flow:   # true for NIO flow, false for IO_flow
+    host4:
+      ansible_host:   # add correct ip address e.g. 10.49.76.159
+      ansible_user:   # add correct ip user e.g. intel
+      ansible_password: "{{ host4_sudo_password }}"
+      ansible_become: yes
+      ansible_become_pass: "{{ host4_sudo_password }}"
+      ansible_become_method: sudo
+      ansible_become_user: root
+      copy_path: "/home/{{ ansible_user }}/ansible_scripts"
+      number_of_vms: 0
+      install_packages: 0   # non-sezo value for installing packages on remote host
+      nio_flow:   # true for NIO flow, false for IO_flow
+    host5:
+      ansible_host:   # add correct ip address e.g. 10.49.76.160
+      ansible_user:   # add correct ip user e.g. intel
+      ansible_password: "{{ host5_sudo_password }}"
+      ansible_become: yes
+      ansible_become_pass: "{{ host5_sudo_password }}"
+      ansible_become_method: sudo
+      ansible_become_user: root
+      copy_path: "/home/{{ ansible_user }}/ansible_scripts"
+      number_of_vms: 0
+      install_packages: 0   # non-sezo value for installing packages on remote host
+      nio_flow:   # true for NIO flow, false for IO_flow

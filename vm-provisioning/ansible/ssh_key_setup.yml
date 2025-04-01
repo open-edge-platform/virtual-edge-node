@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+- name: Set up SSH keys on localhost and copy them to remote hosts
+  hosts: localhost
+  gather_facts: yes
+  vars_files:
+    - "{{ ansible_secret_file_path }}"
+  tasks:
+    - name: Generate SSH key on localhost (if not exists)
+      ansible.builtin.openssh_keypair:
+        path: "~/.ssh/id_rsa"
+        size: 2048
+        state: present
+        type: rsa
+
+    - name: Install sshpass (required for ssh-copy-id with password)
+      ansible.builtin.apt:
+        name: sshpass
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Display the results
+      debug:
+        msg: "{{ lookup('vars', item + '_sudo_password') }}"
+      loop: "{{ groups['all'] }}"
+
+    - name: Copy SSH key to remote hosts
+      ansible.builtin.shell: |
+        sshpass -p "{{ lookup('vars', item + '_sudo_password') }}" ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no "{{ hostvars[item].ansible_user }}"@"{{ hostvars[item].ansible_host }}"
+      loop: "{{ groups['all'] }}"
+      no_log: true

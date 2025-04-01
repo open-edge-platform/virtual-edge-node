@@ -1,0 +1,250 @@
+// SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package ensim.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/field_behavior.proto";
+
+option go_package = "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/api/ensim/v1;ensimv1";
+
+// EdgeNodeModelService provides means to create, delete and read simulated edge nodes.
+service EdgeNodeModelService {
+  // CreateNodes creates a number of nodes
+  rpc CreateNodes(CreateNodesRequest) returns (CreateNodesResponse);
+  // CreateNode creates a single node
+  rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse);
+  // GetNode retrieves a node by UUID
+  rpc GetNode(GetNodeRequest) returns (GetNodeResponse);
+  // UpdateNode updates an existing node
+  rpc UpdateNode(UpdateNodeRequest) returns (UpdateNodeResponse);
+  // DeleteNode deletes a node by UUID
+  rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse);
+  // WatchNodes streams node events
+  rpc WatchNodes(WatchNodesRequest) returns (stream WatchNodesResponse);
+  // ListNodes streams a list of nodes
+  rpc ListNodes(ListNodesRequest) returns (stream ListNodesResponse);
+  // DeleteNodes deletes multiple nodes
+  rpc DeleteNodes(DeleteNodesRequest) returns (DeleteNodesResponse);
+}
+
+// Change event type
+enum EventType {
+  // NONE indicates this response represents a pre-existing entity
+  EVENT_TYPE_UNSPECIFIED = 0;
+
+  // CREATED indicates a new entity was created
+  EVENT_TYPE_CREATED = 1;
+
+  // UPDATED indicates an existing entity was updated
+  EVENT_TYPE_UPDATED = 2;
+
+  // DELETED indicates an entity was deleted
+  EVENT_TYPE_DELETED = 3;
+}
+
+// StatusSource represents the source of the status
+// i.e., where the status was generated from in the simulated edge node
+enum StatusSource {
+  STATUS_SOURCE_UNSPECIFIED = 0;
+  STATUS_SOURCE_ONBOARDED = 1;
+  STATUS_SOURCE_PROVISIONED = 2;
+  STATUS_SOURCE_REQUIREMENTS = 3;
+  STATUS_SOURCE_CREDENTIALS = 4;
+  STATUS_SOURCE_SETUP = 5;
+  STATUS_SOURCE_TEARDOWN = 6;
+  STATUS_SOURCE_NODE_AGENT = 7;
+  STATUS_SOURCE_UPDATE_AGENT = 8;
+  STATUS_SOURCE_HD_AGENT = 9;
+  STATUS_SOURCE_TELEMETRY_AGENT = 10;
+  STATUS_SOURCE_TOKEN_MANAGER = 11;
+}
+
+// StatusSource represents the value of the status for a given StatusSource
+enum StatusMode {
+  STATUS_MODE_UNSPECIFIED = 0;
+  STATUS_MODE_OK = 1;
+  STATUS_MODE_FAILED = 2;
+}
+
+// NodeStatus represents one of the status of the simulated edge node
+message NodeStatus {
+  StatusSource source = 1;
+  StatusMode mode = 2;
+  string details = 3;
+}
+
+enum AgentType {
+  AGENT_TYPE_UNSPECIFIED = 0;
+  AGENT_TYPE_NODE = 1;
+  AGENT_TYPE_UPDATE = 2;
+  AGENT_TYPE_HD = 3;
+  AGENT_TYPE_TELEMETRY = 4;
+}
+
+enum AgentState {
+  AGENT_STATE_UNSPECIFIED = 0;
+  AGENT_STATE_OFF = 1;
+  AGENT_STATE_ON = 2;
+}
+
+// AgentStatus represents the status of agents in the simulated edge node
+message AgentsStates {
+  AgentState desired_state = 1;
+  AgentState current_state = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+  AgentType agent_type = 3;
+}
+
+// NodeCredentials define all the credentials needed to simulate an edge node
+// I.e., enable the edge node to communicate with the orchestrator.
+message NodeCredentials {
+  // Project ID to be associated to the edge node.
+  string project_id = 1 [
+    (buf.validate.field).string = {uuid: true},
+    (buf.validate.field).required = true
+  ];
+  // Username to retrieve the project_id JWT token.
+  // This user must be added to keycloak, be part of the project_id and have the correct roles.
+  // Among them be part of the following keycloak group:
+  // "${proj_uuid}_Edge-Onboarding-Group"
+  string onboard_username = 2 [(buf.validate.field).required = true];
+  // Password associated to username.
+  string onboard_password = 3 [(buf.validate.field).required = true];
+
+  // Username to retrieve the project_id JWT token.
+  // This user must be added to keycloak, be part of the project_id and have the correct roles.
+  // Among them be part of the following keycloak group:
+  //  "${proj_uuid}_Host-Manager-Group"
+  string api_username = 4 [(buf.validate.field).required = true];
+  // Password associated to username.
+  string api_password = 5 [(buf.validate.field).required = true];
+}
+
+// Node represents a simulated edge node
+message Node {
+  // The node uuid
+  string uuid = 1 [
+    (buf.validate.field).string = {uuid: true},
+    (buf.validate.field).required = true
+  ];
+
+  NodeCredentials credentials = 2;
+
+  // The status of each one of the StatusSource for the simulated edge node
+  repeated NodeStatus status = 3 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The state of each one of the AgentType for the simulated edge node
+  repeated AgentsStates agents_states = 4;
+
+  // Check if the node is enabled to use NIO (Non-Interactive Onboarding)
+  bool enable_nio = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // Check if the node is enabled to perform teardown,
+  // i.e., remove the node from the orchestrator via Infrastructure Manager REST API.
+  bool enable_teardown = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// CreateNodeRequest create a node request
+message CreateNodeRequest {
+  // UUID to be used by new node, optional.
+  string uuid = 1 [(buf.validate.field).string = {uuid: true}];
+
+  NodeCredentials credentials = 2 [(buf.validate.field).required = true];
+
+  // Check if the node is enabled to use NIO (Non-Interactive Onboarding)
+  bool enable_nio = 5;
+
+  // Check if the node is enabled to perform teardown,
+  // i.e., remove the node from the orchestrator via Infrastructure Manager REST API.
+  bool enable_teardown = 6;
+}
+
+// CreateNodeResponse create a node response
+message CreateNodeResponse {}
+
+// CreateNodesRequest create nodes request
+message CreateNodesRequest {
+  // Total number of nodes to be created
+  uint32 number = 1;
+
+  // Total number of nodes to be created in parallel
+  uint32 batch_size = 2;
+
+  // The credentials associated to the edge nodes
+  NodeCredentials credentials = 3 [(buf.validate.field).required = true];
+
+  // Check if the node is enabled to use NIO (Non-Interactive Onboarding)
+  bool enable_nio = 5;
+
+  // Check if the node is enabled to perform teardown,
+  // i.e., remove the node from the orchestrator via Infrastructure Manager REST API.
+  bool enable_teardown = 6;
+}
+
+// CreateNodesResponse create nodes response
+message CreateNodesResponse {
+  repeated Node nodes = 1;
+}
+
+// GetNodeRequest get a node request
+message GetNodeRequest {
+  string uuid = 1 [
+    (buf.validate.field).string = {uuid: true},
+    (buf.validate.field).required = true
+  ];
+}
+
+// GetNodeResponse get a node response
+message GetNodeResponse {
+  Node node = 1;
+}
+
+// UpdateNodeRequest update a node request
+message UpdateNodeRequest {
+  Node node = 1;
+}
+
+// UpdateNodeResponse update a node response
+message UpdateNodeResponse {}
+
+// DeleteNodeRequest delete a node request
+message DeleteNodeRequest {
+  string uuid = 1 [
+    (buf.validate.field).string = {uuid: true},
+    (buf.validate.field).required = true
+  ];
+}
+
+// DeleteNodeResponse delete a node response
+message DeleteNodeResponse {}
+
+// DeleteNodesRequest delete nodes request
+message DeleteNodesRequest {
+  // Total number of nodes to be deleted
+  uint32 number = 1;
+}
+
+// DeleteNodesResponse delete nodes response
+message DeleteNodesResponse {}
+
+// ListNodesRequest list nodes request
+message ListNodesRequest {}
+
+// ListNodesResponse list nodes response
+message ListNodesResponse {
+  Node node = 1;
+}
+
+// WatchNodesRequest watch nodes request
+message WatchNodesRequest {
+  bool no_replay = 1;
+  bool no_subscribe = 2;
+}
+
+// WatchNodesResponse watch nodes response
+message WatchNodesResponse {
+  Node node = 1;
+  EventType type = 2;
+}

@@ -1,0 +1,25 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+version: v1
+deps:
+  - buf.build/bufbuild/protovalidate
+  - buf.build/googleapis/googleapis
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - STANDARD
+    - ENUM_FIRST_VALUE_ZERO
+    - COMMENT_MESSAGE
+    - COMMENT_RPC
+    - COMMENT_SERVICE
+  rpc_allow_google_protobuf_empty_responses: true
+  ignore_only:
+    # In accordance with AIP-131 we return un-wrapped resource messages on CRUD RPCs.
+    RPC_RESPONSE_STANDARD_NAME:
+      - ensim/v1/ensim.proto
+    RPC_REQUEST_RESPONSE_UNIQUE:
+      - ensim/v1/ensim.proto

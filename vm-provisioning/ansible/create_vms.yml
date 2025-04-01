@@ -1,0 +1,194 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+
+- name: Rsync
+  hosts: localhost
+  vars_files:
+    - "{{ ansible_secret_file_path }}"
+  tasks:
+    - name: Debug hostvars
+      debug:
+        var: hostvars[item]
+      loop: "{{ groups['all'] }}"
+      when: item != 'localhost'
+
+    - name: Remove directory on remote hosts
+      become: yes
+      become_method: sudo
+      ansible.builtin.file:
+        path: "{{ hostvars[item].copy_path }}"
+        state: absent
+      loop: "{{ groups['all'] }}"
+      when:
+        - hostvars[item].ansible_host is defined
+        - hostvars[item].ansible_user is defined
+        - hostvars[item].copy_path is defined
+        - item != 'localhost'
+      delegate_to: "{{ item }}"
+
+    - name: Synchronize directory from source to target machine using rsync
+      shell: rsync -avzP -e ssh {{ ansible_vm_deploy_scripts }} "{{ hostvars[item].ansible_user }}@{{ hostvars[item].ansible_host }}:{{ hostvars[item].copy_path }}"
+      loop: "{{ groups['all'] }}"
+      when:
+        - hostvars[item].ansible_host is defined
+        - hostvars[item].ansible_user is defined
+        - hostvars[item].copy_path is defined
+        - item != 'localhost'
+      delegate_to: localhost
+
+- name: Install specific packages, update apt cache, and verify applications
+  hosts: all
+  become: yes
+  vars_files:
+    - "{{ ansible_secret_file_path }}"
+  tasks:
+    - name: Check if install_packages is set to zero for each host
+      debug:
+        msg: "install_packages is set to zero on {{ ansible_host }}. VM dependencies will not be installed on this host."
+      when: install_packages == 0
+
+    - name: Register hosts where install_packages is not zero
+      set_fact:
+        install_packages_valid: true
+      when: install_packages != 0
+
+    - name: Fail if install_packages is zero for all hosts
+      meta: end_play
+      when: groups['all'] | map('extract', hostvars, 'install_packages_valid') | select('defined') | length == 0
+      ignore_errors: false
+
+    - name: Execute the installation script on the remote host and save the log
+      become: yes
+      expect:
+        command: "sh -c 'cd {{ copy_path }} && ./install_packages.sh | tee {{ copy_path }}/installation_log.txt'"
+        responses:
+          '\[sudo\] password for .*:': "{{ ansible_become_pass }}"
+        timeout: "{{ ansible_timeout_for_install_vm_dependencies }}"
+      register: create_vms_output
+      when: install_packages > 0
+
+    - name: Display the installation log directly from the remote host
+      command: cat "{{ copy_path }}/installation_log.txt"
+      register: installation_log
+      changed_when: false
+      when: install_packages > 0
+
+    - name: Show the installation log
+      debug:
+        var: installation_log.stdout_lines
+      when: install_packages > 0
+
+    - name: Verify installations and display versions
+      shell: dpkg -l | grep -E 'qemu|libvirt-daemon-system|ebtables|libguestfs-tools|libxslt-dev|libxml2-dev'
+      register: installed_apps
+      ignore_errors: yes
+      when: install_packages > 0
+
+    - name: Display the list of installed applications and their versions
+      debug:
+        msg: "{{ installed_apps.stdout_lines }}"
+      when: install_packages > 0
+
+- name: Clean up VMs and networks
+  hosts: all
+  become: yes
+  vars_files:
+    - "{{ ansible_secret_file_path }}"
+  tasks:
+    - name: Run clean_all_vm_networks_files.sh script
+      block:
+        - become: no
+          expect:
+            command: "sh -c 'cd {{ copy_path }} && ./scripts/vm_network_cleanup.sh'"
+            responses:
+              '\[sudo\] password for .*:': "{{ ansible_become_pass }}"
+            timeout: "{{ ansible_timeout_for_install_vm_dependencies }}"
+          register: clean_networks_output
+          when: number_of_vms > 0
+
+- name: Determine the maximum number of VMs for each host
+  hosts: all
+  become: yes
+  vars_files:
+    - "{{ ansible_secret_file_path }}"
+  tasks:
+    - name: Copy the calculation script to the remote host
+      copy:
+        content: |
+          #!/bin/bash
+          # VM parameters
+          VM_MEMORY=2048  # MB (2 GB)
+          VM_CPUS=2       # Number of vCPUs assigned to each VM
+          VM_DISK=45      # GB
+          # Reservations for the host
+          RESERVE_MEMORY_FOR_HOST=2048  # MB (2 GB)
+          RESERVE_CPUS_FOR_HOST=2       # Number of CPU cores reserved for the host
+          # Retrieve available resources
+          TOTAL_CPUS=$(grep -c ^processor /proc/cpuinfo)
+          TOTAL_RAM=$(free -m | awk '/^Mem:/{print $2}')
+          TOTAL_DISK=$(df --block-size=1G / | awk 'NR==2 {print $4}')
+          # Calculate usable resources
+          USABLE_CPUS=$((TOTAL_CPUS - RESERVE_CPUS_FOR_HOST))
+          USABLE_RAM=$((TOTAL_RAM - RESERVE_MEMORY_FOR_HOST))
+          # Calculate the maximum number of VMs
+          MAX_VMS_CPU=$((USABLE_CPUS / VM_CPUS))
+          MAX_VMS_RAM=$((USABLE_RAM / VM_MEMORY))
+          MAX_VMS_DISK=$((TOTAL_DISK / VM_DISK))
+          # Find the smallest value
+          MAX_VMS=$((MAX_VMS_CPU < MAX_VMS_RAM ? MAX_VMS_CPU : MAX_VMS_RAM))
+          MAX_VMS=$((MAX_VMS < MAX_VMS_DISK ? MAX_VMS : MAX_VMS_DISK))
+          # Display the result
+          echo "Total number of CPU cores (physical and virtual): $TOTAL_CPUS"
+          echo "Available RAM (MB): $TOTAL_RAM"
+          echo "Available Disk Space (GB): $TOTAL_DISK"
+          echo "Usable CPU cores after reserving for host: $USABLE_CPUS"
+          echo "Usable RAM (MB) after reserving for host: $USABLE_RAM"
+          echo "Maximum VMs based on CPU: $MAX_VMS_CPU"
+          echo "Maximum VMs based on RAM: $MAX_VMS_RAM"
+          echo "Maximum VMs based on Disk: $MAX_VMS_DISK"
+          echo "Overall Maximum Number of VMs: $MAX_VMS"
+          echo "The current user is: $(whoami)"
+        dest: /tmp/calculate_max_vms.sh
+        mode: '0755'
+
+    - name: Execute the calculation script
+      command: /tmp/calculate_max_vms.sh
+      register: result
+
+    - name: Display the results
+      debug:
+        msg: "{{ result.stdout_lines }}"
+
+    - name: Run create_vms script and save the log
+      block:
+        - name: Command to be executed
+          debug:
+            msg: >
+             sh -c 'cd {{ copy_path }} && ./scripts/create_vm.sh {{ number_of_vms }} {{ '-nio' if hostvars[inventory_hostname].nio_flow else '' }} | tee {{ copy_path }}/create_vms_log.txt'
+          when: number_of_vms > 0
+        - name: Execute create_vm.sh script as normal user
+          become: yes
+          become_user: "{{ ansible_user }}"
+          expect:
+            command: "sh -c 'cd {{ copy_path }} && ./scripts/create_vm.sh {{ number_of_vms }} {{ '-nio' if hostvars[inventory_hostname].nio_flow else '' }} | tee {{ copy_path }}/create_vms_log.txt'"
+            responses:
+              '\[sudo\] password for .*:': "{{ ansible_become_pass }}"
+            timeout: "{{ ansible_timeout_for_install_vm_dependencies }}"
+          register: create_vms_output
+          no_log: true
+          when: number_of_vms > 0
+      rescue:
+        - name: Fetch the create_vms log from the remote host on failure
+          fetch:
+            src: "{{ copy_path }}/create_vms_log.txt"
+            dest: "{{ playbook_dir }}/create_vms_log_{{ inventory_hostname }}.txt"
+            flat: yes
+        - name: Display an error message
+          fail:
+            msg: "The create_vms script did not complete within the defined timeout. Logs have been saved on Ansible controller in folder {{ playbook_dir }}/create_vms_log_{{ inventory_hostname }}.txt"
+    - name: Display the create_vms log if the script was successful
+      debug:
+        var: create_vms_output.stdout_lines
+      when: create_vms_output is defined and create_vms_output is not failed

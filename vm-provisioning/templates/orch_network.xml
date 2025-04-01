@@ -1,0 +1,25 @@
+<!--
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+-->
+<network xmlns:dnsmasq='http://libvirt.org/schemas/network/dnsmasq/1.0'>
+  <name>orchvm-net-000</name>
+  <bridge name='virbr-000' stp='on' delay='0'/>
+  <forward mode='nat'>
+  <interface dev='enp1s0'/>
+  </forward >
+  <ip address='192.168.000.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.000.3' end='192.168.000.155'/>
+    </dhcp>
+  </ip>
+  <dnsmasq:options>
+    <dnsmasq:option value='dhcp-vendorclass=set:efi-http,HTTPClient:Arch:00016'/>
+    <dnsmasq:option value='dhcp-option-force=tag:efi-http,60,HTTPClient'/>
+    <dnsmasq:option value='dhcp-match=set:ipxe,175'/>
+    <dnsmasq:option value='dhcp-boot=tag:efi-http,&quot;https://coder-xxx.jf.intel.com/tink-stack/signed_ipxe.efi&quot;'/>
+    <dnsmasq:option value='log-queries'/>
+    <dnsmasq:option value='log-dhcp'/>
+    <dnsmasq:option value='log-debug'/>
+  </dnsmasq:options>
+</network>

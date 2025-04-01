@@ -1,0 +1,72 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Load the configuration from the custom config file
+load './config'
+
+Vagrant.configure("2") do |config|
+  # Define the number of VMs
+  num_vms ||= orchvm-num-vms
+  
+  # Set a default management network name if not provided
+  BRIDGE_NAME ||= "orchvm-net-000"
+
+  VM_NAME = "orchvm-net-000-vm" if VM_NAME.nil? || VM_NAME.empty?
+
+  # Loop to create multiple VMs
+  (1..num_vms).each do |i|
+    padded_i = sprintf("%02d", i)
+    # Define the management network name
+    config.vm.define "#{VM_NAME}#{i}" do |vm_config|
+
+    config.vm.network :forwarded_port, guest: 22, host: (2200 + i - 1), host_ip: "0.0.0.0"
+
+      vm_config.vm.provider "libvirt" do |libvirt|
+        libvirt.title = "orchvm-net-000-vm#{i}"
+
+        if STANDALONE != 0
+          libvirt.storage_pool_name = "default"
+        else
+          libvirt.storage_pool_name = POOL_NAME
+        end  # Corrected from 'fi' to 'end'
+
+         libvirt.driver = LIBVIRT_DRIVER 
+
+	 # Network configuration to use the virbr0 bridge
+        libvirt.management_network_name = "orchvm-net-000"
+        libvirt.tpm_model = "tpm-tis"
+        libvirt.tpm_type = "emulator"
+        libvirt.tpm_version = "2.0"
+        libvirt.tpm_path = '/dev/tpm0'
+        libvirt.memory = RAM_SIZE
+        libvirt.cpus = NO_OF_CPUS
+        libvirt.loader = "/usr/share/OVMF/OVMF_CODE_orchvm-net-000-vm#{i}.fd"
+        libvirt.nvram = "/usr/share/OVMF/OVMF_VARS_orchvm-net-000-vm#{i}.fd"
+
+        libvirt.qemu_args = [
+          { value: '-chardev' },
+          { value: "socket,id=serial0,path=/tmp/console0_orchvm-net-000-vm#{i}.sock,server=on,wait=off" },
+          { value: '-serial' },
+          { value: 'chardev:serial0' },
+          { value: '-chardev' },
+          { value: "socket,id=serial1,path=/tmp/console1_orchvm-net-000-vm#{i}.sock,server=on,wait=off" },
+          { value: '-serial' },
+          { value: 'chardev:serial1' },
+          { value: '-fw_cfg' },
+          { value: 'name=etc/edk2/https/cacerts,file=/var/lib/libvirt/boot/orchvm-net-000_ca.der'},
+          { value: '-smbios' },
+	  { value: "type=1,serial=VH000N000M#{padded_i}"}
+        ]
+        libvirt.storage :file, :size => SDA_DISK_SIZE, :type => 'qcow2', :device => 'sda', :bus => 'sata', :detect_zeroes => 'on'
+        libvirt.storage :file, :size => SDB_DISK_SIZE, :type => 'qcow2', :device => 'sdb', :bus => 'sata', :detect_zeroes => 'on'
+
+        libvirt.boot "hd"
+        libvirt.boot "network"
+      #  libvirt.boot "cdrom"
+      end
+    end
+  end
+end

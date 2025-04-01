@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+- name: Install specific packages, update apt cache, and verify applications
+  hosts: all
+  become: yes
+  vars_files:
+    - "{{ ansible_secret_file_path }}"
+  tasks:
+    - name: Copy the calculation script to the remote host
+      copy:
+        content: |
+          #!/bin/bash
+          # VM parameters
+          VM_MEMORY=2048  # MB (2 GB)
+          VM_CPUS=2       # Number of vCPUs assigned to each VM
+          VM_DISK=45      # GB
+          # Reservations for the host
+          RESERVE_MEMORY_FOR_HOST=2048  # MB (2 GB)
+          RESERVE_CPUS_FOR_HOST=2       # Number of CPU cores reserved for the host
+          # Retrieve available resources
+          TOTAL_CPUS=$(grep -c ^processor /proc/cpuinfo)
+          TOTAL_RAM=$(free -m | awk '/^Mem:/{print $2}')
+          FREE_DISK=$(df --output=avail --block-size=1G / | tail -n 1)
+          # Calculate usable resources
+          USABLE_CPUS=$((TOTAL_CPUS - RESERVE_CPUS_FOR_HOST))
+          USABLE_RAM=$((TOTAL_RAM - RESERVE_MEMORY_FOR_HOST))
+          # Calculate the maximum number of VMs
+          MAX_VMS_CPU=$((USABLE_CPUS / VM_CPUS))
+          MAX_VMS_RAM=$((USABLE_RAM / VM_MEMORY))
+          MAX_VMS_DISK=$((FREE_DISK / VM_DISK))
+          # Find the smallest value
+          MAX_VMS=$((MAX_VMS_CPU < MAX_VMS_RAM ? MAX_VMS_CPU : MAX_VMS_RAM))
+          MAX_VMS=$((MAX_VMS < MAX_VMS_DISK ? MAX_VMS : MAX_VMS_DISK))
+          # Display the result
+          echo "Total number of CPU cores (physical and virtual): $TOTAL_CPUS"
+          echo "Available RAM (MB): $TOTAL_RAM"
+          echo "Free Disk Space (GB): $FREE_DISK"
+          echo "Usable CPU cores after reserving for host: $USABLE_CPUS"
+          echo "Usable RAM (MB) after reserving for host: $USABLE_RAM"
+          echo "Maximum VMs based on CPU: $MAX_VMS_CPU"
+          echo "Maximum VMs based on RAM: $MAX_VMS_RAM"
+          echo "Maximum VMs based on Disk: $MAX_VMS_DISK"
+          echo "Overall Maximum Number of VMs: $MAX_VMS"
+        dest: /tmp/calculate_max_vms.sh
+        mode: '0755'
+
+    - name: Execute the calculation script
+      command: /tmp/calculate_max_vms.sh
+      register: result
+
+    - name: Display the results
+      debug:
+        msg: "{{ result.stdout_lines }}"

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+assets
+docs
+utils
+venv
+
+pip_requirements.txt
+*.hcl
+*.md
+.git
+.github
+.idea
+.reuse
+.gitignore
+*.tgz
+ena-manifest.yaml
