@@ -5,26 +5,28 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Get Started](#get-started)
-  - [Minimum System Requirements](#minimum-system-requirements)
-  - [Proxy Settings](#proxy-settings)
-  - [User Access Setup](#user-access-setup)
-  - [Dependencies](#dependencies)
-  - [Orchestrator and Provisioning VMs Configuration](#orchestrator-and-provisioning-vms-configuration)
-    - [Cluster Configuration](#cluster-configuration)
-    - [Interactive Onboarding Flow Configurations](#interactive-onboarding-flow-configurations)
-    - [Non Interactive Onboarding Flow Configurations](#non-interactive-onboarding-flow-configurations)
-    - [VM Resource Configurations](#vm-resource-configurations)
-    - [Linux User Configuration](#linux-user-configuration)
+  - [Step 1: Prerequisites for Creating a Virtual Edge Node](#step-1-prerequisites-for-creating-a-virtual-edge-node)
+    - [1.1: Minimum System Requirements](#11-minimum-system-requirements)
+    - [1.2: Repository Setup](#12-repository-setup)
+  - [Step 2: Proxy Settings](#step-2-proxy-settings)
+  - [Step 3: User Access Setup](#step-3-user-access-setup)
+  - [Step 4: Dependencies](#step-4-dependencies)
+  - [Step 5: Orchestrator and Provisioning VMs Configuration](#step-5-orchestrator-and-provisioning-vms-configuration)
+    - [5.1: Cluster Configuration](#51-cluster-configuration)
+    - [5.2: Interactive Onboarding Flow Configurations](#52-interactive-onboarding-flow-configurations)
+    - [5.3: Non Interactive Onboarding Flow Configurations](#53-non-interactive-onboarding-flow-configurations)
+    - [5.4: VM Resource Configurations](#54-vm-resource-configurations)
+    - [5.5: Linux User Configuration](#55-linux-user-configuration)
     - [Example Orchestrator and Provisioning VMs Configuration](#example-orchestrator-and-provisioning-vms-configuration)
-  - [Download Orchestrator Certificate](#download-orchestrator-certificate)
-  - [OS Instance and Providers](#os-instance-and-providers)
-  - [VMs Creation with Scripts](#vms-creation-with-scripts)
-    - [Standalone VMs Creation](#standalone-vms-creation)
+  - [Step 6: Download Orchestrator Certificate](#step-6-download-orchestrator-certificate)
+  - [Step 7: OS Instance and Providers](#step-7-os-instance-and-providers)
+  - [Step 8: VMs Creation with Scripts](#step-8-vms-creation-with-scripts)
+    - [8.1: Standalone VMs Creation](#81-standalone-vms-creation)
       - [VMs Creation with Interactive Flow (IO)](#vms-creation-with-interactive-flow-io)
       - [VMs Creation with Non-Interactive Onboarding Flow (NIO)](#vms-creation-with-non-interactive-onboarding-flow-nio)
-    - [Provisioning Complete](#provisioning-complete)
-    - [VMs Deletion](#vms-deletion)
-  - [Enabling VNC Access (Optional)](#enabling-vnc-access-optional)
+    - [8.2: Provisioning Complete](#82-provisioning-complete)
+    - [8.3: VMs Deletion](#83-vms-deletion)
+  - [Step 9: Enabling VNC Access (Optional)](#step-9-enabling-vnc-access-optional)
     - [VNC Configuration Lines](#vnc-configuration-lines)
     - [Where to Add VNC Configuration](#where-to-add-vnc-configuration)
     - [Detailed Configuration Breakdown](#detailed-configuration-breakdown)
@@ -64,30 +66,41 @@ a seamless setup process.
 - Provisioning Monitoring: Uses socket_login.exp to monitor and track the progress of VM provisioning in real-time.
 - Ansible Scripts: Provides automation scripts for configuring and managing VMs, ensuring consistent and efficient deployment.
 These scripts are also useful to perform scale tests.
-  
+
 ## Get Started
 
-Instructions to create the environment necessary to onboard and provision virtual edge nodes.
+This section provides step-by-step instructions to set up the environment required for onboarding and provisioning
+virtual edge nodes.
+**Important**: Intel strongly recommends using script-based installation for creating Virtual Machines to ensure a
+streamlined and efficient setup process.
 
-Intel recommends using the script based installation for creating Vitual Machines.
+### Step 1: Prerequisites for Creating a Virtual Edge Node
 
-### Prerequisites for Creating a Virtual Edge Node
+#### 1.1: Minimum System Requirements
 
-#### Minimum System Requirements
-
-It is essential that the host machine has `Ubuntu 22.04` or `Ubuntu 24.04` LTS installed to ensure compatibility. The
-following specifications are recommended for onboarding and provisioning virtual machines (VMs). The number of VMs that
-can be provisioned willdepend on these specifications:
+To ensure optimal compatibility and performance, the host machine must have either Ubuntu 22.04 or Ubuntu 24.04 LTS
+installed.
+The following specifications are recommended for effectively onboarding and provisioning virtual machines (VMs). The
+capacity to provision multiple VMs will depend on these specifications:
 
 - **Operating System:** Ubuntu 22.04 LTS or Ubuntu 24.04 LTS (must be installed on the host machine)
 - **CPU:** 16 cores
 - **Memory:** 64 GB RAM
 - **Storage:** 1 TB HDD
 
-### Proxy Settings
+#### 1.2: Repository Setup
 
-To ensure seamless connectivity to the Edge Orchestrator, set any required proxy settings on your system if they are required.
+Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
+is crucial for accessing the tools required for virtual edge node provisioning:
 
+```bash
+git clone https://github.com/open-edge-platform/virtual-edge-node.git
+```
+
+### Step 2: Proxy Settings
+
+To ensure seamless connectivity with the Edge Orchestrator, it is important to configure any necessary proxy settings
+on your system.
 Below is an example of how to configure these proxy settings:
 
 ```bash
@@ -97,51 +110,54 @@ export socks_proxy=proxy-dmz.mycorp.com:1080
 export no_proxy=.mycorp.com,.local,.internal,.controller.mycorp.corp,.kind-control-plane,.docker.internal,localhost
 ```
 
-### User Access Setup
+### Step 3: User Access Setup
 
-Ensure that a user has the necessary permissions to perform administrative tasks and manage virtualization and containerization
-tools. The below command adds the specified user to important groups, granting them the required access rights.
+Ensure that a user has the necessary permissions to perform administrative tasks and manage virtualization and
+containerization tools. The below command adds the specified user to important groups, granting them the required
+access rights.
 
-Sample command to add a user named `john` to these groups:
+Use the following sample command to add a user named `john` to the necessary groups:
 
 ```bash
 sudo usermod -aG sudo,kvm,docker,libvirt john
 ```
 
-Note: After running this command, the user may need to log out and log back in for the changes to take effect.
+**Note**: After running this command, the user may need to log out and log back in for the changes to take effect.
 
-### Dependencies
+### Step 4: Dependencies
 
 This section verifies the essential dependencies for establishing a KVM-based virtualization environment on your system.
-These dependencies ensure that your system has the necessary tools and libraries to effectively manage and operate virtual
-If not, you will be prompted to check your BIOS/UEFI settings to ensure that virtualization is enabled. This section
-checks the necessary dependencies for setting up a KVM-based virtualization environment on the system. These dependencies
-ensure that your system is equipped with the required tools and libraries to efficiently manage and run virtual machines
-using KVM.
+These dependencies ensure that your system has the necessary tools and libraries to effectively manage and operate
+virtual If not, you will be prompted to check your BIOS/UEFI settings to ensure that virtualization is enabled. This
+section checks the necessary dependencies for setting up a KVM-based virtualization environment on the system. These
+dependencies ensure that your system is equipped with the required tools and libraries to efficiently manage and run
+virtual machines using KVM.
 
 ```bash
 make dependency-check
 ```
 
-If your system supports KVM acceleration, you will see a message stating: "KVM acceleration is supported on this system."
-If not, you will be prompted to check your BIOS/UEFI settings to ensure that virtualization is enabled.
+If your system supports KVM acceleration, a confirmation message will appear: "KVM acceleration is supported on this
+system." If this feature is not supported, you will be advised to review your BIOS/UEFI settings to ensure that
+virtualization is enabled.
 
-### Orchestrator and Provisioning VMs Configuration
+### Step 5: Orchestrator and Provisioning VMs Configuration
 
-Open the `config` file and replace the placeholder values with the actual values specific to your orchestrator.
+To customize the setup with your specific environment, open the `config` file and replace the placeholder values with
+the actual values specific to your orchestrator.
 
-#### Cluster Configuration
+#### 5.1: Cluster Configuration
 
 - `CLUSTER="kind.internal"`: This variable is the FQDN of the orchestrator.
 
-#### Interactive Onboarding Flow Configurations
+#### 5.2: Interactive Onboarding Flow Configurations
 
 - `ONBOARDING_USERNAME="ONBOARDING_USER"`: This variable represents the username to start IO flow. The placeholder "ONBOARDING_USER"
   should be replaced with the actual username.
 - `ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"`: This variable holds the password for the onboarding user. The placeholder
 "ONBOARDING_PASSWORD" should be replaced with the actual password.
 
-#### Non Interactive Onboarding Flow Configurations
+#### 5.3: Non Interactive Onboarding Flow Configurations
 
 Non Interactive Onboarding Project and User Configurations. These configurations would be used to automatically register
 the dynamically created Virtual Edge Node Serial Number.
@@ -152,7 +168,7 @@ onboarding flow configurations.
 - `PROJECT_API_PASSWORD=""`: This variable is intended to store the password for the API user. It is currently empty and
 shouldbe populated with the actual password.
 
-#### VM Resource Configurations
+#### 5.4: VM Resource Configurations
 
 Specify the resource allocations for virtual machines (VMs) to be provisioned.
 
@@ -162,7 +178,7 @@ Specify the resource allocations for virtual machines (VMs) to be provisioned.
 - `SDB_DISK_SIZE="64G"`: Sets the size of the secondary disk (sdb) to 64 GB.
 - `LIBVIRT_DRIVER="kvm"`: If KVM is supported, set the driver to kvm. If KVM is not supported, set the driver to qemu.
 
-#### Linux User Configuration
+#### 5.5: Linux User Configuration
 
 - `USERNAME="PROVISIONED_USERNAME"`: This variable represents the username for the newly provisioned Linux system. The placeholder
   "PROVISIONED_USERNAME" should be replaced with the actual username.
@@ -198,7 +214,7 @@ USERNAME="actual_linux_user"
 PASSWORD="actual_linux_password"
 ```
 
-### Download Orchestrator Certificate
+### Step 6: Download Orchestrator Certificate
 
 To download the Full_server.crt file and save it in the certs directory, follow these steps using wget.
 
@@ -211,7 +227,7 @@ CLUSTER_FQDN="specify the fqdn of the cluster"
 wget https://"tinkerbell-nginx.${CLUSTER_FQDN}"/tink-stack/keys/Full_server.crt --no-check-certificate -O certs/"Full_server.crt"
 ```
 
-### OS Instance and Providers
+### Step 7: OS Instance and Providers
 
 VM based provisioning doesn't support secureboot. It needs `"securityFeature":"SECURITY_FEATURE_NONE"` during instance creation.
 Use the following curl to create an OS instance and Provider instance.
@@ -241,7 +257,7 @@ curl -X POST "https://api.kind.internal/v1/projects/${PROJECT_NAME}/providers" -
 -H "Authorization: Bearer ${JWT_TOKEN}"
 ```
 
-### VMs Creation with Scripts
+### Step 8: VMs Creation with Scripts
 
 Currently, VM onboarding and provisioning are supported only for OS profiles (Ubuntu/Microvisor) where the security
 feature is set to `SECURITY_FEATURE_NONE`, and the selected OS profile must be set as the default in the provider config.
@@ -249,7 +265,7 @@ feature is set to `SECURITY_FEATURE_NONE`, and the selected OS profile must be s
 ![sample os profile](docs/Security_feature.png)
 ![sample provider config](docs/provider_config.png)
 
-#### Standalone VMs Creation
+#### 8.1: Standalone VMs Creation
 
 This section provides instructions for creating one or more virtual machines (VMs) on an orchestrator using predefined
 scripts from the host machine where the VMs will be created.
@@ -280,7 +296,7 @@ To create VMs using the Non-interactive onboarding flow, use the following comma
 **Note: You can press Ctrl+C to cancel the ongoing VM provisioning process, whether it is in progress or completed.
 Already provisioned VMs or ongoing provisioning VMs shall be deleted.**
 
-#### Provisioning Complete
+#### 8.2: Provisioning Complete
 
 Upon successful provisioning with Ubuntu OS, the following log will appear on your terminal.
  ![UbuntuOS provision complete](docs/UbuntuOS_Provision.png)
@@ -288,7 +304,7 @@ Upon successful provisioning with Ubuntu OS, the following log will appear on yo
 Upon successful provisioning with MicroVisor, the following log will appear on your terminal.
  ![MicroVisor provision complete](docs/Microvisor_Provision.png)
 
-#### VMs Deletion
+#### 8.3: VMs Deletion
 
 Run the `destroy_vm.sh` script to delete VMs that have already been provisioned.
 
@@ -296,7 +312,7 @@ Run the `destroy_vm.sh` script to delete VMs that have already been provisioned.
 ./scripts/destroy_vm.sh
 ```
 
-### Enabling VNC Access (Optional)
+### Step 9: Enabling VNC Access (Optional)
 
 By default, VNC access is not enabled in the Vagrantfile to ensure security and simplicity. If you wish to enable VNC
 access to your virtual machines, you can do so by adding the following lines to your Vagrantfile.
@@ -528,12 +544,12 @@ After making your changes, you can re-encrypt the file.
 
 #### Step 3: Orchestrator and Provisioning VMs Configuration
 
-Follow the above [Orchestrator and Provisioning VMs Configuration](#orchestrator-and-provisioning-vms-configuration)
+Follow the above [Step 5: Orchestrator and Provisioning VMs Configuration](#step-5-orchestrator-and-provisioning-vms-configuration)
 steps to set the config file.
 
 #### Step 4: Download Orchestrator Certificate
 
-Follow the above [Download Orchestrator Certificate](#download-orchestrator-certificate)
+Follow the above [Step 6: Download Orchestrator Certificate](#step-6-download-orchestrator-certificate)
 steps to download the `Full_server.crt` certificate file in the `certs` directory.
 
 #### Step 5: Running Ansible Playbooks to Create the VM
@@ -578,7 +594,7 @@ ansible-playbook -i inventory.yml calculate_max_vms.yml --ask-vault-pass
 
  ![maximum number of vms](docs/Ansible-calculate-max-vms.png)
 
-If you encounter permission, follow this [User Access Setup](#user-access-setup) section.
+If you encounter permission, follow this [Step 3: User Access Setup](#step-3-user-access-setup) section.
 
 Review the logs to see how many VMs can be deployed on each host. Based on this information, you can set the appropriate
 number of VMs in the `number_of_vms` variable for each host.
