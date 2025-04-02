@@ -97,57 +97,10 @@ and any other resources allocated to the VM.
 
 ### Sequence Diagram
 
-```mermaid
-sequenceDiagram
-    participant User as User boots target device
-    box "Host Machine Components"
-        participant Vagrant
-        participant libvirt
-        participant KVM/QEMU
-        participant dnsmasq
-    end
-    box "Orchestrator Components"
-        participant tinkstack as Tinkerbell Services
-        participant HookOS as HookOS Init
-        participant Net as Remote Server (Orchestrator)
-    end
-    participant VM as Provisioning the VM
+Below are the sequence diagrams for the Virtual Edge Node Provisioning process:
 
-    User->>User: Update config file with VM resources and orchestrator details
-    User->>Net: Download Full_server.crt to certs/ folder
-    User->>Vagrant: Run `vagrant up`
-    Vagrant->>libvirt: Request VM creation using Vagrantfile
-
-    alt Configured Virtual Interface
-        libvirt->>libvirt: Update interface configuration with Boot EFI file
-        libvirt->>dnsmasq: Start DHCP and DNS services with custom options
-        dnsmasq-->>libvirt: Services started
-    else Create Virtual Interface
-        libvirt->>libvirt: Create virtual interface configuration with Boot EFI file
-        libvirt->>dnsmasq: Start DHCP and DNS services with custom options
-        dnsmasq-->>libvirt: Services started
-    end
-
-    loop "VM Provisioning Process"
-        libvirt->>KVM/QEMU: Create and start VM
-        KVM/QEMU->>libvirt: Begin VM provisioning
-        libvirt->>VM: Attach VM to configured network
-        VM->>dnsmasq: Send DHCP request
-        dnsmasq->>VM: Assign IP address and provide Boot EFI file URL with DHCP response
-        VM->>VM: Run Boot EFI file
-        VM->>tinkstack: Download HookOS from orchestrator
-        tinkstack->>HookOS: Boot into HookOS
-        HookOS->>tinkstack: Download workflows from orchestrator
-        HookOS->>tinkstack: Initiate provisioning workflows
-        tinkstack->HookOS: Provisioning complete
-        HookOS->>User: Reboot into installed UbuntuOS/Microvisor
-        alt UbuntuOS
-          VM->>VM: Executes the PostInstall script to set FQDNs, configure proxies and NTP, upgrade the kernel, and perform other tasks, followed by running all EdgeNode agents.
-        else Microvisor
-          VM->>VM: Executes cloudinit script to set FQDNs, configure proxies and NTP, and perform other tasks, followed by running all EdgeNode agents.
-        end
-   end
-```
+ ![VEN IO Flow Sequence Diagram](ven-io-flow-seq.png)
+ ![VEN NIO Flow Sequence Diagram](ven-nio-flow-seq.png)
 
 ### Network Flow Diagrams
 

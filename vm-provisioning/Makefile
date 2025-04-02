@@ -28,10 +28,21 @@ GIT_COMMIT    ?= $(shell git rev-parse HEAD)
 YAML_FILES           := $(shell find . -path './venv_virtualedgenode' -path './vendor' -prune -o -type f \( -name '*.yaml' -o -name '*.yml' \) -print )
 YAML_IGNORE          := vendor, .github/workflows
 
+# Plantuml variables
+PLANTUML_JAR := plantuml.jar
+PLANTUML_URL := https://sourceforge.net/projects/plantuml/files/plantuml.jar/download
+
 # Include shared makefile
 include ../common.mk
 
 ##### CI Targets #####
+
+plant-download:
+	@echo "Downloading $(PLANTUML_JAR)..."
+	curl -L -o $(PLANTUML_JAR) $(PLANTUML_URL)
+
+sequence.png: docs/ven-nio-flow-seq.puml plantuml.jar
+	java -jar plantuml.jar $< -o .
 
 lint: license shellcheck yamllint mdlint
 	@$(MAKE) yaml-syntax-lint YAML_FILES="$(YAML_FILES)" YAML_IGNORE="$(YAML_IGNORE)"
