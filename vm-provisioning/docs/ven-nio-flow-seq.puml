@@ -1,0 +1,61 @@
+@startuml
+title Non-Interactive Virtual Edge Node Onboarding and Provisioning Sequence Diagram
+actor "User" as User
+box "Host Machine"
+  participant "VEN Directory" as VEN
+  participant "Dnsmasq" as Dnsmasq
+  participant "Vagrant" as Vagrant
+  participant "Libvirt" as Libvirt
+  participant "Docker" as Docker
+  participant "KVM/QEMU" as KVM_QEMU
+end box
+box "Virtual Edge Node (VEN)"
+  participant "UEFI" as UEFI
+  participant "iPXE" as iPXE
+  participant "HookOS" as HookOS
+end box
+box "Orchestrator"
+  participant "Provisioning Artifact service" as CDN
+  participant "Traefik Gateway" as Traefik
+end box
+box "web"
+  participant "Release Service" as ReleaseService
+end box
+User -[#0000FF]> VEN: Clone VEN repository
+note over VEN
+  Update configuration with NIO 
+  and orchestrator details
+end note
+VEN -[#0000FF]> CDN: Download Full_server.crt to certs/ directory
+alt Configure Existing Virtual Bridge
+  VEN -[#0000FF]> Libvirt: Update bridge configuration with EFI boot URL
+  Libvirt -[#0000FF]> Dnsmasq: Start DHCP and DNS services with custom settings
+  Dnsmasq -[#0000FF]--> Libvirt: Services initialized
+else Create New Virtual Bridge
+  VEN -[#0000FF]> Libvirt: Create bridge configuration with EFI boot URL
+  Libvirt -[#0000FF]> Dnsmasq: Start DHCP and DNS services with custom settings
+  Dnsmasq -[#0000FF]--> Libvirt: Services initialized
+end
+note over VEN
+  Run create_vm.sh script  
+  with -nio option.
+  NIO scripts also run to 
+  extract the serial number.
+end note
+VEN -[#0000FF]> Docker: Launch `edge-slim` Docker container
+Docker -[#0000FF]> Vagrant: Execute `vagrant up`
+Vagrant -[#0000FF]> Libvirt: Request VM creation using Vagrantfile
+Libvirt -[#0000FF]> KVM_QEMU: Create and start the VM
+KVM_QEMU -[#0000FF]> UEFI: Initiate VM provisioning
+VEN -[#0000FF]> Traefik: API call to onboard the VEN with Serial number
+UEFI -> CDN: Request iPXE bootloader
+CDN --> UEFI: Provide iPXE bootloader
+UEFI -> UEFI: Verify and execute iPXE
+iPXE -> CDN: Request HookOS image
+CDN --> iPXE: Provide HookOS image
+iPXE -> iPXE: Execute HookOS
+UEFI -> Traefik: Authenticate User/Pass
+Traefik --> UEFI: Success
+HookOS -> Traefik: Register Virtual Edge Node (VEN)
+HookOS -> HookOS: Provisioning completed. Reboot into UbuntuOS/Microvisor 
+@enduml
