@@ -2,6 +2,6 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
 
 # Subfolder are handled by their respective license targets
-Files: *.md vm-provisioning/**
+Files: *.md vm-provisioning/** edge-node-container/** edge-node-simulator/**
 Copyright: 2025 Intel Corporation
 License: Apache-2.0
