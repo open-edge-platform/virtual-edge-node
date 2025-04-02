@@ -17,13 +17,13 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/onsi/ginkgo/v2 v2.23.3
 	github.com/onsi/gomega v1.36.3
-	github.com/open-edge-platform/infra-core/api v1.28.2
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.20.0
-	github.com/open-edge-platform/infra-managers/host v1.19.0
-	github.com/open-edge-platform/infra-managers/maintenance v1.18.0
-	github.com/open-edge-platform/infra-managers/telemetry v1.18.0
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.30.2
-	github.com/open-edge-platform/orch-library/go v0.5.28
+	github.com/open-edge-platform/infra-core/api v1.32.0
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.0
+	github.com/open-edge-platform/infra-managers/host v1.21.0
+	github.com/open-edge-platform/infra-managers/maintenance v1.21.0
+	github.com/open-edge-platform/infra-managers/telemetry v1.21.0
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0
+	github.com/open-edge-platform/orch-library/go v0.5.29
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/term v0.30.0
@@ -94,7 +94,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/labstack/echo-contrib v0.17.2 // indirect
+	github.com/labstack/echo-contrib v0.17.3 // indirect
 	github.com/labstack/echo/v4 v4.13.3 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/lib/pq v1.10.9 // indirect
@@ -111,8 +111,8 @@ require (
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/open-edge-platform/orch-library/go/dazl v0.5.1 // indirect
-	github.com/open-policy-agent/opa v1.2.0 // indirect
+	github.com/open-edge-platform/orch-library/go/dazl v0.5.2 // indirect
+	github.com/open-policy-agent/opa v1.3.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -136,7 +136,7 @@ require (
 	github.com/yashtewari/glob-intersection v0.2.0 // indirect
 	github.com/zclconf/go-cty v1.16.2 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
-	go.einride.tech/aip v0.68.1 // indirect
+	go.einride.tech/aip v0.69.0 // indirect
 	go.mongodb.org/mongo-driver v1.17.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.60.0 // indirect
