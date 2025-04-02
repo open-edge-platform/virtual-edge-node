@@ -5,12 +5,10 @@ module github.com/open-edge-platform/virtual-edge-node/edge-node-container
 
 go 1.24.1
 
-replace github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.0.1 => ../edge-node-simulator
-
 require (
 	github.com/magefile/mage v1.15.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.22.0
-	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.0.1
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.0
+	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.1
 )
 
 require (
@@ -60,8 +58,8 @@ require (
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/open-edge-platform/infra-core/api v1.28.2 // indirect
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.30.2 // indirect
+	github.com/open-edge-platform/infra-core/api v1.32.0 // indirect
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
