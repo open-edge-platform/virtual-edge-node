@@ -11,7 +11,7 @@ num_vms=$1
 # Initialize the counter
 count=0
 
-serial_number=""
+serial_number=$2
 
 echo "Checking for serial number in $log_file..."
 
@@ -24,7 +24,7 @@ fi
 function process_serial_number()
 {
   serial_number=$1
-  host_data=$(curl -X POST -H 'Accept: application/json' -H "Authorization: Bearer ${JWT_TOKEN}" --data "{\"name\":\"${serial_number}-2\",\"serialNumber\":\"${serial_number}\",\"autoOnboard\": true}" --header "Content-Type: application/json" "https://api.${cluster_fqdn}/v1/projects/${project_name}/compute/hosts/register" --insecure)
+  host_data=$(curl -X POST -H 'Accept: application/json' -H "Authorization: Bearer ${JWT_TOKEN}" --data "{\"name\":\"${serial_number}\",\"serialNumber\":\"${serial_number}\",\"autoOnboard\": true}" --header "Content-Type: application/json" "https://api.${cluster_fqdn}/v1/projects/${project_name}/compute/hosts/register" --insecure)
 
   # echo "host_data: $host_data"
   host_status=$(echo "$host_data" | jq -r '.hostStatus')
@@ -37,19 +37,40 @@ function process_serial_number()
   fi
 }
 
+function validate_serial() {
+    local serial="$1"
+    if [[ ! "$serial" =~ ^[A-Za-z0-9]{5,20}$ ]]; then
+        echo "Error: Invalid serial '$serial'. Must be 5-20 alphanumeric chars."
+        return 1
+    fi
+    return 0
+}
 
-# Check if the log file exists
-tail -f "$log_file" | while read -r line; do
-    # Extract serial numbers from the line
-    if [[ $line =~ serial=([^,]+), ]]; then
+if [[ $serial_number ]]; then 
+   # Split into an array
+   IFS=',' read -ra serial_array <<< "$serial_number"
+
+   for serial in "${serial_array[@]}"; do
+      validate_serial "$serial"
+   done
+
+   # Loop through each serial number
+   for serial in "${serial_array[@]}"; do
+      process_serial_number "$serial"
+   done
+else
+   # Check if the log file exists
+   tail -f "$log_file" | while read -r line; do
+      # Extract serial numbers from the line
+      if [[ $line =~ serial=([^,]+), ]]; then
 	serial_number="${BASH_REMATCH[1]}"
 	count=$((count + 1))
 	echo "seial number found #${count}: ${serial_number}"
 	process_serial_number "$serial_number"
-  if [ "$count" -eq "$num_vms" ]; then
+        if [ "$count" -eq "$num_vms" ]; then
 	   echo "serial number generated for all VMs"
 	   exit 0
 	fi
-    fi
-done
-
+      fi
+   done
+fi

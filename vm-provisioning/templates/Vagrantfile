@@ -16,9 +16,23 @@ Vagrant.configure("2") do |config|
 
   VM_NAME = "orchvm-net-000-vm" if VM_NAME.nil? || VM_NAME.empty?
 
+  static_config_serials = ""
+
   # Loop to create multiple VMs
   (1..num_vms).each do |i|
     padded_i = sprintf("%02d", i)
+
+    serialnum = ""
+
+    if !static_config_serials.empty?
+      # Split the string into an array
+      serials_array = static_config_serials.split(',')
+      serialnum = serials_array[i-1]
+    else
+      serialnum = "VH000N000M#{padded_i}"
+    end
+
+
     # Define the management network name
     config.vm.define "#{VM_NAME}#{i}" do |vm_config|
 
@@ -58,7 +72,7 @@ Vagrant.configure("2") do |config|
           { value: '-fw_cfg' },
           { value: 'name=etc/edk2/https/cacerts,file=/var/lib/libvirt/boot/orchvm-net-000_ca.der'},
           { value: '-smbios' },
-	  { value: "type=1,serial=VH000N000M#{padded_i}"}
+	  { value: "type=1,serial=#{serialnum}"}
         ]
         libvirt.storage :file, :size => SDA_DISK_SIZE, :type => 'qcow2', :device => 'sda', :bus => 'sata', :detect_zeroes => 'on'
         libvirt.storage :file, :size => SDB_DISK_SIZE, :type => 'qcow2', :device => 'sdb', :bus => 'sata', :detect_zeroes => 'on'

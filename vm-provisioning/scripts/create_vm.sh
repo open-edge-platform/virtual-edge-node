@@ -50,6 +50,39 @@ VERSION_ID=$(grep '^VERSION_ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
 export HTTPS_BOOT_FILE="$BOOT_EFI_URI"
 #--------------------------------------
 
+# Parse arguments
+if [ "$FLOW" = "-nio" ]; then
+ while [[ $# -eq 3 ]]; do
+    case $3 in
+        -serials=*)
+            IFS=',' read -r -a serials <<< "${3#*=}" # Split the value into an array
+            shift # Move to the next argument
+	    if [ "${#serials[@]}" -ne "$NUM_VMS" ]; then
+		echo "Error: Number of serials (${#serials[@]}) does not match the expected number of VMs ($NUM_VMS)."
+		exit 1
+	    fi
+	    for serial in "${serials[@]}"; do
+    		# Append each serial to the result string with a comma
+    		if [ -z "$result_string" ]; then
+                  result_string="$serial"
+                else
+                  result_string="$result_string,$serial"
+                fi
+            done
+	    export STATIC_CONFIG_SERIALS="$result_string"
+            ;;
+        *)
+            echo "Unknown option: $3"
+            echo "Usage: $0 <number_of_vms> [-nio] [-serials=<serials>]"
+	    exit 1
+            ;;
+    esac
+ done
+fi
+
+# Output the parsed values
+echo "Serials: $STATIC_CONFIG_SERIALS"
+
 mgmt_intf_name=""
 if [ -n "$BRIDGE_NAME" ]; then
    source "${PWD}/scripts/network_file_backup_restore.sh"
@@ -265,6 +298,9 @@ function create_random_virtbr_net_name() {
         octet_ip=${ip_to_connect##*.}
         formatted_octet_ip=$(printf "%03d" "$octet_ip")
         sed -i "s|VH[0-9]\{3\}N[0-9]\{3\}|VH${formatted_octet_ip}N${random_number}|g" "${PWD}/Vagrantfile"
+	if [ "$STATIC_CONFIG_SERIALS" != "" ]; then
+	   sed -Ei "s|static_config_serials = \"\"|static_config_serials = \"$STATIC_CONFIG_SERIALS\"|g" "$PWD/Vagrantfile"
+	fi
         break
 
       # If the interface exists, the loop will continue and generate a new number
@@ -323,7 +359,7 @@ function prepare_certificate_for_network() {
 
 function check_io_or_nio() {
   set -e
-  if [ "$FLOW" == "-nio" ]; then
+  if [ "$FLOW" == "-nio" ] && [ -z "$STATIC_CONFIG_SERIALS" ]; then
     echo "NIO FLOW" 
     log_with_timestamp "Validating JWT token and project name using nio_flow_validation.sh..."
     if [ -f "${BASE_DIR}/nio_flow_validation.sh" ]; then
@@ -343,6 +379,8 @@ function check_io_or_nio() {
         exit 1
     fi
     log_with_timestamp "NIO flow config validation successful."
+  elif [ "$FLOW" == "-nio" ]; then
+    echo "NIO FLOW with static serial numbers: $STATIC_CONFIG_SERIALS"
   else
     echo "IO FLOW"
   fi
@@ -474,9 +512,10 @@ function spawn_vms() {
 
 function main() {
 
+  echo "First argument: $NUM_VMS"
   # Check if the argument is provided and it is a number
-  if [ -z "$1" ] || ! [[ "$1" =~ ^[0-9]+$ ]]; then
-    echo "Usage: $0 <number_of_vms>"
+  if [ -z "$NUM_VMS" ] || ! [[ "$NUM_VMS" =~ ^[0-9]+$ ]]; then
+    echo "Usage: $0 <number_of_vms> [-nio] [-serials=<serials>]"
     exit 1
   fi
  
@@ -525,7 +564,7 @@ function main() {
     pids[i]=$!
   done
   
-  if [ "$FLOW" == "-nio" ]; then
+  if [ "$FLOW" == "-nio" ] && [ -z "$STATIC_CONFIG_SERIALS" ]; then
     config_serial_number "$NUM_VMS"
   fi
  
