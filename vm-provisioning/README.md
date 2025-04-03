@@ -223,8 +223,8 @@ To download the Full_server.crt file and save it in the certs directory, follow 
 Here's an example of how to download the file into the certs directory:
 
 ```bash
-CLUSTER_FQDN="specify the fqdn of the cluster"
-wget https://"tinkerbell-nginx.${CLUSTER_FQDN}"/tink-stack/keys/Full_server.crt --no-check-certificate -O certs/"Full_server.crt"
+source ./config
+wget https://"tinkerbell-nginx.${CLUSTER}"/tink-stack/keys/Full_server.crt --no-check-certificate -O certs/"Full_server.crt"
 ```
 
 ### Step 7: OS Instance and Providers
@@ -242,16 +242,16 @@ cd vm-provisioning
 source ./config
 
 2. Obtain the JWT token 
-export JWT_TOKEN=$(curl --location --insecure --request POST 'https://keycloak.${CLUSTER}/realms/master/protocol/openid-connect/token' \
+export JWT_TOKEN=$(curl --location --insecure --request POST "https://keycloak.${CLUSTER}/realms/master/protocol/openid-connect/token" \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'grant_type=password' \
 --data-urlencode 'client_id=system-client' \
---data-urlencode 'username=${API_USER}' \
---data-urlencode 'password=${API_PASSWORD}' \
+--data-urlencode "username=${PROJECT_API_USER}" \
+--data-urlencode "password=${PROJECT_API_PASSWORD}" \
 --data-urlencode 'scope=openid profile email groups' | jq -r '.access_token')
 
 3. Sample configuration to create a provider with an OS instance:
-curl -X POST "https://api.kind.internal/v1/projects/${PROJECT_NAME}/providers" -H "accept: application/json" \
+curl -X POST "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" -H "accept: application/json" \
 -H "Content-Type: application/json" -d '{"providerKind":"PROVIDER_KIND_BAREMETAL","name":"infra_onboarding", \
 "apiEndpoint":"xyz123", "apiCredentials": ["abc123"], "config": "{\"defaultOs\":\"os-51c4eba0\",\"autoProvision\":true}" }' \
 -H "Authorization: Bearer ${JWT_TOKEN}"
