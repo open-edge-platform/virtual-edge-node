@@ -97,7 +97,7 @@ function update_defaultOs_provider() {
             "name": "infra_onboarding",
             "apiEndpoint": "xyz123",
             "apiCredentials": ["abc123"],
-            "config": "{\"defaultOs\":\"'"${osResourceID1}"'\",\"autoProvision\":true}"
+            "config": "{\"defaultOs\":\"'"${osResourceID1}"'\",\"autoProvision\":true,\"osSecurityFeatureEnable\":false}"
         }'
     fi
 
