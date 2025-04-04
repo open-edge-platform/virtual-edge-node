@@ -68,8 +68,8 @@ jobs:
       - name: Upload Lint Report
         uses: actions/upload-artifact@v4
         with:
-          name: out/yaml-syntax-report
-          path: /home/runner/work/virtual-edge-node/virtual-edge-node/vm-provisioning/out/yaml-syntax-report.log
+          name: yaml-syntax-report
+          path: ${{ github.workspace }}/out/yaml-syntax-report.log
           
       - name: Final Status Check
         run: |
