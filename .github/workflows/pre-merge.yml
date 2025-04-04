@@ -68,8 +68,8 @@ jobs:
       - name: Upload Lint Report
         uses: actions/upload-artifact@v4
         with:
-          name: out/yaml-syntax-report.log
-          path: lint_report-${{ env.SANITIZED_REPORT_PATH }}.txt
+          name: out/yaml-syntax-report
+          path: out/yaml-syntax-report.log
           
       - name: Final Status Check
         run: |
