@@ -65,6 +65,12 @@ jobs:
     if: ${{ always() }}
     needs: [pre-merge-pipeline]
     steps:
+      - name: Upload Lint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: out/yaml-syntax-report.log
+          path: lint_report-${{ env.SANITIZED_REPORT_PATH }}.txt
+          
       - name: Final Status Check
         run: |
           pre_merge_pipeline_result="${{ needs.pre-merge-pipeline.result }}"
