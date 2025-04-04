@@ -69,7 +69,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: out/yaml-syntax-report
-          path: out/yaml-syntax-report.log
+          path: /home/runner/work/virtual-edge-node/virtual-edge-node/vm-provisioning/out/yaml-syntax-report.log
           
       - name: Final Status Check
         run: |
