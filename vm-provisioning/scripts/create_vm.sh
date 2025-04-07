@@ -558,7 +558,7 @@ function main() {
   #export VAGRANT_DEBUG=info
   rm -rf out/logs
   mkdir -p -m 700 out/
-  mkdir -p -m 700 out/logs
+  mkdir -m 700 out/logs
   LOG_FILE="${log_file}"
   echo "$(date): Script started." | tee -a "$LOG_FILE"
   # exec > >(tee -a "$LOG_FILE") 2>&1
