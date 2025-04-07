@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #set -x
 source ./config
+source "${PWD}/scripts/nio_configs.sh"
 
 cluster_fqdn=$CLUSTER
 project_name=${PROJECT_NAME:-default_project_name}

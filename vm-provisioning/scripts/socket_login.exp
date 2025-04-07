@@ -40,7 +40,6 @@ set log_file "$log_dir/$output_filename"
 set log [open $log_file "a"]
 puts $log "[timestamp -format {%Y-%m-%d %H:%M:%S}] Starting new session: $vm_name"
 flush $log
-exec chmod 600 $log_file
 
 # Function to log the time difference
 proc log_time { start_time comment } {

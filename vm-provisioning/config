@@ -8,14 +8,9 @@
 STANDALONE=1
 
 CLUSTER="kind.internal"
-# IO Flow Configurations
-ONBOARDING_USERNAME="ONBOARDING_USER"
-ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"
 
 # NIO Flow Configurations
 PROJECT_NAME="infra-proj-1"
-PROJECT_API_USER="edgeinfra-infra-api-user"
-PROJECT_API_PASSWORD=""
 
 # VM Resources
 RAM_SIZE=8192

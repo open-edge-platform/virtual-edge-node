@@ -13,11 +13,11 @@
   - [Step 4: Dependencies](#step-4-dependencies)
   - [Step 5: Orchestrator and Provisioning VMs Configuration](#step-5-orchestrator-and-provisioning-vms-configuration)
     - [5.1: Cluster Configuration](#51-cluster-configuration)
-    - [5.2: Interactive Onboarding Flow Configurations](#52-interactive-onboarding-flow-configurations)
-    - [5.3: Non Interactive Onboarding Flow Configurations](#53-non-interactive-onboarding-flow-configurations)
-    - [5.4: VM Resource Configurations](#54-vm-resource-configurations)
-    - [5.5: Linux User Configuration](#55-linux-user-configuration)
+    - [5.2: NIO Configurations](#52-nio-configurations)
+    - [5.3: VM Resource Configurations](#53-vm-resource-configurations)
+    - [5.4: Linux User Configuration](#54-linux-user-configuration)
     - [Example Orchestrator and Provisioning VMs Configuration](#example-orchestrator-and-provisioning-vms-configuration)
+    - [5.5: Configuration Setup](#55-configuration-setup)
   - [Step 6: Download Orchestrator Certificate](#step-6-download-orchestrator-certificate)
   - [Step 7: OS Instance and Providers](#step-7-os-instance-and-providers)
   - [Step 8: VMs Creation with Scripts](#step-8-vms-creation-with-scripts)
@@ -150,25 +150,12 @@ the actual values specific to your orchestrator.
 
 - `CLUSTER="kind.internal"`: This variable is the FQDN of the orchestrator.
 
-#### 5.2: Interactive Onboarding Flow Configurations
+#### 5.2: NIO Configurations
 
-- `ONBOARDING_USERNAME="ONBOARDING_USER"`: This variable represents the username to start IO flow. The placeholder "ONBOARDING_USER"
-  should be replaced with the actual username.
-- `ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"`: This variable holds the password for the onboarding user. The placeholder
-"ONBOARDING_PASSWORD" should be replaced with the actual password.
+- `PROJECT_NAME="your-project-name"` : Non Interactive Onboarding Project configurations would be used to
+automatically register the dynamically created Virtual Edge Node Serial Number.
 
-#### 5.3: Non Interactive Onboarding Flow Configurations
-
-Non Interactive Onboarding Project and User Configurations. These configurations would be used to automatically register
-the dynamically created Virtual Edge Node Serial Number.
-
-- `PROJECT_NAME="your-project-name"`: This variable specifies the name of the project associated with the non interactive
-onboarding flow configurations.
-- `PROJECT_API_USER="actual_api_user"`: This variable indicates the username for accessing an API.
-- `PROJECT_API_PASSWORD=""`: This variable is intended to store the password for the API user. It is currently empty and
-shouldbe populated with the actual password.
-
-#### 5.4: VM Resource Configurations
+#### 5.3: VM Resource Configurations
 
 Specify the resource allocations for virtual machines (VMs) to be provisioned.
 
@@ -178,7 +165,7 @@ Specify the resource allocations for virtual machines (VMs) to be provisioned.
 - `SDB_DISK_SIZE="64G"`: Sets the size of the secondary disk (sdb) to 64 GB.
 - `LIBVIRT_DRIVER="kvm"`: If KVM is supported, set the driver to kvm. If KVM is not supported, set the driver to qemu.
 
-#### 5.5: Linux User Configuration
+#### 5.4: Linux User Configuration
 
 - `USERNAME="PROVISIONED_USERNAME"`: This variable represents the username for the newly provisioned Linux system. The placeholder
   "PROVISIONED_USERNAME" should be replaced with the actual username.
@@ -193,14 +180,8 @@ Here's an example of how you might update the fields in a `config` file:
 # Cluster FQDN
 CLUSTER="kind.internal"
 
-# Interactive Onboarding (IO) Configurations
-ONBOARDING_USERNAME="actual_onboard_user"
-ONBOARDING_PASSWORD="actual_onboard_password"
-
 # NIO Configurations
 PROJECT_NAME="your-project-name"
-PROJECT_API_USER="actual_api_user"
-PROJECT_API_PASSWORD="actual_api_password"
 
 # VM Resources
 RAM_SIZE=8192
@@ -213,6 +194,43 @@ LIBVIRT_DRIVER="kvm"
 USERNAME="actual_linux_user"
 PASSWORD="actual_linux_password"
 ```
+
+#### 5.5: Configuration Setup
+
+##### Interactive Onboarding Flow (IO) Configurations
+
+Before running the IO flow script, export the onboarding username and password:
+
+```bash
+export ONBOARDING_USERNAME="ONBOARDING_USER"
+export ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"
+```
+
+- `ONBOARDING_USERNAME="ONBOARDING_USER"`: This variable represents the username to start IO flow. The
+placeholder "ONBOARDING_USER" should be replaced with the actual username.
+- `ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"`: This variable holds the password for the onboarding user. The placeholder
+"ONBOARDING_PASSWORD" should be replaced with the actual password.
+
+##### Non Interactive Onboarding Flow (NIO) Configurations
+
+Non Interactive Onboarding Project and User Configurations. These configurations would be used to automatically register
+the dynamically created Virtual Edge Node Serial Number.
+
+Before running the NIO flow script, export the project API username and password:
+
+```bash
+export PROJECT_API_USER="your_project_api_username"
+export PROJECT_API_PASSWORD="your_project_api_password"
+```
+
+- `PROJECT_NAME="your-project-name"`: This variable specifies the name of the project associated with the non interactive
+onboarding flow configurations.
+- `PROJECT_API_USER="actual_api_user"`: This variable indicates the username for accessing an API.
+- `PROJECT_API_PASSWORD=""`: This variable is intended to store the password for the API user. It is currently empty and
+shouldbe populated with the actual password
+
+**Note**: If you do not export these credentials, the script will prompt you to enter them when you run the
+`create_vms.sh` script.
 
 ### Step 6: Download Orchestrator Certificate
 
