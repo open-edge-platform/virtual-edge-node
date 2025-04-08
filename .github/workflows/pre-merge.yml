@@ -35,6 +35,8 @@ jobs:
           changed_projects='${{ steps.discover-changes.outputs.changed_projects }}'
           filtered_projects=$(echo "$changed_projects" | jq -cr --argjson folders_to_remove "$folders_to_remove" 'map(select(. as $item | $folders_to_remove | index($item) | not))')
           echo "filtered_projects=$filtered_projects" >> $GITHUB_OUTPUT
+          VM_PROV_YAML_REPORT_PATH="${{ github.workspace }}/vm-provisioning/out/yaml-syntax-report.log"
+          echo "REPORT_PATH=${VM_PROV_YAML_REPORT_PATH}" >> $GITHUB_ENV
   pre-merge-pipeline:
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
@@ -53,7 +55,7 @@ jobs:
       run_validate_clean_folder: true
       run_docker_build: true
       run_scan_containers: true
-      run_artifact: false
+      run_artifact: true
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       # temporarily use the main branch as the reference branch
