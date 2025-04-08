@@ -5,12 +5,12 @@
 # NIO Flow Configurations
 # Check if PROJECT_API_USER is set, otherwise prompt the user
 if [ -z "${PROJECT_API_USER}" ]; then
-    read -p "Enter Project API Username: " PROJECT_API_USER
+    read -rp "Enter Project API Username: " PROJECT_API_USER
 fi
 
 # Check if PROJECT_API_PASSWORD is set, otherwise prompt the user
 if [ -z "${PROJECT_API_PASSWORD}" ]; then
-    read -sp "Enter Project API Password: " PROJECT_API_PASSWORD
+    read -rsp "Enter Project API Password: " PROJECT_API_PASSWORD
     echo
 fi
 

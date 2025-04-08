@@ -5,12 +5,12 @@
 # IO Flow Configurations
 # Check if ONBOARDING_USERNAME is set, otherwise prompt the user
 if [ -z "${ONBOARDING_USERNAME}" ]; then
-    read -p "Enter onboarding username: " ONBOARDING_USERNAME
+    read -rp "Enter onboarding username: " ONBOARDING_USERNAME
 fi
 
 # Check if ONBOARDING_PASSWORD is set, otherwise prompt the user
 if [ -z "${ONBOARDING_PASSWORD}" ]; then
-    read -sp "Enter onboarding password: " ONBOARDING_PASSWORD
+    read -rsp "Enter onboarding password: " ONBOARDING_PASSWORD
     echo
 fi
 
