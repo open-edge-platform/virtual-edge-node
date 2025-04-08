@@ -9,9 +9,6 @@ STANDALONE=1
 
 CLUSTER="kind.internal"
 
-# NIO Flow Configurations
-PROJECT_NAME="infra-proj-1"
-
 # VM Resources
 RAM_SIZE=8192
 NO_OF_CPUS=4

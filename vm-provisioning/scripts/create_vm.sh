@@ -50,7 +50,7 @@ WORKFLOW_FAIL_VMS=0
 IPXE_FAIL_VMS=0
 OTH_FAIL_VMS=0
 
-BOOT_EFI_URI="https://${CLUSTER}/tink-stack/signed_ipxe.efi"
+BOOT_EFI_URI="https://tinkerbell-nginx.${CLUSTER}/tink-stack/signed_ipxe.efi"
 
 # Extract NAME and VERSION_ID from /etc/os-release
 NAME=$(grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
