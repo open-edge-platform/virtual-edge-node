@@ -10,8 +10,6 @@ source "${PWD}/scripts/common_vars.sh"
 
 # Assign arguments to variables
 export SUPPORT_GUI_XTERM="${SUPPORT_GUI_XTERM:-""}"
-export USERNAME_HOOK="${ONBOARDING_USERNAME:-user}"
-export PASSWORD_HOOK="${ONBOARDING_PASSWORD:-pass}"
 export USERNAME_LINUX="${USERNAME_LINUX:-user}"
 export PASSWORD_LINUX="${PASSWORD_LINUX:-user}"
 export SUPPORT_GUI_XTERM="${SUPPORT_GUI_XTERM:-""}"
@@ -33,6 +31,17 @@ BASE_DIR="${PWD}/scripts"
 # Number of VMs to create
 NUM_VMS=$1
 FLOW=$2
+
+if [ "$FLOW" == "-io" ] || [ -z "$FLOW" ]; then
+    # Source IO Flow Configurations
+    source "${PWD}/scripts/io_configs.sh"
+elif [ "$FLOW" == "-nio" ]; then
+    # Source NIO Flow Configurations
+    source "${PWD}/scripts/nio_configs.sh"
+else
+    echo "Invalid flow specified. Please use '-io' or '-nio'."
+    exit 1
+fi
 
 # Starting SSH port (will increment for each VM)
 SSH_PORT=6000

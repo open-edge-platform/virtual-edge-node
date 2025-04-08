@@ -13,11 +13,10 @@
   - [Step 4: Dependencies](#step-4-dependencies)
   - [Step 5: Orchestrator and Provisioning VMs Configuration](#step-5-orchestrator-and-provisioning-vms-configuration)
     - [5.1: Cluster Configuration](#51-cluster-configuration)
-    - [5.2: Interactive Onboarding Flow Configurations](#52-interactive-onboarding-flow-configurations)
-    - [5.3: Non Interactive Onboarding Flow Configurations](#53-non-interactive-onboarding-flow-configurations)
-    - [5.4: VM Resource Configurations](#54-vm-resource-configurations)
-    - [5.5: Linux User Configuration](#55-linux-user-configuration)
+    - [5.2: VM Resource Configurations](#52-vm-resource-configurations)
+    - [5.3: Linux User Configuration](#53-linux-user-configuration)
     - [Example Orchestrator and Provisioning VMs Configuration](#example-orchestrator-and-provisioning-vms-configuration)
+    - [5.4: Configuration Setup](#54-configuration-setup)
   - [Step 6: Download Orchestrator Certificate](#step-6-download-orchestrator-certificate)
   - [Step 7: OS Instance and Providers](#step-7-os-instance-and-providers)
   - [Step 8: VMs Creation with Scripts](#step-8-vms-creation-with-scripts)
@@ -30,7 +29,7 @@
     - [VNC Configuration Lines](#vnc-configuration-lines)
     - [Where to Add VNC Configuration](#where-to-add-vnc-configuration)
     - [Detailed Configuration Breakdown](#detailed-configuration-breakdown)
-  - [VMs Creation with Ansible Scripts](#alternate-vms-creation-with-ansible-scripts)
+  - [(Alternate) VMs Creation with Ansible Scripts](#alternate-vms-creation-with-ansible-scripts)
     - [How Ansible Works](#how-ansible-works)
     - [Controller Node](#controller-node)
     - [Remote Hosts (Managed Nodes)](#remote-hosts-managed-nodes)
@@ -150,25 +149,7 @@ the actual values specific to your orchestrator.
 
 - `CLUSTER="kind.internal"`: This variable is the FQDN of the orchestrator.
 
-#### 5.2: Interactive Onboarding Flow Configurations
-
-- `ONBOARDING_USERNAME="ONBOARDING_USER"`: This variable represents the username to start IO flow. The placeholder "ONBOARDING_USER"
-  should be replaced with the actual username.
-- `ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"`: This variable holds the password for the onboarding user. The placeholder
-"ONBOARDING_PASSWORD" should be replaced with the actual password.
-
-#### 5.3: Non Interactive Onboarding Flow Configurations
-
-Non Interactive Onboarding Project and User Configurations. These configurations would be used to automatically register
-the dynamically created Virtual Edge Node Serial Number.
-
-- `PROJECT_NAME="your-project-name"`: This variable specifies the name of the project associated with the non interactive
-onboarding flow configurations.
-- `PROJECT_API_USER="actual_api_user"`: This variable indicates the username for accessing an API.
-- `PROJECT_API_PASSWORD=""`: This variable is intended to store the password for the API user. It is currently empty and
-shouldbe populated with the actual password.
-
-#### 5.4: VM Resource Configurations
+#### 5.2: VM Resource Configurations
 
 Specify the resource allocations for virtual machines (VMs) to be provisioned.
 
@@ -178,7 +159,7 @@ Specify the resource allocations for virtual machines (VMs) to be provisioned.
 - `SDB_DISK_SIZE="64G"`: Sets the size of the secondary disk (sdb) to 64 GB.
 - `LIBVIRT_DRIVER="kvm"`: If KVM is supported, set the driver to kvm. If KVM is not supported, set the driver to qemu.
 
-#### 5.5: Linux User Configuration
+#### 5.3: Linux User Configuration
 
 - `USERNAME="PROVISIONED_USERNAME"`: This variable represents the username for the newly provisioned Linux system. The placeholder
   "PROVISIONED_USERNAME" should be replaced with the actual username.
@@ -193,15 +174,6 @@ Here's an example of how you might update the fields in a `config` file:
 # Cluster FQDN
 CLUSTER="kind.internal"
 
-# Interactive Onboarding (IO) Configurations
-ONBOARDING_USERNAME="actual_onboard_user"
-ONBOARDING_PASSWORD="actual_onboard_password"
-
-# NIO Configurations
-PROJECT_NAME="your-project-name"
-PROJECT_API_USER="actual_api_user"
-PROJECT_API_PASSWORD="actual_api_password"
-
 # VM Resources
 RAM_SIZE=8192
 NO_OF_CPUS=4
@@ -213,6 +185,46 @@ LIBVIRT_DRIVER="kvm"
 USERNAME="actual_linux_user"
 PASSWORD="actual_linux_password"
 ```
+
+#### 5.4: Configuration Setup
+
+##### Interactive Onboarding Flow (IO) Configurations
+
+Before running the IO flow script, export the onboarding username and password:
+
+```bash
+export ONBOARDING_USERNAME="ONBOARDING_USER"
+export ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"
+```
+
+- `ONBOARDING_USERNAME="ONBOARDING_USER"`: This variable represents the username to start IO flow. The
+placeholder "ONBOARDING_USER" should be replaced with the actual username.
+- `ONBOARDING_PASSWORD="ONBOARDING_PASSWORD"`: This variable holds the password for the onboarding user. The placeholder
+"ONBOARDING_PASSWORD" should be replaced with the actual password.
+
+##### Non Interactive Onboarding Flow (NIO) Configurations
+
+Non Interactive Onboarding Project and User Configurations. These configurations would be used to automatically register
+the dynamically created Virtual Edge Node Serial Number.
+
+Before running the NIO flow script, export the project API username and password:
+
+```bash
+export PROJECT_API_USER="your_project_api_username"
+export PROJECT_API_PASSWORD="your_project_api_password"
+export PROJECT_NAME="your-project-name"
+```
+
+- `PROJECT_NAME="your-project-name"`: This variable specifies the name of the project associated with the non interactive
+onboarding flow configurations.
+- `PROJECT_API_USER="actual_api_user"`: This variable indicates the username for accessing an API.
+- `PROJECT_API_PASSWORD=""`: This variable is intended to store the password for the API user. It is currently empty and
+shouldbe populated with the actual password
+- `PROJECT_NAME="your-project-name"` : Non Interactive Onboarding Project configurations would be used to
+automatically register the dynamically created Virtual Edge Node Serial Number.
+
+**Note**: If you do not export these credentials, the script will prompt you to enter them when you run the
+`create_vms.sh` script.
 
 ### Step 6: Download Orchestrator Certificate
 
@@ -466,6 +478,15 @@ ansible_become_method: sudo
 ansible_become_user: root
 ```
 
+**IMPORTANT**: While using root as the **ansible_become_user** allows for full administrative access on the remote
+hosts, it can lead to permission issues when creating, reading, or writing files and directories. This is because files
+created by tasks running as root may not be accessible to non-root users.
+
+**Recommendation**:
+To avoid permission errors, it is recommended to use the actual Ansible user (e.g., guest) for tasks that involve file
+operations. This ensures that files and directories are created with the correct ownership and permissions, allowing
+seamless access and management.
+
 - Define the desired copy_path on the remote host where you wish to copy the script. If the specified
 copy_path does not exist, it will be created automatically during the script execution.
 
@@ -509,7 +530,7 @@ ansible_password: "{{ host1_sudo_password }}"
 ansible_become: yes
 ansible_become_pass: "{{ host1_sudo_password }}"
 ansible_become_method: sudo
-ansible_become_user: root
+ansible_become_user: guest    # Actual ansible user
 copy_path: "/home/{{ ansible_user }}/ansible_scripts"
 number_of_vms: 1
 install_packages: 1
@@ -518,8 +539,52 @@ nio_flow: false
 
 ##### 2.2: Modify secret.yml
 
+The `secret.yml` file is used to securely store sensitive information required by the Ansible playbook for VM
+provisioning. This includes credentials and configuration details for both IO and NIO flows. It is crucial to
+keep this file secure and avoid exposing it in version control systems.
+
+```bash
+host1_sudo_password: ""    # add sudo password for host1
+host2_sudo_password: ""    # add sudo password for host2
+host3_sudo_password: ""    # add sudo password for host3
+host4_sudo_password: ""    # add sudo password for host4
+host5_sudo_password: ""    # add sudo password for host5
+
+# IO Configurations
+ONBOARDING_USERNAME: "actual_onboard_user"
+ONBOARDING_PASSWORD: "actual_onboard_password"
+
+# NIO Configurations
+PROJECT_NAME: "your-project-name"
+PROJECT_API_USER: "actual_api_user"
+PROJECT_API_PASSWORD: "actual_api_password"
+```
+
+##### Host Password
+
 In the `secret.yml` file, define the passwords for each host that is listed in the `inventory.yml`.
 This is critical for Ansible to authenticate with the remote hosts.
+
+##### Interactive Onboarding (IO) Flow Configurations**
+
+- `ONBOARDING_USERNAME: "actual_onboard_user"` : This variable represents the username to start IO flow. The
+placeholder "actual_onboard_user" should be replaced with the actual username.
+- `ONBOARDING_PASSWORD: "actual_onboard_password"`: This variable holds the password for the onboarding user. The placeholder
+"actual_onboard_password" should be replaced with the actual password.
+
+##### Non Interactive Onboarding (NIO) Flow Configurations**
+
+Non Interactive Onboarding Project and User Configurations. These configurations would be used to automatically register
+the dynamically created Virtual Edge Node Serial Number.
+
+- `PROJECT_NAME: "your-project-name"`: This variable specifies the name of the project associated with the non interactive
+onboarding flow configurations.
+- `PROJECT_API_USER: "actual_api_user"`: This variable indicates the username for accessing an API.
+- `PROJECT_API_PASSWORD: "actual_api_password"`: This variable is intended to store the password for the API user.
+
+**Important Note**: Ensure that both IO and NIO flow configurations are included in the secret.yml file. Missing
+any of these variables can lead to unexpected behavior or errors during script execution. All required variables
+must be defined for the playbook to function correctly.
 
 ##### Encrypt secret.yml
 

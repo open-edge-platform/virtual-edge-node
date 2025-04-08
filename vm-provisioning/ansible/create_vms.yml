@@ -168,14 +168,19 @@
             msg: >
              sh -c 'cd {{ copy_path }} && ./scripts/create_vm.sh {{ number_of_vms }} {{ '-nio' if hostvars[inventory_hostname].nio_flow else '' }} | tee {{ copy_path }}/create_vms_log.txt'
           when: number_of_vms > 0
-        - name: Execute create_vm.sh script as normal user
+        - name: Execute create_vm.sh script with environment variables
+          shell: |
+            {% if hostvars[inventory_hostname].nio_flow %}
+            export PROJECT_API_USER="{{ PROJECT_API_USER }}"
+            export PROJECT_API_PASSWORD="{{ PROJECT_API_PASSWORD }}"
+            export PROJECT_NAME="{{ PROJECT_NAME }}"
+            {% else %}
+            export ONBOARDING_USERNAME="{{ ONBOARDING_USERNAME }}"
+            export ONBOARDING_PASSWORD="{{ ONBOARDING_PASSWORD }}"
+            {% endif %}
+            cd {{ copy_path }} && ./scripts/create_vm.sh {{ number_of_vms }} {{ '-nio' if hostvars[inventory_hostname].nio_flow else '' }} | tee {{ copy_path }}/create_vms_log.txt
           become: yes
           become_user: "{{ ansible_user }}"
-          expect:
-            command: "sh -c 'cd {{ copy_path }} && ./scripts/create_vm.sh {{ number_of_vms }} {{ '-nio' if hostvars[inventory_hostname].nio_flow else '' }} | tee {{ copy_path }}/create_vms_log.txt'"
-            responses:
-              '\[sudo\] password for .*:': "{{ ansible_become_pass }}"
-            timeout: "{{ ansible_timeout_for_install_vm_dependencies }}"
           register: create_vms_output
           no_log: true
           when: number_of_vms > 0

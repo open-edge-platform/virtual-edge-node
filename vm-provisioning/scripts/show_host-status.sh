@@ -20,7 +20,7 @@ fi
 # Source the config file
 # shellcheck disable=SC1090
 source "$CONFIG_FILE"
-
+source "${PWD}/scripts/nio_configs.sh"
 
 # optional, mandatory if ca certificate is copied to certs folder and this script running from another host
 orch_fqdn_ip='' #10.139.220.XXX

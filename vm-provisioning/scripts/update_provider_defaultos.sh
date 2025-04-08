@@ -9,6 +9,8 @@ set -o pipefail
 # Load configuration variables
 os_type="$1"
 source "${PWD}/config"
+source "${PWD}/scripts/nio_configs.sh"
+
 # Function to obtain JWT token
 get_jwt_token() {
     curl -s -k -X POST \

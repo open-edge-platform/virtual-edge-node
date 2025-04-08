@@ -5,6 +5,8 @@
 set -eu
 # Load configuration
 source "${PWD}/config"
+source "${PWD}/scripts/nio_configs.sh"
+
 # Function to display usage information
 usage() {
     echo "Usage: $0 <serial_number>"
