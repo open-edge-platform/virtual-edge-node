@@ -19,6 +19,8 @@ fi
 pkill -9 minicom || true
 # Iterate over each VM and delete it
 for vm_name in $VM_LIST; do
+    nw_name=$(virsh domiflist "$vm_name" | sed -n '3p' | awk '{print $3}')
+    nw_names+=("$nw_name")
     echo "Processing VM: $vm_name"
     # Destroy the VM if it is running
     if virsh list --name | grep -q "^${vm_name}$"; then
@@ -31,7 +33,7 @@ for vm_name in $VM_LIST; do
 done
 if [ -n "$STANDALONE" ]; then
   echo "standalone mode $STANDALONE"
-  restore_network_file
+  restore_network_file "${nw_names[@]}"
 fi
 sudo rm -rf /tmp/console*.sock
 sudo find "${BOOT_IMAGE}"/ -name 'vm-provisioning*' -exec rm -rf {} +

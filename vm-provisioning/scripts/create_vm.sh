@@ -7,8 +7,11 @@
 # source variables from common variable file
 source "${PWD}/config"
 source "${PWD}/scripts/common_vars.sh"
+chmod +x scripts/socket_login.exp
 
 # Assign arguments to variables
+export USERNAME_HOOK=""
+export PASSWORD_HOOK=""
 export SUPPORT_GUI_XTERM="${SUPPORT_GUI_XTERM:-""}"
 export USERNAME_LINUX="${USERNAME_LINUX:-user}"
 export PASSWORD_LINUX="${PASSWORD_LINUX:-user}"
@@ -136,8 +139,8 @@ cleanup_trap() {
     fi	
 
   elif [ -n "$network_to_remove" ]; then
-    sudo virsh net-destroy "$network_to_remove"
-    sudo virsh net-undefine "$network_to_remove"
+    sudo virsh net-destroy "$network_name"
+    sudo virsh net-undefine "$network_name"
 
     sudo rm -rf /var/lib/libvirt/boot/"${network_name}"_ca.der
     sudo rm -rf /usr/share/OVMF/OVMF_*_"${network_name}"-vm*.fd
@@ -557,7 +560,8 @@ function main() {
   #start the vms
   #export VAGRANT_DEBUG=info
   rm -rf out/logs
-  mkdir -p -m 700 out/
+  mkdir -p out/
+  mkdir -m 700 out/
   mkdir -m 700 out/logs
   LOG_FILE="${log_file}"
   echo "$(date): Script started." | tee -a "$LOG_FILE"
