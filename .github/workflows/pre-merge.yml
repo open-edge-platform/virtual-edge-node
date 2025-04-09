@@ -36,58 +36,54 @@ jobs:
           changed_projects='${{ steps.discover-changes.outputs.changed_projects }}'
           filtered_projects=$(echo "$changed_projects" | jq -cr --argjson folders_to_remove "$folders_to_remove" 'map(select(. as $item | $folders_to_remove | index($item) | not))')
           echo "filtered_projects=$filtered_projects" >> $GITHUB_OUTPUT
-          echo "filtered_projects=$filtered_projects" >> $GITHUB_ENV
-          echo "filtered_projects0=${filtered_projects[0]}" >> $GITHUB_ENV
       - name: "Artifact Folder or Files"
         id: arti-path
         run: |
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-            artifact_path="vm-provisioning/out/"
             echo "artifact_path=vm-provisioning/out/" >> $GITHUB_OUTPUT
           else
-            artifact_path="nothing"
-            echo "artifact_path=nothing" >> $GITHUB_OUTPUT
+            echo "artifact_path=''" >> $GITHUB_OUTPUT
           fi
-  # pre-merge-pipeline:
-  #   needs: pre-checks
-  #   if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-  #   uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@sybacharan-patch-2
-  #   with:
-  #     run_security_scans: false
-  #     run_version_check: false
-  #     run_dep_version_check: false
-  #     run_build: true
-  #     run_lint: true
-  #     run_test: false #only for testing 
-  #     run_validate_clean_folder: false
-  #     run_docker_build: false
-  #     run_scan_containers: false
-  #     run_artifact: true
-  #     artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
-  #     prefix_tag_separator: "/"
-  #     project_folder: ${{ matrix.project_folder }}
-  #     # temporarily use the main branch as the reference branch
-  #     # to use the latest golangci-lint version
-  #     orch_ci_repo_ref: "main"
-  #   secrets: inherit
-  # final-check:
-  #   runs-on: ubuntu-latest
-  #   if: ${{ always() }}
-  #   needs: [pre-merge-pipeline]
-  #   steps:
-  #     - name: Final Status Check
-  #       run: |
-  #         pre_merge_pipeline_result="${{ needs.pre-merge-pipeline.result }}"
+  pre-merge-pipeline:
+    needs: pre-checks
+    if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@sybacharan-patch-2
+    with:
+      run_security_scans: true
+      run_version_check: true
+      run_dep_version_check: true
+      run_build: true
+      run_lint: true
+      run_test: false #only for testing 
+      run_validate_clean_folder: true
+      run_docker_build: true
+      run_scan_containers: true
+      run_artifact: true
+      artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
+      prefix_tag_separator: "/"
+      project_folder: ${{ matrix.project_folder }}
+      # temporarily use the main branch as the reference branch
+      # to use the latest golangci-lint version
+      orch_ci_repo_ref: "main"
+    secrets: inherit
+  final-check:
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [pre-merge-pipeline]
+    steps:
+      - name: Final Status Check
+        run: |
+          pre_merge_pipeline_result="${{ needs.pre-merge-pipeline.result }}"
           
-  #         echo "Pre-merge pipeline result: $pre_merge_pipeline_result"
+          echo "Pre-merge pipeline result: $pre_merge_pipeline_result"
 
-  #         if [ "$pre_merge_pipeline_result" == "success" ] || [ "$pre_merge_pipeline_result" == "skipped" ]; then
-  #           echo "Pre-merge check passed successfully."
-  #         else
-  #           echo "Pre-merge checks failed. PR can't get merged"
-  #           exit 1
-  #         fi
+          if [ "$pre_merge_pipeline_result" == "success" ] || [ "$pre_merge_pipeline_result" == "skipped" ]; then
+            echo "Pre-merge check passed successfully."
+          else
+            echo "Pre-merge checks failed. PR can't get merged"
+            exit 1
+          fi
