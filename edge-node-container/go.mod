@@ -7,7 +7,7 @@ go 1.24.1
 
 require (
 	github.com/magefile/mage v1.15.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.0
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.1
 	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.1
 )
 
