@@ -39,7 +39,7 @@ jobs:
       - name: "Artifact Folder or Files"
         id: arti-path
         run: |
-          if [ "$filtered_projects" == "["vm-provisioning"]" ]; then
+          if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
             echo "artifact_path=vm-provisioning/out/" >> $GITHUB_OUTPUT
           else
             echo "artifact_path='empty'" >> $GITHUB_OUTPUT
