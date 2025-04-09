@@ -42,7 +42,7 @@ jobs:
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
             echo "artifact_path=vm-provisioning/out/" >> $GITHUB_OUTPUT
           else
-            echo "artifact_path=''" >> $GITHUB_OUTPUT
+            echo "artifact_path=""" >> $GITHUB_OUTPUT
           fi
   pre-merge-pipeline:
     needs: pre-checks
