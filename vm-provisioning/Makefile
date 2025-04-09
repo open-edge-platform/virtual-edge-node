@@ -36,8 +36,6 @@ include ../common.mk
 lint: license shellcheck yamllint mdlint
 	@$(MAKE) yaml-syntax-lint YAML_FILES="$(YAML_FILES)" YAML_IGNORE="$(YAML_IGNORE)"
 	@$(MAKE) rx-yaml-input-validate
-	echo "ARTIFACT_PATH=vm-provisioning/out/yaml-syntax-report.log" >> $$GITHUB_ENV
-
 dependency-check:
 	./install_packages.sh
 
