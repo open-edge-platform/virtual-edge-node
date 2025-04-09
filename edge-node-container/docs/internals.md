@@ -29,9 +29,60 @@ flowchart TD;
     C --> |Stopped|D(Teardown);
 ```
 
+
+
 ## Workflows
 
-The workflows are described according to the functionalities of the components previously described.
+See below the C4 component diagram of the simulated edge node.
+
+```mermaid
+C4Component
+    title Component diagram EdgeNodeinContainer
+
+    Container_Boundary(ensim, "ENiC") {
+        Container_Boundary(fakedmi, "Fake DMI (Simulated)") {
+            Component(fake, "Fake DMI Table", "Fake DMI Table", "Fakes UUID and Serial Number.")
+        }
+        Container_Boundary(onbprov, "Onboard/Provision (Simulated)") {
+            Component(onboard, "Interactive Onboarding", "Interactive", "All interactive onboarding mechanisms.")
+            Component(nio, "Non-Interactive Onboarding", "NIO", "All non-interactive onboarding mechanisms.")
+            Component(prov, "Provisioning", "Tinkerbell worker", "Executes tinkerbell workflow actions.")
+        }
+
+        Container_Boundary(agents, "Agents") {
+            Component(update-agent, "Update Agent", "Update Agent", "Updates maintenance status")
+            Component(node-agent, "Node Agent", "Node Agent", "Updates host/instance status")
+            Component(hd-agent, "HW Discovery Agent", "HDA", "Updates HW info")
+            Component(telemetry-agent, "Telemetry Agent", "Telemetry Agent", "Set telemetry config")
+            Component(cluster-agent, "Cluster Agent", "Cluster Agent", "Set cluster config")
+        }
+    }
+    Container_Boundary(orch, "Orchestrator") {
+        Container_Boundary(infra, "Edge Infrastructure Manager") {
+            System_Ext(om, "Onboarding Manager", "Onboarding Manager")
+            System_Ext(tinker, "Tinkerbell server", "Tinkerbell Workflows")
+            System_Ext(mrm, "Maintenance Resource Manager", "MRM")
+            System_Ext(hrm, "Host Resource Manager", "HRM")
+            System_Ext(trm, "Telemetry Resource Manager", "TRM")
+        }
+        Container_Boundary(cluster, "Cluster Manager") {
+          System_Ext(ecm, "Edge Cluster Manager", "Edge Cluster Manager")
+        }
+    }
+    Rel(onboard, om, "CreateNodes", "gRPC")
+    Rel(nio, om, "OnboardNodeStream", "gRPC")
+    
+    Rel(prov, tinker, "GetWorkflowContexts/ReportActionStatus", "gRPC")
+    
+    Rel(node-agent, hrm, "UpdateInstanceStateStatusByHostGUID", "gRPC")
+    Rel(hd-agent, hrm, "UpdateHostSystemInfoByGUID", "gRPC")
+    Rel(update-agent, mrm, "PlatformUpdateStatus", "gRPC")
+    Rel(telemetry-agent, trm, "GetTelemetryConfigByGUID", "gRPC")
+    Rel(cluster-agent, ecm, "GetClusterConfig", "gRPC")
+  ```
+
+The diagram above showcases the main components of ENiC, described in the list below.
+And their workflows are described according to their functionalities.
 
 - fake-uuid init container: it runs with `root` user, from a new uuid created at run-time, it performs the
   parsing of an actual DMI Table Template file, to overwrite it with the newly created uuid, and save a new
