@@ -32,7 +32,6 @@ jobs:
         id: filter-changes
         run: |
           folders_to_remove='[".github",".reuse","LICENSES",".git","tools"]'
-          
           changed_projects='${{ steps.discover-changes.outputs.changed_projects }}'
           filtered_projects=$(echo "$changed_projects" | jq -cr --argjson folders_to_remove "$folders_to_remove" 'map(select(. as $item | $folders_to_remove | index($item) | not))')
           echo "filtered_projects=$filtered_projects" >> $GITHUB_OUTPUT
