@@ -40,8 +40,10 @@ jobs:
         id: arti-path
         run: |
           if [ "$filtered_projects" == "vm-provisioning" ]; then
+            artifact_path="vm-provisioning/out/"
             echo "artifact_path=vm-provisioning/out/" >> $GITHUB_OUTPUT
           else
+            artifact_path="nothing"
             echo "artifact_path=nothing" >> $GITHUB_OUTPUT
           fi
   pre-merge-pipeline:
