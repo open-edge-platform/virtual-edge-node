@@ -1,5 +1,40 @@
 # Edge Node in a Container
 
+This document elaborates on how ENiC architecture is defined,
+and how/where ENiC is used regarding EMF (Edge Manageability Framework).
+
+ENiC (Edge Node in a Container) is a lightweight implementation of an edge node.
+It performs the processes of onboarding and provisioning using simulated
+interfaces with the orchestrator.
+And it installs and run the actual Bare Metal Agents (BMAs) inside the container,
+enabling the execution of infrastructure, cluster and application use cases.
+
+First and foremost, notice:
+
+- ENiC is not part of EMF;
+- ENiC is developed and released for testing purposes only;
+- ENiC can be used to validate EMF features, in infrastructure,
+  cluster and application scopes;
+- ENiC is used by the Continuous Integration pipeline of EMF to
+  run integration tests in the scope of infrastructure, cluster,
+  application and UI domains;
+- ENiC does not contain external (management/control) interfaces,
+  it only communicates with an EMF orchestrator for the sole purpose
+  of testing its functionalities;
+- ENiC performs the onboarding/provisioning process of an actual edge node
+  using simulated calls, which exercise the same interfaces as an actual
+  edge node does in the EMF orchestrator;
+- ENiC enables the execution of Bare Metal Agents in the same manner as an
+  actual edge node, i.e., BMAs are installed (from their .deb packages),
+  configured and executed as systemd services;
+- ENiC requires its container to run in privileged mode and with root
+  user because it needs to install the BMAs after it is initiated,
+  and some BMAs require access to the “dmidecode” tool,
+  used to retrieve the system UUID and Serial Number;
+- Further hardening of ENiC is going to be performed to reduce the
+  privileges/capabilities of the container and possibly avoid the execution
+  of it using the root user. This requires further investigation.
+
 ## Prereqs
 
 - Golang

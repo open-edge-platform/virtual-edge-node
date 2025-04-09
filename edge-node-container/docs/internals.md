@@ -29,8 +29,6 @@ flowchart TD;
     C --> |Stopped|D(Teardown);
 ```
 
-
-
 ## Workflows
 
 See below the C4 component diagram of the simulated edge node.
