@@ -35,6 +35,14 @@ jobs:
           changed_projects='${{ steps.discover-changes.outputs.changed_projects }}'
           filtered_projects=$(echo "$changed_projects" | jq -cr --argjson folders_to_remove "$folders_to_remove" 'map(select(. as $item | $folders_to_remove | index($item) | not))')
           echo "filtered_projects=$filtered_projects" >> $GITHUB_OUTPUT
+      - name: "Artifact Folder or Files"
+        id: arti-path
+        run: |
+          if [ "$filtered_projects" == "vm-provisioning" ]; then
+            echo "artifact_path=vm-provisioning/out/" >> $GITHUB_OUTPUT
+          else
+            echo "artifact_path=nothing" >> $GITHUB_OUTPUT
+          fi
   pre-merge-pipeline:
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
@@ -54,6 +62,7 @@ jobs:
       run_docker_build: false
       run_scan_containers: false
       run_artifact: true
+      artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       # temporarily use the main branch as the reference branch
