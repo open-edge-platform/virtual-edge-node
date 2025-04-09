@@ -795,8 +795,8 @@ github.com/open-edge-platform/infra-managers/telemetry v1.21.0 h1:Gy2h3qwRsn3JCg
 github.com/open-edge-platform/infra-managers/telemetry v1.21.0/go.mod h1:6u2M8KxwriPWyLn1W3NMc1SSEDFoiRGhlLtrkcOkcRY=
 github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0 h1:3uRK793GSkQT2R/rf7/NrcI/mGP83rMyjMSUtFSNiBg=
 github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0/go.mod h1:7SL3s3QWqg+Z+yp/J6wJZmMnug04G8NGlLKma1SCwX4=
-github.com/open-edge-platform/orch-library/go v0.5.29 h1:LfOaRcRYXpQdcyHrVwN4wC2l11wbdUnBLkc2P7vrZNY=
-github.com/open-edge-platform/orch-library/go v0.5.29/go.mod h1:Wm6A5AJx4DCIOi4u+y1IMJxgFZ4n27f5FLSqW0QPW9k=
+github.com/open-edge-platform/orch-library/go v0.5.31 h1:IIQ8IMLz1fpovZUUYs8UYSiJR615uPeeJB1b+e0D+Tk=
+github.com/open-edge-platform/orch-library/go v0.5.31/go.mod h1:ZjoTX4aTWIAbUzzOod+Pt/imyR2GLi1tpRPq/LgSEew=
 github.com/open-edge-platform/orch-library/go/dazl v0.5.2 h1:YajSGrup0GtzILvXOGL5slbZQMrge513ATBKtadQq38=
 github.com/open-edge-platform/orch-library/go/dazl v0.5.2/go.mod h1:UiO3TOEqEuRT81OtgPsqR9LpB1887i5nk2TelhJksMY=
 github.com/open-policy-agent/opa v1.3.0 h1:zVvQvQg+9+FuSRBt4LgKNzJwsWl/c85kD5jPozJTydY=
