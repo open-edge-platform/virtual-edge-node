@@ -53,15 +53,15 @@ jobs:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
     uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@sybacharan-patch-2
     with:
-      run_security_scans: false
-      run_version_check: false
-      run_dep_version_check: false
-      run_build: false
-      run_lint: false
+      run_security_scans: true
+      run_version_check: true
+      run_dep_version_check: true
+      run_build: true
+      run_lint: true
       run_test: false #only for testing 
-      run_validate_clean_folder: false
-      run_docker_build: false
-      run_scan_containers: false
+      run_validate_clean_folder: true
+      run_docker_build: true
+      run_scan_containers: true
       run_artifact: true
       artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
       prefix_tag_separator: "/"
