@@ -74,8 +74,8 @@ Vagrant.configure("2") do |config|
           { value: '-smbios' },
 	  { value: "type=1,serial=#{serialnum}"}
         ]
+        libvirt.disk_bus = "virtio"
         libvirt.storage :file, :size => SDA_DISK_SIZE, :type => 'qcow2', :device => 'sda', :bus => 'sata', :detect_zeroes => 'on'
-        libvirt.storage :file, :size => SDB_DISK_SIZE, :type => 'qcow2', :device => 'sdb', :bus => 'sata', :detect_zeroes => 'on'
 
         libvirt.boot "hd"
         libvirt.boot "network"
