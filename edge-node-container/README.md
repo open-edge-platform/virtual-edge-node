@@ -1,13 +1,23 @@
-# Edge Node in a Container
+# Edge Node in a Container - For Testing Purposes Only
 
-This document elaborates on how ENiC architecture is defined,
-and how/where ENiC is used regarding EMF (Edge Manageability Framework).
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Get Started](#get-started)
+- [Contribute](#contribute)
+
+## Overview
+
+This sub-repository contains the implementation of the Edge Node in a Container (ENiC).
 
 ENiC (Edge Node in a Container) is a lightweight implementation of an edge node.
 It performs the processes of onboarding and provisioning using simulated
 interfaces with the orchestrator.
 And it installs and run the actual Bare Metal Agents (BMAs) inside the container,
 enabling the execution of infrastructure, cluster and application use cases.
+
+## Features
 
 First and foremost, notice:
 
@@ -35,7 +45,9 @@ First and foremost, notice:
   privileges/capabilities of the container and possibly avoid the execution
   of it using the root user. This requires further investigation.
 
-## Prereqs
+## Get Started
+
+### Prereqs
 
 - Golang
 - Docker
@@ -52,7 +64,7 @@ make bma_versions   # Applies the BMA versions into the chart values.
 make apply-version  # Applies the VERSION into the chart versions.
 ```
 
-## Build and load the container image
+### Build and load the container image
 
 This repository also contains the Dockerfile and Helm Chart required to
 emulate the EN on top of Kubernetes.
@@ -94,7 +106,7 @@ docker exec kind-control-plane crictl images | grep enic
 Both of these containers are deployed as part of the same POD, but they have
 very different roles:
 
-## Edge Node
+### Edge Node Logs
 
 Contains the BMA and runs under `systemd`. Emulates the Edge Node.
 Once it starts it will set up all the required configuration for the BMA and
@@ -134,12 +146,12 @@ kubectl -n enic exec -it $(kubectl -n enic get pods -l app=enic --no-headers | a
 kubectl -n enic exec -it $(kubectl -n enic get pods -l app=enic --no-headers | awk '{print $1}') -c edge-node -- journalctl -u cluster-dns -f
 ```
 
-## Edge Node Scripts
+### Edge Node Scripts
 
 Contains the utility scripts defined in [./scripts](./scripts)
 which are responsible to run the `onboard` and `agents` systemd services.
 
-## Deploy
+### Deploy
 
 Until the images are published use `make kind-load`
 
@@ -169,3 +181,29 @@ helm upgrade --install enic -n enic ./chart/ \
   --set global.registry.name=<registry> \
   --set param.debug=true
 ```
+
+## Contribute
+
+All source code of ENiC is maintained and released in CI using the VERSION file.
+In addition, the chart of ENiC is versioned in the same tag with the VERSION file, this is mandatory
+to keep all charts versions and app versions compatible in the same repository.
+It is just a hack to facilitate the release process of them, given the source code is so related.
+
+Make sure the versions in ENiC go.mod match those of the components of the
+Edge Infrastructure Manager release.
+That's the only manner to maintain ENiC compatible with Edge Infrastructure Manager.
+For example, update the go.mod with:
+
+```yaml
+github.com/open-edge-platform/infra-core/inventory/v2 v2.9.0
+```
+
+Run the go.mod/go.sum update with:
+
+```bash
+make go-tidy
+```
+
+See the [docs](docs) for advanced architectural details:
+
+- [Architecture and Workflows](docs/internals.md)
