@@ -43,18 +43,20 @@ C4Component
         Container_Boundary(fakedmi, "Fake DMI (Simulated)") {
             Component(fake, "Fake DMI Table", "Fake DMI Table", "Fakes UUID and Serial Number.")
         }
-        Container_Boundary(onbprov, "Onboard/Provision (Simulated)") {
-            Component(onboard, "Interactive Onboarding", "Interactive", "All interactive onboarding mechanisms.")
-            Component(nio, "Non-Interactive Onboarding", "NIO", "All non-interactive onboarding mechanisms.")
-            Component(prov, "Provisioning", "Tinkerbell worker", "Executes tinkerbell workflow actions.")
-        }
+        Container_Boundary(edgenode, "Emulated Edge Node") {
+          Container_Boundary(onbprov, "Onboard/Provision (Simulated)") {
+              Component(onboard, "Interactive Onboarding", "Interactive", "All interactive onboarding mechanisms.")
+              Component(nio, "Non-Interactive Onboarding", "NIO", "All non-interactive onboarding mechanisms.")
+              Component(prov, "Provisioning", "Tinkerbell worker", "Executes tinkerbell workflow actions.")
+          }
 
-        Container_Boundary(agents, "Agents") {
-            Component(update-agent, "Update Agent", "Update Agent", "Updates maintenance status")
-            Component(node-agent, "Node Agent", "Node Agent", "Updates host/instance status")
-            Component(hd-agent, "HW Discovery Agent", "HDA", "Updates HW info")
-            Component(telemetry-agent, "Telemetry Agent", "Telemetry Agent", "Set telemetry config")
-            Component(cluster-agent, "Cluster Agent", "Cluster Agent", "Set cluster config")
+          Container_Boundary(agents, "Agents") {
+              Component(update-agent, "Update Agent", "Update Agent", "Updates maintenance status")
+              Component(node-agent, "Node Agent", "Node Agent", "Updates host/instance status")
+              Component(hd-agent, "HW Discovery Agent", "HDA", "Updates HW info")
+              Component(telemetry-agent, "Telemetry Agent", "Telemetry Agent", "Set telemetry config")
+              Component(cluster-agent, "Cluster Agent", "Cluster Agent", "Set cluster config")
+          }
         }
     }
     Container_Boundary(orch, "Orchestrator") {
