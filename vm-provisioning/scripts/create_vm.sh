@@ -126,13 +126,13 @@ cleanup_trap() {
 	 sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${mgmt_intf_name}-vm*.qcow2"
          sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${mgmt_intf_name}-vm*.raw"
          sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_${mgmt_intf_name}-vm*.log ./out/logs/"
-         sudo chmod 600 "./out/logs/$(basename "$PWD")_${mgmt_intf_name}-vm"*.log
+         sudo chmod 644 "./out/logs/$(basename "$PWD")_${mgmt_intf_name}-vm"*.log
     else
          sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.qcow2"
          sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.raw"
 
          sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_${VM_NAME}*.log ./out/logs/"
-	 sudo chmod 600 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
+	 sudo chmod 644 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
     fi	
 
   elif [ -n "$network_to_remove" ]; then
@@ -147,13 +147,13 @@ cleanup_trap() {
     	sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${network_name}-vm*.raw"
 
     	sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_$network_name-vm*.log ./out/logs/"
-    	sudo chmod 600 "./out/logs/$(basename "$PWD")_$network_name-vm"*.log
+    	sudo chmod 644 "./out/logs/$(basename "$PWD")_$network_name-vm"*.log
     else
         sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.qcow2"
         sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.raw"
 
     	sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_${VM_NAME}*.log ./out/logs/"
-    	sudo chmod 600 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
+    	sudo chmod 644 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
     fi
   fi
   exit 0
@@ -168,7 +168,6 @@ LOGFILE="out/logs/master_log_${ip_to_connect##*.}.log"
 # Function to log messages with timestamp
 log_with_timestamp() {
   echo -e "[$(date +"%Y-%m-%d %H:%M:%S")] [$ip_to_connect] $1" | tee -a "$LOGFILE"
-  chmod 600 "$LOGFILE"
 }
 
 function wait_for_file() {
@@ -557,12 +556,10 @@ function main() {
   #start the vms
   #export VAGRANT_DEBUG=info
   rm -rf out/logs
-  mkdir -p -m 700 out/
-  mkdir -p -m 700 out/logs
+  mkdir -p out/logs
   LOG_FILE="${log_file}"
   echo "$(date): Script started." | tee -a "$LOG_FILE"
   # exec > >(tee -a "$LOG_FILE") 2>&1
-  chmod 600 $LOG_FILE
 
   sleep 5
 
