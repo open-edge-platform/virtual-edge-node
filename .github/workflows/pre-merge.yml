@@ -43,7 +43,7 @@ jobs:
             artifact_path="vm-provisioning/out/"
             echo "artifact_path=vm-provisioning/out/" >> $GITHUB_OUTPUT
           else
-            artifact_path="nothing"
+            artifact_path="vm-provisioning/out/"
             echo "artifact_path=nothing" >> $GITHUB_OUTPUT
           fi
   pre-merge-pipeline:
@@ -65,7 +65,7 @@ jobs:
       run_docker_build: true
       run_scan_containers: true
       run_artifact: true
-      artifacts_path: "${{ needs.pre-checks.outputs.artifact_path }}"
+      artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       # temporarily use the main branch as the reference branch
