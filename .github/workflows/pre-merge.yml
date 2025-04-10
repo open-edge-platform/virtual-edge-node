@@ -51,6 +51,7 @@ jobs:
   pre-merge-pipeline:
     needs: pre-checks
     # if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
+    if: ${{ always() }}
     strategy:
       fail-fast: false
       matrix:
