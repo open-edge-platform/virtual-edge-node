@@ -560,9 +560,10 @@ function main() {
   #start the vms
   #export VAGRANT_DEBUG=info
   rm -rf out/logs
-  mkdir -p out/
-  mkdir -m 700 out/
-  mkdir -m 700 out/logs
+  mkdir -p out/logs
+  chmod 700 out
+  chmod 700 out/logs
+
   LOG_FILE="${log_file}"
   echo "$(date): Script started." | tee -a "$LOG_FILE"
   # exec > >(tee -a "$LOG_FILE") 2>&1
