@@ -40,7 +40,7 @@ jobs:
         id: arti-path
         run: |
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-            echo "artifact_path=vm-provisioning/out/ vm-provisioning/scripts/create_vm.sh vm-provisioning/ansible/install_ansible.sh" >> $GITHUB_OUTPUT
+            echo "artifact_path=vm-provisioning/scripts/create_vm.sh" >> $GITHUB_OUTPUT
           else
             echo "artifact_path=empty" >> $GITHUB_OUTPUT
           fi
