@@ -40,11 +40,7 @@ jobs:
         id: arti-path
         run: |
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-            echo "vm-provisioning/out/" >> paths.txt
-            echo "vm-provisioning/scripts/create_vm.sh" >> paths.txt
-            echo "vm-provisioning/ansible/install_ansible.sh" >> paths.txt
-            file_contents=$(<paths.txt)
-            "artifact_path=$file_contents" >> $GITHUB_OUTPUT
+            "artifact_path=nothing" >> $GITHUB_OUTPUT
           else
             "artifact_path=empty" >> $GITHUB_OUTPUT
           fi
@@ -67,7 +63,7 @@ jobs:
       run_docker_build: true
       run_scan_containers: true
       run_artifact: true
-      artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
+      artifacts_path: "vm-provisioning/out/ vm-provisioning/scripts/create_vm.sh vm-provisioning/ansible/install_ansible.sh"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       # temporarily use the main branch as the reference branch
