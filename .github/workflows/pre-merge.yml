@@ -48,7 +48,6 @@ jobs:
             # artifact_path="empty"
           fi
           echo "artifact_path=${paths[*]}" >> $GITHUB_OUTPUT
-          # echo "artifact_paths=$artifact_paths" >> $GITHUB_OUTPUT
   pre-merge-pipeline:
     needs: pre-checks
     # if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
