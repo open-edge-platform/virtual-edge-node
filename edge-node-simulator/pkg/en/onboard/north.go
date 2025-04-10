@@ -5,10 +5,12 @@ package onboard
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"os"
 	"sync"
+	"time"
 
 	edgeinfraapi "github.com/open-edge-platform/infra-core/api/pkg/api/v0"
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
@@ -16,62 +18,144 @@ import (
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/utils"
 )
 
-func apiSetup(ctx context.Context, cfg *defs.Settings) error {
-	APIToken, err := ensim_kc.GetKeycloakToken(
-		ctx,
-		cfg.CertCA,
-		cfg.OrchFQDN,
-		cfg.EdgeAPIUser,
-		cfg.EdgeAPIPass,
-		defs.OrchKcClientID,
-	)
+const (
+	// wait time for HTTP request.
+	waitTime = 5 * time.Second
+)
+
+func httpGet(ctx context.Context, client *http.Client, url, token string, responseHooker func(*http.Response) error) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
-		zlog.Err(err).Msgf("failed to get keycloak API token")
 		return err
 	}
-	err = os.Setenv(jwtTokenEnvVar, APIToken)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := client.Do(req)
 	if err != nil {
-		zlog.Err(err).Msgf("failed to set env jwtToken")
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("HTTP GET to %s failed, status: %s", url, resp.Status)
 		return err
 	}
 
-	err = os.Setenv(projectIDEnvVar, cfg.Project)
-	if err != nil {
-		zlog.Err(err).Msgf("failed to set env projectID")
-		return err
+	if responseHooker != nil {
+		if err := responseHooker(resp); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
-func deleteHostInstance(ctx context.Context, apiClient *edgeinfraapi.ClientWithResponses, hostID, instanceID string) error {
-	zlog.Info().Msgf("Deleting Instance %s in Edge Infra", instanceID)
-	resDeleteInstance, err := apiClient.DeleteInstancesInstanceIDWithResponse(
-		ctx,
-		instanceID,
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
+func httpDelete(ctx context.Context, client *http.Client,
+	url, token, resourceID string,
+	responseHooker func(*http.Response) error,
+) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete,
+		fmt.Sprintf("%s/%s", url, resourceID), http.NoBody)
 	if err != nil {
 		return err
 	}
-	if resDeleteInstance.StatusCode() != http.StatusNoContent {
-		return fmt.Errorf("failed to delete Instance %s resources code %d", instanceID, resDeleteInstance.StatusCode())
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("HTTP Delete to %s failed, status: %s",
+			fmt.Sprintf("%s/%s", url, resourceID), resp.Status)
+		return err
+	}
+
+	if responseHooker != nil {
+		if err := responseHooker(resp); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func HTTPInfraOnboardDelResource(ctx context.Context,
+	client *http.Client,
+	url, token, resourceID string,
+) error {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
+	defer cancel()
+
+	if err := httpDelete(rCtx, client, url, token, resourceID, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func HTTPInfraOnboardGetHostAndInstance(ctx context.Context,
+	client *http.Client,
+	url, token, uuid string,
+) (string, string, error) {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
+	defer cancel()
+
+	hostID := ""
+	instanceID := ""
+	responseHooker := func(res *http.Response) error {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		ps := &edgeinfraapi.HostsList{}
+		err = json.Unmarshal(b, &ps)
+		if err != nil {
+			return err
+		}
+		if ps.Hosts == nil || len(*ps.Hosts) == 0 {
+			return fmt.Errorf("empty host result for uuid %s", uuid)
+		}
+		host := (*ps.Hosts)[0]
+		hostID = *host.ResourceId
+		if host.Instance != nil && host.Instance.InstanceID != nil {
+			instanceID = *host.Instance.InstanceID
+		} else {
+			return fmt.Errorf("instance not yet created for uuid %s", uuid)
+		}
+		return nil
+	}
+
+	if err := httpGet(rCtx, client, fmt.Sprintf("%s?uuid=%s", url, uuid), token, responseHooker); err != nil {
+		return hostID, instanceID, err
+	}
+
+	return hostID, instanceID, nil
+}
+
+// cleanupHost is used to remove hosts that are created during the test.
+func cleanupHost(ctx context.Context, hostURL, instanceURL, apiToken string, apiClient *http.Client, hostUUID string) error {
+	hostID, instanceID, err := HTTPInfraOnboardGetHostAndInstance(ctx, apiClient, hostURL, apiToken, hostUUID)
+	if err != nil {
+		return err
+	}
+	zlog.Info().Msgf("Deleting Instance %s in Edge Infra", instanceID)
+	err = HTTPInfraOnboardDelResource(ctx, apiClient, instanceURL, apiToken, instanceID)
+	if err != nil {
+		zlog.Error().Err(err).Msgf("Failed to delete instance %s in Edge Infra", instanceID)
+		return err
 	}
 	zlog.Info().Msgf("Deleted Instance %s in Edge Infra", instanceID)
 
 	zlog.Info().Msgf("Deleting Host %s in Edge Infra", hostID)
-	resDeleteHost, err := apiClient.DeleteComputeHostsHostIDWithResponse(
-		ctx,
-		hostID,
-		edgeinfraapi.HostOperationWithNote{},
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
+	err = HTTPInfraOnboardDelResource(ctx, apiClient, hostURL, apiToken, hostID)
 	if err != nil {
+		zlog.Error().Err(err).Msgf("Failed to delete host %s in Edge Infra", hostID)
 		return err
-	}
-	if resDeleteHost.StatusCode() != http.StatusNoContent {
-		return fmt.Errorf("failed to delete Host %s resources code %d", hostID, resDeleteHost.StatusCode())
 	}
 	zlog.Info().Msgf("Deleted Host %s in Edge Infra", hostID)
 	return nil
@@ -79,7 +163,14 @@ func deleteHostInstance(ctx context.Context, apiClient *edgeinfraapi.ClientWithR
 
 func Teardown(ctx context.Context, cfg *defs.Settings) error {
 	zlog.Info().Msgf("Deleting Host/Instance of ENiC in Edge Infra %s project %s", cfg.ENGUID, cfg.Project)
-	err := apiSetup(ctx, cfg)
+	apiToken, err := ensim_kc.GetKeycloakToken(
+		ctx,
+		cfg.CertCA,
+		cfg.OrchFQDN,
+		cfg.EdgeAPIUser,
+		cfg.EdgeAPIPass,
+		defs.OrchKcClientID,
+	)
 	if err != nil {
 		return err
 	}
@@ -89,45 +180,13 @@ func Teardown(ctx context.Context, cfg *defs.Settings) error {
 		return err
 	}
 
-	apiURL := fmt.Sprintf(orchAPIURL, cfg.OrchFQDN)
-	apiClient, err := edgeinfraapi.NewClientWithResponses(apiURL, edgeinfraapi.WithHTTPClient(httpClient))
+	hostURL := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/hosts", cfg.OrchFQDN, cfg.Project)
+	instanceURL := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/instances", cfg.OrchFQDN, cfg.Project)
+	err = cleanupHost(ctx, hostURL, instanceURL, apiToken, httpClient, cfg.ENGUID)
 	if err != nil {
 		return err
 	}
 
-	byUUIDFilter := fmt.Sprintf(`uuid = %q`, cfg.ENGUID)
-	resList, err := apiClient.GetComputeHostsWithResponse(
-		ctx,
-		&edgeinfraapi.GetComputeHostsParams{
-			Filter: &byUUIDFilter,
-		},
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
-	if err != nil {
-		return err
-	}
-
-	if resList.StatusCode() != http.StatusOK {
-		return fmt.Errorf("failed to retrieve Host with UUID %s status %d", cfg.ENGUID, resList.StatusCode())
-	}
-
-	if resList.JSON200.Hosts == nil {
-		return fmt.Errorf("failed to retrieve valid list of Hosts with UUID %s", cfg.ENGUID)
-	}
-
-	if len(*resList.JSON200.Hosts) != 1 {
-		return fmt.Errorf("failed to retrieve unique Host with UUID %s", cfg.ENGUID)
-	}
-
-	host := (*resList.JSON200.Hosts)[0]
-	hostID := *host.ResourceId
-	instanceID := *host.Instance.ResourceId
-
-	err = deleteHostInstance(ctx, apiClient, hostID, instanceID)
-	if err != nil {
-		return err
-	}
 	zlog.Info().Msgf("Successfully deleted host/instance in Edge Infra for UUID %s", cfg.ENGUID)
 	return nil
 }
