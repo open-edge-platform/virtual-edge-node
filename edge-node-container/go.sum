@@ -698,8 +698,8 @@ github.com/open-edge-platform/orch-library/go v0.5.29 h1:LfOaRcRYXpQdcyHrVwN4wC2
 github.com/open-edge-platform/orch-library/go v0.5.29/go.mod h1:Wm6A5AJx4DCIOi4u+y1IMJxgFZ4n27f5FLSqW0QPW9k=
 github.com/open-edge-platform/orch-library/go/dazl v0.5.2 h1:YajSGrup0GtzILvXOGL5slbZQMrge513ATBKtadQq38=
 github.com/open-edge-platform/orch-library/go/dazl v0.5.2/go.mod h1:UiO3TOEqEuRT81OtgPsqR9LpB1887i5nk2TelhJksMY=
-github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.1 h1:UT3p4Z6NduaR4IzIJ+1VTBWEhcfEJDfFd0BLUOQTmdA=
-github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.1/go.mod h1:O630pCWm2XNbN1YEDg3PtbSsJWo58dr0Gx2u36rT8ic=
+github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.2 h1:C0gq6V7gcZJEe6OqhhEvEpQMRK4RHZWlWd3ZBbk5Kgc=
+github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.2/go.mod h1:O630pCWm2XNbN1YEDg3PtbSsJWo58dr0Gx2u36rT8ic=
 github.com/open-policy-agent/opa v1.3.0 h1:zVvQvQg+9+FuSRBt4LgKNzJwsWl/c85kD5jPozJTydY=
 github.com/open-policy-agent/opa v1.3.0/go.mod h1:t9iPNhaplD2qpiBqeudzJtEX3fKHK8zdA29oFvofAHo=
 github.com/perimeterx/marshmallow v1.1.5 h1:a2LALqQ1BlHM8PZblsDdidgv1mWi1DgC2UmX50IvK2s=
