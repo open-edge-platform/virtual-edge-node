@@ -43,7 +43,8 @@ jobs:
             echo "vm-provisioning/out/" >> paths.txt
             echo "vm-provisioning/scripts/create_vm.sh" >> paths.txt
             echo "vm-provisioning/ansible/install_ansible.sh" >> paths.txt
-            echo "artifact_path=$(paste -sd ',' paths.txt)" >> $GITHUB_OUTPUT
+            file_contents=$(<paths.txt)
+            "artifact_path=$file_contents" >> $GITHUB_OUTPUT
           else
             "artifact_path=empty" >> $GITHUB_OUTPUT
           fi
