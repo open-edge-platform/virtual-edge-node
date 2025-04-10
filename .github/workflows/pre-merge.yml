@@ -39,16 +39,16 @@ jobs:
       - name: "Artifact Folder or Files"
         id: arti-path
         run: |
-          # paths=()
-          # if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-          #   paths+=('vm-provisioning/out/' 'vm-provisioning/scripts/create_vm.sh' 'vm-provisioning/ansible/install_ansible.sh')
-          #   # echo "::set-output name=artifact_paths::vm-provisioning/out/ vm-provisioning/scripts/create_vm.sh vm-provisioning/ansible/install_ansible.sh"
-          # else
-          #   paths+=('empty')
-          #   # artifact_path="empty"
-          # fi
-          # echo "artifact_path=${paths[*]}" >> $GITHUB_OUTPUT
-          echo "something"
+          paths=()
+          if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
+            paths+=('vm-provisioning/out/' 'vm-provisioning/scripts/create_vm.sh' 'vm-provisioning/ansible/install_ansible.sh')
+            # echo "::set-output name=artifact_paths::vm-provisioning/out/ vm-provisioning/scripts/create_vm.sh vm-provisioning/ansible/install_ansible.sh"
+          else
+            paths+=('empty')
+            # artifact_path="empty"
+          fi
+          echo "artifact_path=${paths[*]}" >> $GITHUB_OUTPUT
+          # echo "something"
   pre-merge-pipeline:
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
@@ -70,7 +70,7 @@ jobs:
       run_artifact: true
       artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
       prefix_tag_separator: "/"
-      project_folder: "vm-provisioning"
+      project_folder: ${{ matrix.project_folder }}
       # temporarily use the main branch as the reference branch
       # to use the latest golangci-lint version
       orch_ci_repo_ref: "main"
