@@ -155,8 +155,7 @@ Specify the resource allocations for virtual machines (VMs) to be provisioned.
 
 - `RAM_SIZE=8192`: Allocates 8192 MB (or 8 GB) of RAM to each VM.
 - `NO_OF_CPUS=4`: Assigns 2 CPU cores to each VM.
-- `SDA_DISK_SIZE="64G"`: Sets the size of the primary disk (sda) to 64 GB.
-- `SDB_DISK_SIZE="64G"`: Sets the size of the secondary disk (sdb) to 64 GB.
+- `SDA_DISK_SIZE="110G"`: Sets the size of the primary disk (sda) to minimum 110 GB.
 - `LIBVIRT_DRIVER="kvm"`: If KVM is supported, set the driver to kvm. If KVM is not supported, set the driver to qemu.
 
 #### 5.3: Linux User Configuration
@@ -177,8 +176,7 @@ CLUSTER="kind.internal"
 # VM Resources
 RAM_SIZE=8192
 NO_OF_CPUS=4
-SDA_DISK_SIZE="64G"
-SDB_DISK_SIZE="64G"
+SDA_DISK_SIZE="110G"
 LIBVIRT_DRIVER="kvm"
 
 # Linux Provisioning
@@ -247,6 +245,10 @@ Use the following curl to create an OS instance and Provider instance.
 **Note: The following commands are required to run initially when starting VM provisioning. These configurations will be
 used for further VM provisioning.**
 
+**Important**: Before executing the Below JWT export command, ensure that all NIO configurations are properly exported
+as environment variables. This step is crucial to ensure that the JWT export process has access to the necessary
+credentials and settings, preventing errors and ensuring smooth execution.
+
 ```sh
 cd vm-provisioning
 
@@ -287,7 +289,7 @@ scripts from the host machine where the VMs will be created.
 To create a specified number of VMs, execute the following command:
 
 ```bash
-chmod +x create_vm.sh
+chmod +x ./scripts/create_vm.sh
 ./scripts/create_vm.sh <NO_OF_VMS>
 ```
 
@@ -297,15 +299,45 @@ Note: You can press Ctrl+C to cancel the ongoing VM provisioning process, whethe
 
 ##### VMs Creation with Non-Interactive Onboarding Flow (NIO)
 
-To create VMs using the Non-interactive onboarding flow, use the following command:
+To create VMs using the Non-Interactive Onboarding flow, you have two options:
+
+##### (I). NIO Flow without Custom Serial Numbers
+
+Use this option to automatically generate random serial numbers for each VM.
 
 ```bash
-chmod +x create_vm.sh
+chmod +x ./scripts/create_vm.sh
 ./scripts/create_vm.sh <NO_OF_VMS> -nio
 ```
 
 - `NO_OF_VMS`: Replace this placeholder with the actual number of VMs you wish to create.
 - `-nio`: This option enables the Non Interactive Onboarding flow.
+
+##### (II). NIO Flow with Custom Serial Numbers
+
+Use this option to specify custom serial numbers for each VM.
+
+```bash
+chmod +x ./scripts/create_vm.sh
+./scripts/create_vm.sh <NO_OF_VMS> -nio -serials=<serials>
+```
+
+**-serials=**: Provide a comma-separated list of serial numbers for each VM. The number of serials must match the number
+of VMs specified.
+
+##### Example Commands
+
+Automatically generate random serial numbers:
+
+```bash
+./scripts/create_vm.sh 3 -nio
+```
+
+Specify custom serial numbers:
+
+```bash
+./scripts/create_vm.sh 3 -nio -serials=VM112M01,VM112M02,VM113M01
+```
 
 **Note: You can press Ctrl+C to cancel the ongoing VM provisioning process, whether it is in progress or completed.
 Already provisioned VMs or ongoing provisioning VMs shall be deleted.**
@@ -323,7 +355,7 @@ Upon successful provisioning with MicroVisor, the following log will appear on y
 Run the `destroy_vm.sh` script to delete VMs that have already been provisioned.
 
 ```bash
-chmod +x destroy_vm.sh
+chmod +x ./scripts/destroy_vm.sh
 ./scripts/destroy_vm.sh
 ```
 
@@ -413,7 +445,7 @@ Install Ansible on Controller Node using the install_ansible.sh script that is a
 ```
 
 To allow a file or folder to be executed, you need to modify its permissions using the chmod command.
-This is particularly useful for scripts or programs that need to be run directly
+This is particularly useful for scripts or programs that need to be run directly.
 
 ```bash
 chmod +x /path/to/your/file
