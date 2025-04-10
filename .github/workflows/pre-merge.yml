@@ -42,8 +42,6 @@ jobs:
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
             echo "artifact_path<<EOF" >> $GITHUB_OUTPUT
             echo "vm-provisioning/out/" >> $GITHUB_OUTPUT
-            echo "vm-provisioning/scripts/create_abc.sh" >> $GITHUB_OUTPUT
-            echo "vm-provisioning/ansible/install_ansible.sh" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "artifact_path=empty" >> $GITHUB_OUTPUT
