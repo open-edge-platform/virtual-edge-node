@@ -18,8 +18,13 @@ import (
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/utils"
 )
 
+const (
+	// wait time for HTTP request.
+	waitTime = 5 * time.Second
+)
+
 func httpGet(ctx context.Context, client *http.Client, url, token string, responseHooker func(*http.Response) error) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return err
 	}
@@ -46,8 +51,12 @@ func httpGet(ctx context.Context, client *http.Client, url, token string, respon
 	return nil
 }
 
-func httpDelete(ctx context.Context, client *http.Client, url, token string, resourceID string, responseHooker func(*http.Response) error) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf("%s/%s", url, resourceID), nil)
+func httpDelete(ctx context.Context, client *http.Client,
+	url, token, resourceID string,
+	responseHooker func(*http.Response) error,
+) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete,
+		fmt.Sprintf("%s/%s", url, resourceID), http.NoBody)
 	if err != nil {
 		return err
 	}
@@ -61,7 +70,8 @@ func httpDelete(ctx context.Context, client *http.Client, url, token string, res
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("HTTP Delete to %s failed, status: %s", fmt.Sprintf("%s/%s", url, resourceID), resp.Status)
+		err = fmt.Errorf("HTTP Delete to %s failed, status: %s",
+			fmt.Sprintf("%s/%s", url, resourceID), resp.Status)
 		return err
 	}
 
@@ -74,8 +84,11 @@ func httpDelete(ctx context.Context, client *http.Client, url, token string, res
 	return nil
 }
 
-func HttpInfraOnboardDelResource(ctx context.Context, url string, token string, client *http.Client, resourceID string) error {
-	rCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func HTTPInfraOnboardDelResource(ctx context.Context,
+	client *http.Client,
+	url, token, resourceID string,
+) error {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
 	defer cancel()
 
 	if err := httpDelete(rCtx, client, url, token, resourceID, nil); err != nil {
@@ -85,8 +98,11 @@ func HttpInfraOnboardDelResource(ctx context.Context, url string, token string, 
 	return nil
 }
 
-func HttpInfraOnboardGetHostAndInstance(ctx context.Context, url string, token string, client *http.Client, uuid string) (string, string, error) {
-	rCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func HTTPInfraOnboardGetHostAndInstance(ctx context.Context,
+	client *http.Client,
+	url, token, uuid string,
+) (string, string, error) {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
 	defer cancel()
 
 	hostID := ""
@@ -122,13 +138,13 @@ func HttpInfraOnboardGetHostAndInstance(ctx context.Context, url string, token s
 }
 
 // cleanupHost is used to remove hosts that are created during the test.
-func cleanupHost(ctx context.Context, hostUrl, instanceUrl, apiToken string, cli *http.Client, hostUUID string) error {
-	hostID, instanceID, err := HttpInfraOnboardGetHostAndInstance(ctx, hostUrl, apiToken, cli, hostUUID)
+func cleanupHost(ctx context.Context, hostURL, instanceURL, apiToken string, apiClient *http.Client, hostUUID string) error {
+	hostID, instanceID, err := HTTPInfraOnboardGetHostAndInstance(ctx, apiClient, hostURL, apiToken, hostUUID)
 	if err != nil {
 		return err
 	}
 	zlog.Info().Msgf("Deleting Instance %s in Edge Infra", instanceID)
-	err = HttpInfraOnboardDelResource(ctx, instanceUrl, apiToken, cli, instanceID)
+	err = HTTPInfraOnboardDelResource(ctx, apiClient, instanceURL, apiToken, instanceID)
 	if err != nil {
 		zlog.Error().Err(err).Msgf("Failed to delete instance %s in Edge Infra", instanceID)
 		return err
@@ -136,7 +152,7 @@ func cleanupHost(ctx context.Context, hostUrl, instanceUrl, apiToken string, cli
 	zlog.Info().Msgf("Deleted Instance %s in Edge Infra", instanceID)
 
 	zlog.Info().Msgf("Deleting Host %s in Edge Infra", hostID)
-	err = HttpInfraOnboardDelResource(ctx, hostUrl, apiToken, cli, hostID)
+	err = HTTPInfraOnboardDelResource(ctx, apiClient, hostURL, apiToken, hostID)
 	if err != nil {
 		zlog.Error().Err(err).Msgf("Failed to delete host %s in Edge Infra", hostID)
 		return err
@@ -164,9 +180,9 @@ func Teardown(ctx context.Context, cfg *defs.Settings) error {
 		return err
 	}
 
-	hostUrl := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/hosts", cfg.OrchFQDN, cfg.Project)
-	instanceUrl := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/instances", cfg.OrchFQDN, cfg.Project)
-	err = cleanupHost(ctx, hostUrl, instanceUrl, apiToken, httpClient, cfg.ENGUID)
+	hostURL := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/hosts", cfg.OrchFQDN, cfg.Project)
+	instanceURL := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/instances", cfg.OrchFQDN, cfg.Project)
+	err = cleanupHost(ctx, hostURL, instanceURL, apiToken, httpClient, cfg.ENGUID)
 	if err != nil {
 		return err
 	}
