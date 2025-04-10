@@ -7,8 +7,11 @@
 # source variables from common variable file
 source "${PWD}/config"
 source "${PWD}/scripts/common_vars.sh"
+chmod +x scripts/socket_login.exp
 
 # Assign arguments to variables
+export USERNAME_HOOK=""
+export PASSWORD_HOOK=""
 export SUPPORT_GUI_XTERM="${SUPPORT_GUI_XTERM:-""}"
 export USERNAME_LINUX="${USERNAME_LINUX:-user}"
 export PASSWORD_LINUX="${PASSWORD_LINUX:-user}"
@@ -126,18 +129,18 @@ cleanup_trap() {
 	 sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${mgmt_intf_name}-vm*.qcow2"
          sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${mgmt_intf_name}-vm*.raw"
          sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_${mgmt_intf_name}-vm*.log ./out/logs/"
-         sudo chmod 644 "./out/logs/$(basename "$PWD")_${mgmt_intf_name}-vm"*.log
+         sudo chmod 600 "./out/logs/$(basename "$PWD")_${mgmt_intf_name}-vm"*.log
     else
          sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.qcow2"
          sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.raw"
 
          sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_${VM_NAME}*.log ./out/logs/"
-	 sudo chmod 644 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
+	 sudo chmod 600 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
     fi	
 
   elif [ -n "$network_to_remove" ]; then
-    sudo virsh net-destroy "$network_to_remove"
-    sudo virsh net-undefine "$network_to_remove"
+    sudo virsh net-destroy "$network_name"
+    sudo virsh net-undefine "$network_name"
 
     sudo rm -rf /var/lib/libvirt/boot/"${network_name}"_ca.der
     sudo rm -rf /usr/share/OVMF/OVMF_*_"${network_name}"-vm*.fd
@@ -147,13 +150,13 @@ cleanup_trap() {
     	sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${network_name}-vm*.raw"
 
     	sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_$network_name-vm*.log ./out/logs/"
-    	sudo chmod 644 "./out/logs/$(basename "$PWD")_$network_name-vm"*.log
+    	sudo chmod 600 "./out/logs/$(basename "$PWD")_$network_name-vm"*.log
     else
         sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.qcow2"
         sudo bash -c "rm -rf ${BOOT_IMAGE}/$(basename "$PWD")_${VM_NAME}*.raw"
 
     	sudo bash -c "mv /var/log/libvirt/qemu/$(basename "$PWD")_${VM_NAME}*.log ./out/logs/"
-    	sudo chmod 644 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
+    	sudo chmod 600 "./out/logs/$(basename "$PWD")_${VM_NAME}"*.log
     fi
   fi
   exit 0
@@ -168,6 +171,7 @@ LOGFILE="out/logs/master_log_${ip_to_connect##*.}.log"
 # Function to log messages with timestamp
 log_with_timestamp() {
   echo -e "[$(date +"%Y-%m-%d %H:%M:%S")] [$ip_to_connect] $1" | tee -a "$LOGFILE"
+  chmod 600 "$LOGFILE"
 }
 
 function wait_for_file() {
@@ -556,10 +560,13 @@ function main() {
   #start the vms
   #export VAGRANT_DEBUG=info
   rm -rf out/logs
-  mkdir -p out/logs
+  mkdir -p out/
+  mkdir -m 700 out/
+  mkdir -m 700 out/logs
   LOG_FILE="${log_file}"
   echo "$(date): Script started." | tee -a "$LOG_FILE"
   # exec > >(tee -a "$LOG_FILE") 2>&1
+  chmod 600 $LOG_FILE
 
   sleep 5
 

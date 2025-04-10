@@ -37,7 +37,9 @@ lint: license shellcheck yamllint mdlint
 	@$(MAKE) yaml-syntax-lint YAML_FILES="$(YAML_FILES)" YAML_IGNORE="$(YAML_IGNORE)"
 	@$(MAKE) rx-yaml-input-validate
 dependency-check:
+	chmod +x ./install_packages.sh
 	./install_packages.sh
+	chmod -x ./install_packages.sh
 
 build: 
 	@# Help: Runs build stage
