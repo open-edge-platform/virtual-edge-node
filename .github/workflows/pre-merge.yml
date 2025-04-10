@@ -40,12 +40,11 @@ jobs:
         id: arti-path
         run: |
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-            paths="vm-provisioning/out/\nvm-provisioning/scripts/create_vm.sh\nvm-provisioning/ansible/install_ansible.sh"
+            paths="vm-provisioning/out/,vm-provisioning/scripts/create_vm.sh,vm-provisioning/ansible/install_ansible.sh"
           else
             paths="empty"
           fi
-          echo -e "artifact_path=$paths" >> $GITHUB_OUTPUT
-          echo -e "artifact_path=$paths" >> $GITHUB_ENV
+          echo "artifact_path=$paths" >> $GITHUB_OUTPUT
   pre-merge-pipeline:
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
