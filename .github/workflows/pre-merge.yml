@@ -39,18 +39,11 @@ jobs:
       - name: "Artifact Folder or Files"
         id: arti-path
         run: |
-          artifact_path=""
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-            artifact_path=$(cat <<EOF
-            vm-provisioning/out/
-            vm-provisioning/scripts/create_vm.sh
-            vm-provisioning/ansible/install_ansible.sh
-            EOF
-            )
+            echo "artifact_path=vm-provisioning/out/,vm-provisioning/scripts/create_vm.sh,vm-provisioning/ansible/install_ansible.sh" >> $GITHUB_OUTPUT
           else
-            artifact_path="empty"
+            echo "artifact_path=empty" >> $GITHUB_OUTPUT
           fi
-          echo "artifact_path=$artifact_path" >> $GITHUB_OUTPUT
   pre-merge-pipeline:
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
@@ -58,6 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
+        arti_path: ${{ fromJson(needs.pre-checks.outputs.artifact_path) }}
     uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@sybacharan-patch-2
     with:
       run_security_scans: true
@@ -70,7 +64,7 @@ jobs:
       run_docker_build: true
       run_scan_containers: true
       run_artifact: true
-      artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
+      artifacts_path: ${{ matrix.arti_path }}
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       # temporarily use the main branch as the reference branch
