@@ -50,8 +50,7 @@ jobs:
           echo "artifact_path=${paths[*]}" >> $GITHUB_OUTPUT
   pre-merge-pipeline:
     needs: pre-checks
-    # if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
-    if: ${{ always() }}
+    if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
     strategy:
       fail-fast: false
       matrix:
