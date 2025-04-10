@@ -45,8 +45,7 @@ jobs:
             vm-provisioning/out/
             vm-provisioning/scripts/create_vm.sh
             vm-provisioning/ansible/install_ansible.sh
-            EOF
-            )
+            EOF)
           else
             artifact_path="empty"
           fi
