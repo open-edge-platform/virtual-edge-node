@@ -54,8 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-        project_folder: ["vm-provisioning"]
+        project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
     uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@sybacharan-patch-2
     with:
       run_security_scans: true

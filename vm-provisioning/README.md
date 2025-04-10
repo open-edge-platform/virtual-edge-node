@@ -287,6 +287,7 @@ scripts from the host machine where the VMs will be created.
 To create a specified number of VMs, execute the following command:
 
 ```bash
+chmod +x create_vm.sh
 ./scripts/create_vm.sh <NO_OF_VMS>
 ```
 
@@ -299,6 +300,7 @@ Note: You can press Ctrl+C to cancel the ongoing VM provisioning process, whethe
 To create VMs using the Non-interactive onboarding flow, use the following command:
 
 ```bash
+chmod +x create_vm.sh
 ./scripts/create_vm.sh <NO_OF_VMS> -nio
 ```
 
@@ -321,6 +323,7 @@ Upon successful provisioning with MicroVisor, the following log will appear on y
 Run the `destroy_vm.sh` script to delete VMs that have already been provisioned.
 
 ```bash
+chmod +x destroy_vm.sh
 ./scripts/destroy_vm.sh
 ```
 

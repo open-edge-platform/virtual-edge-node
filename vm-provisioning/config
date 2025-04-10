@@ -1,9 +1,8 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-
 # default value is set to 1
-# The default value is set to 1. If it is set to 0, the user has control over 
+# The default value is set to 1. If it is set to 0, the user has control over
 # the POOL_NAME and BRIDGE_NAME (Libvirt network interface).
 STANDALONE=1
 
@@ -12,8 +11,7 @@ CLUSTER="kind.internal"
 # VM Resources
 RAM_SIZE=8192
 NO_OF_CPUS=4
-SDA_DISK_SIZE="64G"
-SDB_DISK_SIZE="64G"
+SDA_DISK_SIZE="110G"
 LIBVIRT_DRIVER="kvm"
 
 # Provisioned VM User credentials
@@ -22,13 +20,10 @@ PASSWORD="user"
 CI_CONFIG="false"
 
 # Optional: Advance Settings
-# Below configurations are intended only for CI/CD
-# Specify the name of the NIC interface
 INTF_NAME=""
-# Specify the name of the provisioning VM
 VM_NAME=""
-# This setting is applicable only when STANDALONE is set to 0. 
-# If STANDALONE is set to 1, POOL_NAME defaults to 'default'.
+# The following configurations apply only if STANDALONE is set to 0
+# If STANDALONE is set to 1, POOL_NAME will be changed to 'default'
 POOL_NAME="default"
 # The name of the libvirt network interface
 BRIDGE_NAME=""
