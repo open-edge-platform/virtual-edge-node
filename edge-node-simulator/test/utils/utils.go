@@ -8,7 +8,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
@@ -42,27 +41,6 @@ func GetHTTPClientWithCA(caCert string) (*http.Client, error) {
 	return &http.Client{
 		Transport: transport,
 	}, nil
-}
-
-func VerifyCA(caCert, fqdn string) error {
-	block, _ := pem.Decode([]byte(caCert))
-	cert, err := x509.ParseCertificate(block.Bytes)
-	if err != nil {
-		zlog.Err(err).Msgf("failed to parse CA cert")
-		return err
-	}
-
-	zlog.Info().Msgf("CA cert %s", cert.PermittedURIDomains)
-
-	_, err = cert.Verify(x509.VerifyOptions{
-		DNSName:     fqdn,
-		CurrentTime: time.Now(),
-	})
-	if err != nil {
-		zlog.Err(err).Msgf("failed to verify CA cert")
-		return err
-	}
-	return nil
 }
 
 func GetOrchAPIToken(
