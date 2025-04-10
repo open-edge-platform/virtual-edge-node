@@ -41,15 +41,11 @@ jobs:
         run: |
           artifact_paths=""
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-            artifact_paths=$(cat <<EOF
-            vm-provisioning/out/
-            vm-provisioning/scripts/create_vm.sh
-            vm-provisioning/ansible/install_ansible.sh
-            EOF)
+            echo "::set-output name=artifact_paths::vm-provisioning/out/ vm-provisioning/scripts/create_vm.sh vm-provisioning/ansible/install_ansible.sh"
           else
             artifact_path="empty"
           fi
-          echo "artifact_paths=$artifact_paths" >> $GITHUB_OUTPUT
+          # echo "artifact_paths=$artifact_paths" >> $GITHUB_OUTPUT
   pre-merge-pipeline:
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
