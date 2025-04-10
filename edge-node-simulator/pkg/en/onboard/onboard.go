@@ -8,10 +8,3 @@ import (
 )
 
 var zlog = logging.GetLogger("onboard")
-
-var (
-	jwtTokenEnvVar  = "JWT_TOKEN"
-	projectIDEnvVar = "PROJECT_ID"
-)
-
-var orchAPIURL = "https://%s/edge-infra.orchestrator.apis/v1"

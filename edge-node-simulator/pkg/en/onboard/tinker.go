@@ -267,7 +267,8 @@ func (t tinkWorker) ExecuteWorkflow(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		case <-workflowDone:
-			break
+			zlog.Info().Msgf("Tinkerbell workflow done with workerID %s", t.workerID)
+			return nil
 		case <-time.After(t.retryInterval):
 			zlog.Debug().Msgf("waiting for workflow %s", t.workerID)
 		}
