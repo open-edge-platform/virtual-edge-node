@@ -40,10 +40,12 @@ jobs:
         id: arti-path
         run: |
           if [ "$filtered_projects" == '["vm-provisioning"]' ]; then
-            "artifact_path=nothing" >> $GITHUB_OUTPUT
+            paths="vm-provisioning/out/\nvm-provisioning/scripts/create_vm.sh\nvm-provisioning/ansible/install_ansible.sh"
           else
-            "artifact_path=empty" >> $GITHUB_OUTPUT
+            paths="empty"
           fi
+          echo -e "artifact_path=$paths" >> $GITHUB_OUTPUT
+          echo -e "artifact_path=$paths" >> $GITHUB_ENV
   pre-merge-pipeline:
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
@@ -63,7 +65,7 @@ jobs:
       run_docker_build: true
       run_scan_containers: true
       run_artifact: true
-      artifacts_path: "vm-provisioning/out/ vm-provisioning/scripts/create_vm.sh vm-provisioning/ansible/install_ansible.sh"
+      artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       # temporarily use the main branch as the reference branch
