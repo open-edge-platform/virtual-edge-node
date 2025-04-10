@@ -51,11 +51,12 @@ jobs:
           # echo "artifact_paths=$artifact_paths" >> $GITHUB_OUTPUT
   pre-merge-pipeline:
     needs: pre-checks
-    if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
+    # if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
+        # project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
+        project_folder: ["vm-provisioning"]
     uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@sybacharan-patch-2
     with:
       run_security_scans: true
@@ -70,7 +71,7 @@ jobs:
       run_artifact: true
       artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
       prefix_tag_separator: "/"
-      project_folder: ${{ matrix.project_folder }}
+      project_folder: "vm-provisioning"
       # temporarily use the main branch as the reference branch
       # to use the latest golangci-lint version
       orch_ci_repo_ref: "main"
