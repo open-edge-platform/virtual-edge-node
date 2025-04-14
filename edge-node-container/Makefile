@@ -45,7 +45,7 @@ YAML_IGNORE := vendor, .github/workflows, $(VENV_NAME), chart/
 #### Development Targets ####
 build: go-build ## Build local binaries
 
-lint: license yamllint hadolint-custom go-lint helm-lint helm-version-check mdlint ## Run all lint tools
+lint: license yamllint hadolint-custom go-lint helm-lint helm-version-check mdlint bma_packages_test ## Run all lint tools
 
 # https://github.com/hadolint/hadolint/
 hadolint-custom: ## Check Dockerfiles with Hadolint
@@ -109,6 +109,9 @@ bma-manifest:
 
 bma_packages: $(VENV_NAME) bma-manifest
 	python3 ./utils/bma_utils.py < ena-manifest.yaml
+
+bma_packages_test: bma_packages # validates that bma package versions are updated
+	diff -u <(echo -n) <(git diff .)
 
 docker-push: ##  Push docker images
 	docker push $(ENIC_DOCKER_TAG)
