@@ -175,7 +175,6 @@ kubectl apply --namespace=enic -f cert.yaml
 helm upgrade --install enic -n enic ./chart/ \
   --set param.orch_fqdn=<cluster-fqdn> \
   --set param.orch_ip=<coder-ip> \
-  -f chart/bma_values.yaml \
   --set param.orchUser=<onb-user> \
   --set param.orchPass=<password> \
   --set global.registry.name=<registry> \
