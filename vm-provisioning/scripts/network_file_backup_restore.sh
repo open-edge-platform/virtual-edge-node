@@ -36,6 +36,14 @@ function restore_network_file() {
     sudo systemctl restart libvirtd
     sudo systemctl daemon-reload
     echo "Successfully reset the $BRIDGE_NAME with backup file"
+  else
+   # shellcheck disable=SC2119
+   nw_names=("$@")
+   for nw in "${nw_names[@]}"; do
+    virsh net-destroy "$nw"
+    virsh net-undefine "$nw"
+   done
+
   fi
 }
 

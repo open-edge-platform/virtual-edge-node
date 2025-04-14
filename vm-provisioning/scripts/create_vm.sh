@@ -119,6 +119,7 @@ cleanup_trap() {
   network_to_remove=$(virsh net-list | grep "${network_name}")
 
   if [ -n "$BRIDGE_NAME" ]; then
+    # shellcheck disable=SC2119
     restore_network_file
     
     #cleanup certificate
