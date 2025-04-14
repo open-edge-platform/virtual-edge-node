@@ -119,6 +119,11 @@ Use the following sample command to add a user named `john` to the necessary gro
 
 ```bash
 sudo usermod -aG sudo,kvm,docker,libvirt john
+
+(or)
+
+chmod +x scripts/create_new_user.sh
+./scripts/create_new_user.sh
 ```
 
 **Note**: After running this command, the user may need to log out and log back in for the changes to take effect.
