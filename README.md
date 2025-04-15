@@ -15,6 +15,10 @@ The repository supports Day 0 provisioning of the Virtual Edge Nodes for the Edg
 - [**VM-Provisioning**](vm-provisioning/): provides a set of scripts, templates, and configurations designed to streamline
   and automate the initial setup and deployment of virtual machines (VMs) during the Day 0 provisioning phase on an Edge
   Orchestrator. It utilizes Vagrant and libvirt APIs to ensure efficient and smooth VM provisioning.
+- [**Edge Node in a Container**](edge-node-container/): contains an emulated version of an edge node in a container,
+  for testing purposes only.
+- [**Edge Node Simulator**](edge-node-simulator/): contains a simulator for edge nodes with the Infrastructure Manager,
+  for testing purposes only.
 
 Read more about Virtual Edge Node in the [User Guide][user-guide-url].
 
@@ -31,7 +35,7 @@ For support, start with [Troubleshooting](https://docs.openedgeplatform.intel.co
 
 ## License
 
-Each component of the Edge Infrastructure external is licensed under [Apache 2.0][apache-license].
+Each component of the Virtual Edge Node is licensed under [Apache 2.0][apache-license].
 
 Last Updated Date: April 15, 2025
 

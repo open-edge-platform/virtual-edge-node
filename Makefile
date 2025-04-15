@@ -8,7 +8,19 @@ SUBPROJECTS := vm-provisioning edge-node-simulator edge-node-container
 
 all: lint mdlint build
 	@# Help: Runs build, lint, test stages for all subprojects
-	
+
+
+#### Python venv Target ####
+VENV_DIR := venv_ven
+
+$(VENV_DIR): requirements.txt ## Create Python venv
+	python3 -m venv $@ ;\
+  set +u; . ./$@/bin/activate; set -u ;\
+  python -m pip install --upgrade pip ;\
+  python -m pip install -r requirements.txt
+
+dependency-check: $(VENV_DIR)
+
 license:
 	@echo "---LICENSE CHECK---"
 	@for dir in $(SUBPROJECTS); do $(MAKE) -C $$dir license; done
