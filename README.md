@@ -20,4 +20,19 @@ Read more about Virtual Edge Node in the [User Guide][user-guide-url].
 
 Navigate through the folders to get started, develop, and contribute to Virtual Edge Node.
 
-[user-guide-url]: https://literate-adventure-7vjeyem.pages.github.io/edge_orchestrator/content/deployment_guide/deployment.html
+[user-guide-url]: https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/virtual_edge_node/index.html
+
+## Community and Support
+
+To learn more about the project, its community, and governance, visit
+the [Edge Orchestrator Community](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/index.html).
+
+For support, start with [Troubleshooting](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/troubleshooting/index.html)
+
+## License
+
+Each component of the Edge Infrastructure external is licensed under [Apache 2.0][apache-license].
+
+Last Updated Date: April 15, 2025
+
+[apache-license]: https://www.apache.org/licenses/LICENSE-2.0
