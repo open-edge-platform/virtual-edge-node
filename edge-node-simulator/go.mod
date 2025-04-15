@@ -18,11 +18,11 @@ require (
 	github.com/onsi/ginkgo/v2 v2.23.3
 	github.com/onsi/gomega v1.36.3
 	github.com/open-edge-platform/infra-core/api v1.32.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.0
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.2
 	github.com/open-edge-platform/infra-managers/host v1.21.0
-	github.com/open-edge-platform/infra-managers/maintenance v1.21.0
+	github.com/open-edge-platform/infra-managers/maintenance v1.21.1
 	github.com/open-edge-platform/infra-managers/telemetry v1.21.0
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.1
 	github.com/open-edge-platform/orch-library/go v0.5.29
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.28.0
