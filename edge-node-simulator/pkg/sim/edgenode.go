@@ -139,6 +139,12 @@ func (en *EdgeNode) startRequirements() error {
 		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS, ensimapi.StatusMode_STATUS_MODE_FAILED, err.Error())
 		return err
 	}
+
+	errDownloads := ensim_onboard.GetArtifacts(en.cfg)
+	if errDownloads != nil {
+		zlog.Error().Err(errDownloads).Msg("failed to download artifacts")
+		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS, ensimapi.StatusMode_STATUS_MODE_FAILED, errDownloads.Error())
+	}
 	en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS, ensimapi.StatusMode_STATUS_MODE_OK, "")
 	return nil
 }
