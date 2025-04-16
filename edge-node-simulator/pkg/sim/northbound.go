@@ -92,7 +92,8 @@ func (s *Server) buildENSettings(enUUID, enProject,
 	}
 
 	enBasePath := s.cfg.BaseFolder + "/" + enUUID
-	enSerial := strings.Trim(enUUID, "-")
+	enSerial := strings.Replace(enUUID, "-", "", -1)[:20]
+
 	setting := &defs.Settings{
 		OrchFQDN:        s.cfg.OrchFQDN,
 		ENGUID:          enUUID,
