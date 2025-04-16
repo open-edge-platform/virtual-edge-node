@@ -32,7 +32,7 @@ func TestENSim_Case01_IO(t *testing.T) {
 	require.NotNil(t, cfg)
 
 	// Set the environment variables - projectID
-	t.Setenv(utils.ProjectIDEnvVar, cfg.ProjectID)
+	t.Setenv(utils.ProjectIDEnvVar, cfg.Project)
 
 	certCA, err := utils_test.LoadFile(cfg.CAPath)
 	require.NoError(t, err)
@@ -77,7 +77,7 @@ func TestENSim_Case01_IO(t *testing.T) {
 	// 2. Create 1 node in Infrastructure Manager SIM
 	enUUID := uuid.New().String()
 	enCredentals := &ensimapi.NodeCredentials{
-		ProjectId:       cfg.ProjectID,
+		Project:         cfg.Project,
 		OnboardUsername: cfg.EdgeOnboardUser,
 		OnboardPassword: cfg.EdgeOnboardPass,
 		ApiUsername:     cfg.EdgeAPIUser,
@@ -111,7 +111,7 @@ func TestENSim_Case01_IO(t *testing.T) {
 	assert.NotNil(t, simNode)
 
 	assert.Equal(t, enUUID, simNode.Uuid)
-	assert.Equal(t, cfg.ProjectID, simNode.Credentials.ProjectId)
+	assert.Equal(t, cfg.Project, simNode.Credentials.Project)
 	assert.Equal(t, cfg.EdgeOnboardUser, simNode.Credentials.OnboardUsername)
 	assert.Equal(t, cfg.EdgeOnboardPass, simNode.Credentials.OnboardPassword)
 	for _, state := range simNode.AgentsStates {
@@ -138,7 +138,7 @@ func TestENSim_Case01_IO(t *testing.T) {
 	assert.NotNil(t, simNode)
 
 	assert.Equal(t, enUUID, simNode.Uuid)
-	assert.Equal(t, cfg.ProjectID, simNode.Credentials.ProjectId)
+	assert.Equal(t, cfg.Project, simNode.Credentials.Project)
 	for _, state := range simNode.AgentsStates {
 		assert.Equal(t, ensimapi.AgentState_AGENT_STATE_OFF, state.CurrentState)
 		assert.Equal(t, ensimapi.AgentState_AGENT_STATE_OFF, state.DesiredState)
@@ -158,7 +158,7 @@ func TestENSim_Case01_IO(t *testing.T) {
 	assert.NotNil(t, simNode)
 
 	assert.Equal(t, enUUID, simNode.Uuid)
-	assert.Equal(t, cfg.ProjectID, simNode.Credentials.ProjectId)
+	assert.Equal(t, cfg.Project, simNode.Credentials.Project)
 	for _, state := range simNode.AgentsStates {
 		assert.Equal(t, ensimapi.AgentState_AGENT_STATE_ON, state.CurrentState)
 		assert.Equal(t, ensimapi.AgentState_AGENT_STATE_ON, state.DesiredState)
@@ -194,8 +194,8 @@ func TestENSim_Case02_NIO(t *testing.T) {
 	cfg := flags_test.GetConfig()
 	require.NotNil(t, cfg)
 
-	// Set the environment variables - projectID
-	t.Setenv(utils.ProjectIDEnvVar, cfg.ProjectID)
+	// Set the environment variables - Project
+	t.Setenv(utils.ProjectIDEnvVar, cfg.Project)
 
 	certCA, err := utils_test.LoadFile(cfg.CAPath)
 	require.NoError(t, err)
@@ -262,7 +262,7 @@ func TestENSim_Case02_NIO(t *testing.T) {
 
 	// Create 1 node in Infrastructure Manager SIM
 	enCredentals := &ensimapi.NodeCredentials{
-		ProjectId:       cfg.ProjectID,
+		Project:         cfg.Project,
 		OnboardUsername: cfg.EdgeOnboardUser,
 		OnboardPassword: cfg.EdgeOnboardPass,
 		ApiUsername:     cfg.EdgeAPIUser,
@@ -297,7 +297,7 @@ func TestENSim_Case02_NIO(t *testing.T) {
 	assert.NotNil(t, simNode)
 
 	assert.Equal(t, enUUID, simNode.Uuid)
-	assert.Equal(t, cfg.ProjectID, simNode.Credentials.ProjectId)
+	assert.Equal(t, cfg.Project, simNode.Credentials.Project)
 	assert.Equal(t, cfg.EdgeOnboardUser, simNode.Credentials.OnboardUsername)
 	assert.Equal(t, cfg.EdgeOnboardPass, simNode.Credentials.OnboardPassword)
 	for _, state := range simNode.AgentsStates {
@@ -324,7 +324,7 @@ func TestENSim_Case02_NIO(t *testing.T) {
 	assert.NotNil(t, simNode)
 
 	assert.Equal(t, enUUID, simNode.Uuid)
-	assert.Equal(t, cfg.ProjectID, simNode.Credentials.ProjectId)
+	assert.Equal(t, cfg.Project, simNode.Credentials.Project)
 	for _, state := range simNode.AgentsStates {
 		assert.Equal(t, ensimapi.AgentState_AGENT_STATE_OFF, state.CurrentState)
 		assert.Equal(t, ensimapi.AgentState_AGENT_STATE_OFF, state.DesiredState)
@@ -344,7 +344,7 @@ func TestENSim_Case02_NIO(t *testing.T) {
 	assert.NotNil(t, simNode)
 
 	assert.Equal(t, enUUID, simNode.Uuid)
-	assert.Equal(t, cfg.ProjectID, simNode.Credentials.ProjectId)
+	assert.Equal(t, cfg.Project, simNode.Credentials.Project)
 	for _, state := range simNode.AgentsStates {
 		assert.Equal(t, ensimapi.StatusMode_STATUS_MODE_OK, state.CurrentState)
 		assert.Equal(t, ensimapi.StatusMode_STATUS_MODE_OK, state.DesiredState)

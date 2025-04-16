@@ -16,7 +16,7 @@ type TestConfig struct {
 	CAPath              string
 	ENSimAddress        string
 	InfraRESTAPIAddress string
-	ProjectID           string
+	Project             string
 	AmountEdgeNodes     int
 	DeployEdgeNodes     bool
 	CreateOrgProject    bool
@@ -33,7 +33,7 @@ func GetDefaultConfig() *TestConfig {
 		CAPath:              "",
 		ENSimAddress:        "localhost:5001",
 		InfraRESTAPIAddress: "http://127.0.0.1:8080/edge-infra.orchestrator.apis/v1",
-		ProjectID:           "",
+		Project:             "",
 		AmountEdgeNodes:     1,
 		DeployEdgeNodes:     false,
 		CreateOrgProject:    false,
@@ -84,9 +84,9 @@ var (
 		"", "The Infrastructure Manager cert CA file path",
 	)
 
-	projectID = flag.String(
-		"projectID",
-		defaultCfg.ProjectID, "The project ID",
+	project = flag.String(
+		"project",
+		defaultCfg.Project, "The project name",
 	)
 
 	amountEdgeNodes = flag.Int(
@@ -122,7 +122,7 @@ func GetConfig() *TestConfig {
 		InfraRESTAPIAddress: *flagInfraURL,
 		ENSimAddress:        *simAddress,
 		CAPath:              *caPath,
-		ProjectID:           *projectID,
+		Project:             *project,
 		AmountEdgeNodes:     *amountEdgeNodes,
 		DeployEdgeNodes:     *deployEdgeNodes,
 		CreateOrgProject:    *createOrgProject,

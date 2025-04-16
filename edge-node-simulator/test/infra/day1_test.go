@@ -74,7 +74,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			Expect(cfg.AmountEdgeNodes).To(Equal(len(listNodes)))
 
 			for _, simNode := range listNodes {
-				Expect(cfg.ProjectID).To(Equal(simNode.Credentials.ProjectId))
+				Expect(cfg.Project).To(Equal(simNode.Credentials.Project))
 				Expect(cfg.EdgeOnboardUser).To(Equal(simNode.Credentials.OnboardUsername))
 				Expect(cfg.EdgeOnboardPass).To(Equal(simNode.Credentials.OnboardPassword))
 
@@ -103,7 +103,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			Expect(cfg.AmountEdgeNodes).To(Equal(len(listNodes)))
 
 			for _, simNode := range listNodes {
-				Expect(cfg.ProjectID).To(Equal(simNode.Credentials.ProjectId))
+				Expect(cfg.Project).To(Equal(simNode.Credentials.Project))
 				Expect(cfg.EdgeOnboardUser).To(Equal(simNode.Credentials.OnboardUsername))
 				Expect(cfg.EdgeOnboardPass).To(Equal(simNode.Credentials.OnboardPassword))
 
@@ -180,7 +180,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			Expect(cfg.AmountEdgeNodes).To(Equal(len(listNodes)))
 
 			for _, simNode := range listNodes {
-				Expect(cfg.ProjectID).To(Equal(simNode.Credentials.ProjectId))
+				Expect(cfg.Project).To(Equal(simNode.Credentials.Project))
 				Expect(cfg.EdgeOnboardUser).To(Equal(simNode.Credentials.OnboardUsername))
 				Expect(cfg.EdgeOnboardPass).To(Equal(simNode.Credentials.OnboardPassword))
 

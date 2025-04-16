@@ -84,7 +84,7 @@ const (
 )
 
 type CliCfg struct {
-	ProjectID       string
+	Project         string
 	OnboardUsername string
 	OnboardPassword string
 	APIUsername     string
@@ -362,13 +362,13 @@ func (c *Cli) PromptNodeDelete(arg interface{}) (interface{}, error) {
 }
 
 func (c *Cli) getENCredentials() (*ensimv1.NodeCredentials, error) {
-	labelProjectID := fmt.Sprintf("Create Node - project UUID (default: %s)", c.cfg.ProjectID)
+	labelProject := fmt.Sprintf("Create Node - project (default: %s)", c.cfg.Project)
 	labelOnbUser := fmt.Sprintf("Create Node - onboard username (default: %s)", c.cfg.OnboardUsername)
 	labelOnbPassword := fmt.Sprintf("Create Node - onboard password (default: %s)", c.cfg.OnboardPassword)
 	labelAPIUser := fmt.Sprintf("Create Node - api username (default: %s)", c.cfg.APIUsername)
 	labelAPIPassword := fmt.Sprintf("Create Node - api password (default: %s)", c.cfg.APIPassword)
 
-	projectUUID, err := c.runPrompt(labelProjectID, c.cfg.ProjectID)
+	projectName, err := c.runPrompt(labelProject, c.cfg.Project)
 	if err != nil {
 		zlog.Error().Err(err).Msg("Prompt failed.")
 		return nil, err
@@ -395,7 +395,7 @@ func (c *Cli) getENCredentials() (*ensimv1.NodeCredentials, error) {
 	}
 
 	enCredentials := &ensimv1.NodeCredentials{
-		ProjectId:       projectUUID,
+		Project:         projectName,
 		OnboardUsername: nodeUserOnb,
 		OnboardPassword: nodePasswdOnb,
 		ApiUsername:     nodeUserAPI,
