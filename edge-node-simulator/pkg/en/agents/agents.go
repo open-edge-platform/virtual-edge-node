@@ -522,7 +522,7 @@ func (a *Agents) gatherStatus() (string, bool) {
 		return true
 	})
 
-	zlog.Info().Msgf("%d of %d components running", counter, total)
+	zlog.Debug().Msgf("%s: %d of %d components running", a.cfg.ENGUID, counter, total)
 	if counter != total {
 		zlog.Warn().Msgf("Unhealthy components: %v", unhealthy)
 	}
