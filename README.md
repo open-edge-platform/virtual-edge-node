@@ -24,8 +24,6 @@ Read more about Virtual Edge Node in the [User Guide][user-guide-url].
 
 Navigate through the folders to get started, develop, and contribute to Virtual Edge Node.
 
-[user-guide-url]: https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/virtual_edge_node/index.html
-
 ## Contribute
 
 To learn how to contribute to the project, see the [Contributor's
@@ -45,3 +43,5 @@ Each component of the Virtual Edge Node is licensed under [Apache 2.0][apache-li
 Last Updated Date: April 15, 2025
 
 [apache-license]: https://www.apache.org/licenses/LICENSE-2.0
+
+[user-guide-url]: https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/virtual_edge_node/index.html
