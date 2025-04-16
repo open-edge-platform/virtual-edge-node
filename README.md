@@ -26,13 +26,6 @@ Navigate through the folders to get started, develop, and contribute to Virtual 
 
 [user-guide-url]: https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/virtual_edge_node/index.html
 
-## Community and Support
-
-To learn more about the project, its community, and governance, visit
-the [Edge Orchestrator Community](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/index.html).
-
-For support, start with [Troubleshooting](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/troubleshooting/index.html)
-
 ## Contribute
 
 To learn how to contribute to the project, see the [Contributor's
