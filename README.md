@@ -33,6 +33,18 @@ the [Edge Orchestrator Community](https://docs.openedgeplatform.intel.com/edge-m
 
 For support, start with [Troubleshooting](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/troubleshooting/index.html)
 
+## Contribute
+
+To learn how to contribute to the project, see the [Contributor's
+Guide](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/contributor_guide/index.html).
+
+## Community and Support
+
+To learn more about the project, its community, and governance, visit
+the [Edge Orchestrator Community](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/index.html).
+
+For support, start with [Troubleshooting](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/troubleshooting/index.html)
+
 ## License
 
 Each component of the Virtual Edge Node is licensed under [Apache 2.0][apache-license].
