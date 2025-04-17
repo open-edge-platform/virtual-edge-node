@@ -5,7 +5,11 @@ package flags
 
 import (
 	"flag"
+
+	"github.com/open-edge-platform/infra-core/inventory/v2/pkg/logging"
 )
+
+var zlog = logging.GetLogger("flags")
 
 type TestConfig struct {
 	OrchFQDN            string
@@ -128,5 +132,6 @@ func GetConfig() *TestConfig {
 		CreateOrgProject:    *createOrgProject,
 		Cleanup:             *cleanup,
 	}
+	zlog.Info().Msgf("GetConfig %v", cfg)
 	return cfg
 }
