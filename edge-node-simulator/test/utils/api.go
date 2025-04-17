@@ -18,7 +18,7 @@ import (
 
 const (
 	// wait time for HTTP request.
-	waitTime = 5 * time.Second
+	waitTime = 60 * time.Second
 )
 
 var (
@@ -275,6 +275,9 @@ func DeleteAllInstancesAPI(ctx context.Context, client *http.Client, cfg *flags_
 }
 
 func HelperCleanupHostsAPI(ctx context.Context, client *http.Client, cfg *flags_test.TestConfig) error {
+	ctx, cancel := context.WithTimeout(ctx, waitTime)
+	defer cancel()
+
 	err := DeleteAllInstancesAPI(ctx, client, cfg, nil)
 	if err != nil {
 		return err
