@@ -275,14 +275,11 @@ func DeleteAllInstancesAPI(ctx context.Context, client *http.Client, cfg *flags_
 }
 
 func HelperCleanupHostsAPI(ctx context.Context, client *http.Client, cfg *flags_test.TestConfig) error {
-	ctx, cancel := context.WithTimeout(ctx, waitTime)
-	defer cancel()
-
-	err := DeleteAllInstancesAPI(ctx, client, cfg, nil)
+	err := DeleteAllInstancesAPI(context.Background(), client, cfg, nil)
 	if err != nil {
 		return err
 	}
-	err = DeleteAllHostsAPI(ctx, client, cfg, nil)
+	err = DeleteAllHostsAPI(context.Background(), client, cfg, nil)
 	if err != nil {
 		return err
 	}
