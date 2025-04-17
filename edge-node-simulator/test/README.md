@@ -1,7 +1,5 @@
 # Integration Tests
 
-TODO: update, examples are outdated.
-
 The following steps provide guidance on how to run the scale tests for days 1 and 2 using the Infrastructure Manager simulator.
 All test cases have descriptions in their respective files/definitions.
 
