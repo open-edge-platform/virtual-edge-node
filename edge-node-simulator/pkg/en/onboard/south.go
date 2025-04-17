@@ -21,7 +21,7 @@ import (
 type onboardOperation int
 
 var (
-	tinkerTimeout = 60 * time.Second
+	tinkerTimeout = 660 * time.Second // Waits for 11 minutes before timing out tinker worker.
 	kcTimeout     = 60 * time.Second
 )
 

@@ -112,6 +112,7 @@ func (s *Server) buildENSettings(enUUID, enProject,
 		Org:             "",
 		BaseFolder:      enBasePath,
 		MACAddress:      macAddress,
+		AutoProvision:   true,
 	}
 	zlog.Info().Msgf("Node settings %v", setting)
 	return setting, nil
