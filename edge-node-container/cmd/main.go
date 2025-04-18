@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/magefile/mage/sh"
 
@@ -30,7 +29,6 @@ var (
 	termChan  = make(chan bool, 1)      // channel to signal termination of main process.
 	sigChan   = make(chan os.Signal, 1) // channel to handle any interrupt signals
 
-	onboardTimeout       = 120 * time.Second
 	defaultoamServerAddr = "0.0.0.0:5991"
 	defaultBaseFolder    = "/tmp/enic"
 	defaultOrchFQDN      = "kind.internal"
@@ -210,7 +208,14 @@ func main() {
 
 	setOAM(cfg.OamServerAddr, termChan, readyChan, &wg)
 
-	ctx, cancel := context.WithTimeout(context.Background(), onboardTimeout)
+	// set the readiness probe to true
+	// we never want the ENiC POD to be restarted
+	// even if the onboarding or provisioning fails.
+	// This will simplify debugging and mimic the behavior of
+	// the real edge node.
+	readyChan <- true
+
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	if cfg.NIOnboard {
@@ -242,7 +247,6 @@ func main() {
 	}
 
 	zlog.Info().Msg("Edge Node Onboarded/Provisioned")
-	readyChan <- true
 	signal.Notify(sigChan, os.Interrupt)
 	<-sigChan
 	zlog.Info().Msg("Exiting")
