@@ -116,13 +116,20 @@ spec:
           {{- if .Values.param.oamServerAddress }}
           {{- $oamservport:= (splitList ":" .Values.param.oamServerAddress) | last | atoi }}
           livenessProbe:
-            grpc:
-              port: {{ $oamservport }}
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "systemctl status onboard"
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
-            grpc:
-              port: {{ $oamservport }}
+          # check if systemctl onboard is running
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "systemctl status onboard"
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
