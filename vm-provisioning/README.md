@@ -19,12 +19,15 @@
     - [5.4: Configuration Setup](#54-configuration-setup)
   - [Step 6: Download Orchestrator Certificate](#step-6-download-orchestrator-certificate)
   - [Step 7: OS Instance and Providers](#step-7-os-instance-and-providers)
+    - [Option 1: Manual Provider Creation Using Curl Command](#option-1-manual-provider-creation-using-curl-command)
+    - [Option 2: Automated Provider Creation Using Script](#option-2-automated-provider-creation-using-script)
   - [Step 8: VMs Creation with Scripts](#step-8-vms-creation-with-scripts)
     - [8.1: Standalone VMs Creation](#81-standalone-vms-creation)
       - [VMs Creation with Interactive Flow (IO)](#vms-creation-with-interactive-flow-io)
       - [VMs Creation with Non-Interactive Onboarding Flow (NIO)](#vms-creation-with-non-interactive-onboarding-flow-nio)
-    - [8.2: Provisioning Complete](#82-provisioning-complete)
-    - [8.3: VMs Deletion](#83-vms-deletion)
+    - [8.2: Viewing Running Logs at QEMU KVM Console](#82-viewing-running-logs-at-qemu-kvm-console)
+    - [8.3: Provisioning Complete](#83-provisioning-complete)
+    - [8.4: VMs Deletion](#84-vms-deletion)
   - [Step 9: Enabling VNC Access (Optional)](#step-9-enabling-vnc-access-optional)
     - [VNC Configuration Lines](#vnc-configuration-lines)
     - [Where to Add VNC Configuration](#where-to-add-vnc-configuration)
@@ -247,12 +250,15 @@ wget https://"tinkerbell-nginx.${CLUSTER}"/tink-stack/keys/Full_server.crt --no-
 VM-based provisioning does not support Secure Boot; therefore, the "osSecurityFeatureEnable":"false" must be set in the
 provider configuration. Use the following curl command to create an OS instance and a Provider instance.
 
-**Note: The following commands are required to run initially when starting VM provisioning. These configurations will be
-used for further VM provisioning.**
+**Note: The following commands are required to run initially when starting VM provisioning. These configurations will
+be used for further VM provisioning.**
 
-**Important**: Before executing the Below JWT export command, ensure that all NIO configurations are properly exported
-as environment variables. This step is crucial to ensure that the JWT export process has access to the necessary
-credentials and settings, preventing errors and ensuring smooth execution.
+**Important**: Before executing the Below JWT export command, ensure that all NIO configurations are properly
+exported as environment variables. This step is crucial to ensure that the JWT export process has access to the
+necessary credentials and settings, preventing errors and ensuring smooth execution. Provider can be setup using
+two following options.
+
+#### Option 1: Manual Provider Creation Using Curl Command
 
 ```sh
 cd vm-provisioning
@@ -274,6 +280,47 @@ curl -X POST "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" -H "
 -H "Content-Type: application/json" -d '{"providerKind":"PROVIDER_KIND_BAREMETAL","name":"infra_onboarding", \
 "apiEndpoint":"xyz123", "apiCredentials": ["abc123"], "config": "{\"defaultOs\":\"os-51c4eba0\",\"autoProvision\":true,\"defaultLocalAccount\":\"\",\"osSecurityFeatureEnable\":false}" }' \
 -H "Authorization: Bearer ${JWT_TOKEN}"
+```
+
+#### Option 2: Automated Provider Creation Using Script
+
+This `update_provider_defaultos.sh` script is designed to automate the process of updating the default OS profile
+in a provider and enable auto provisioning for virtual edge nodes. It interacts with a cloud API to manage OS
+profiles and providers, ensuring that the correct OS is set as the default for provisioning.
+
+**Auto Provisioning**: The provider is configured with `autoProvision: true`, enabling automatic
+provisioning of virtual edge nodes.
+
+Before running the script, export the configuration variables from config and nio_configs.sh
+
+```bash
+source ./config
+source ./scripts/nio_configs.sh
+```
+
+To execute the script, use the following command:
+
+```bash
+chmod +x ./scripts/update_provider_defaultos.sh
+./scripts/update_provider_defaultos.sh [os_type]
+```
+
+Replace [os_type] with the desired OS profile, such as microvisor or ubuntu.
+
+#### Example Commands
+
+**Microvisor OS**: Update the provider with Microvisor os.
+
+```bash
+chmod +x ./scripts/update_provider_defaultos.sh
+./scripts/update_provider_defaultos.sh microvisor
+```
+
+**Ubuntu OS**: Update the provider with Ubuntu os.
+
+```bash
+chmod +x ./scripts/update_provider_defaultos.sh
+./scripts/update_provider_defaultos.sh ubuntu
 ```
 
 ### Step 8: VMs Creation with Scripts
@@ -331,7 +378,7 @@ chmod +x ./scripts/create_vm.sh
 **-serials=**: Provide a comma-separated list of serial numbers for each VM. The number of serials must match the number
 of VMs specified.
 
-##### Example Commands
+##### Examples
 
 Automatically generate random serial numbers:
 
@@ -348,7 +395,19 @@ Specify custom serial numbers:
 **Note: You can press Ctrl+C to cancel the ongoing VM provisioning process, whether it is in progress or completed.
 Already provisioned VMs or ongoing provisioning VMs shall be deleted.**
 
-#### 8.2: Provisioning Complete
+#### 8.2: Viewing Running Logs at QEMU KVM Console
+
+After the creation of VMs, you can view the running logs and manage your virtual machines using the QEMU KVM console.
+To do this, open a duplicate terminal and run the following command:
+
+```bash
+virt-manager
+```
+
+This command will launch the Virt-Manager UI, where you can see all the running Edge Nodes (ENs) or VMs.
+Select a VM to open its QEMU KVM console and view the running logs and manage its settings.
+
+#### 8.3: Provisioning Complete
 
 Upon successful provisioning with Ubuntu OS, the following log will appear on your terminal.
  ![UbuntuOS provision complete](docs/UbuntuOS_Provision.png)
@@ -356,7 +415,7 @@ Upon successful provisioning with Ubuntu OS, the following log will appear on yo
 Upon successful provisioning with MicroVisor, the following log will appear on your terminal.
  ![MicroVisor provision complete](docs/Microvisor_Provision.png)
 
-#### 8.3: VMs Deletion
+#### 8.4: VMs Deletion
 
 Run the `destroy_vm.sh` script to delete VMs that have already been provisioned.
 
@@ -378,9 +437,9 @@ Add the following lines within the libvirt block to enable VNC access:
 libvirt.graphics_type = "vnc"
 libvirt.video_type = 'qxl'
 libvirt.graphics_ip = "0.0.0.0" # Optional: specify the VNC listen address
-libvirt.graphics_port = "5900"  # Optional: specify the VNC port
-libvirt.graphics_password = "abc" # Optional: set a password for VNC access
 ```
+
+By default, Vagrant will automatically assign the VNC port 5900 for libvirt graphics.
 
 #### Where to Add VNC Configuration
 
