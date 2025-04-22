@@ -229,7 +229,7 @@ func artifactsImage(baseURL string) []*Artifact {
 		NewArtifact(
 			"TiberOS",
 			baseURL,
-			"https://%s/files-edge-orch/repository/TiberMicrovisor/",
+			"https://%s/files-edge-orch/repository/TiberMicrovisor/TiberMicrovisor_nonRT/tiber-readonly-%s",
 			"image",
 			"",
 			ArtifactTypeImage,
