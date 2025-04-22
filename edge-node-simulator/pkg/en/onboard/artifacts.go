@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
 	"gopkg.in/yaml.v3"
+
+	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
 )
 
 type AritfactType string
@@ -32,6 +33,26 @@ var agentsNames = []string{
 	"trtl",
 }
 
+var tinkerActionNames = []string{
+	"securebootflag",
+	"qemu_nbd_image2disk",
+	"image2disk",
+	"writefile",
+	"efibootset",
+	"kernelupgrd",
+	"tibermicrovisor_partition",
+	"fde",
+	"cexec",
+	"erase_non_removable_disks",
+}
+
+var tinkStackArtifactNames = []string{
+	"ipxe.efi",
+	"boot.ipxe",
+	"vmlinuz-x86_64",
+	"initramfs-x86_64",
+}
+
 const (
 	ArtifactTypeAgent        AritfactType = "agent"
 	ArtifactTypeTinker       AritfactType = "tinker"
@@ -48,17 +69,16 @@ type Artifact struct {
 	ArtifactType    AritfactType `json:"artifact_type"`
 }
 
-// Manifest
 type Manifest struct {
-	Metadata   string    `yaml:"metadata"`
-	Repository string    `yaml:"repository"`
+	Metadata   string    `yaml:"metadata,omitempty"`
+	Repository string    `yaml:"repository,omitempty"`
 	Packages   []Package `yaml:"packages"`
 }
 
 type Package struct {
 	Name        string `yaml:"name"`
 	Version     string `yaml:"version"`
-	OCIArtifact string `yaml:"ociArtifact"`
+	OCIArtifact string `yaml:"oci_artifact,omitempty"`
 }
 
 // URLArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
@@ -181,39 +201,17 @@ func artifactsAgent(baseURL string, agentsVersions map[string]string) []*Artifac
 }
 
 func artifactsTinker(baseURL string) []*Artifact {
-	artifacts := []*Artifact{
-		NewArtifact(
-			"iPXE binary",
+	artifacts := []*Artifact{}
+	for _, artifactName := range tinkStackArtifactNames {
+		artifact := NewArtifact(
+			artifactName,
 			baseURL,
-			"https://tinkerbell-nginx.%s/tink-stack/ipxe.efi",
-			"image",
+			"https://tinkerbell-nginx.%s/tink-stack/"+artifactName,
+			artifactName,
 			"",
 			ArtifactTypeTinker,
-		),
-		NewArtifact(
-			"Boot ipxe",
-			baseURL,
-			"https://tinkerbell-nginx.%s/tink-stack/boot.ipxe",
-			"image",
-			"",
-			ArtifactTypeTinker,
-		),
-		NewArtifact(
-			"HookOS kernel",
-			baseURL,
-			"https://tinkerbell-nginx.%s/tink-stack/vmlinuz-x86_64",
-			"image",
-			"",
-			ArtifactTypeTinker,
-		),
-		NewArtifact(
-			"initramfs img",
-			baseURL,
-			"https://tinkerbell-nginx.%s/tink-stack/initramfs-x86_64",
-			"image",
-			"",
-			ArtifactTypeTinker,
-		),
+		)
+		artifacts = append(artifacts, artifact)
 	}
 	return artifacts
 }
@@ -241,87 +239,17 @@ func artifactsImage(baseURL string) []*Artifact {
 }
 
 func artifactsTinkerAction(baseURL, tinkerVersion string) []*Artifact {
-	artifacts := []*Artifact{
-		NewArtifact(
-			"securebootflag",
+	artifacts := []*Artifact{}
+	for _, actionName := range tinkerActionNames {
+		artifact := NewArtifact(
+			actionName,
 			baseURL,
-			"%s/edge-orch/infra/tinker-actions/securebootflag:%s",
-			"tinkeraction",
+			"%s/edge-orch/infra/tinker-actions/"+actionName+":%s",
+			actionName,
 			tinkerVersion,
 			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"qemu_nbd_image2disk",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/qemu_nbd_image2disk:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"image2disk",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/image2disk:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"writefile",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/writefile:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"efibootset",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/efibootset:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"kernelupgrd",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/kernelupgrd:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"tibermicrovisor_partition",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/tibermicrovisor_partition:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"fde",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/fde:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"cexec",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/cexec:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
-		NewArtifact(
-			"erase_non_removable_disks",
-			baseURL,
-			"%s/edge-orch/infra/tinker-actions/erase_non_removable_disks:%s",
-			"tinkeraction",
-			tinkerVersion,
-			ArtifactTypeTinkerAction,
-		),
+		)
+		artifacts = append(artifacts, artifact)
 	}
 	return artifacts
 }
