@@ -18,7 +18,7 @@ updates:
       - github
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "[gomod] "
     groups:
