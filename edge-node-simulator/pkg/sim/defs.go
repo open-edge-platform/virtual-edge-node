@@ -8,4 +8,8 @@ var (
 	defaultgRPCPort      = 5001
 	defaultBaseFolder    = "/tmp/scale"
 	defaultOrchFQDN      = "kind.internal"
+
+	defaultURLFilesRS            = "registry-rs.edgeorchestration.intel.com/"
+	defaultTinkerActionsVersion  = "1.0.0"
+	defaultAgentsManifestVersion = "1.0.0"
 )

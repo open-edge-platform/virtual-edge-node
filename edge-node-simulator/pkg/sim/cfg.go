@@ -10,15 +10,19 @@ import (
 )
 
 type Config struct {
-	CAPath        string
-	KeyPath       string
-	CertPath      string
-	GRPCPort      int16
-	OrchFQDN      string
-	OrchIP        string
-	OrchCAPath    string
-	BaseFolder    string
-	OamServerAddr string
+	CAPath                string
+	KeyPath               string
+	CertPath              string
+	GRPCPort              int16
+	OrchFQDN              string
+	OrchIP                string
+	OrchCAPath            string
+	BaseFolder            string
+	OamServerAddr         string
+	EnableDownloads       bool
+	URLFilesRS            string
+	TinkerActionsVersion  string
+	AgentsManifestVersion string
 }
 
 var (
@@ -69,6 +73,26 @@ var (
 		defaultoamServerAddr,
 		"default OAM server address",
 	)
+	enableDownloads = flag.Bool(
+		"enableDownloads",
+		false,
+		"enable downloads of artifacts in the simulator",
+	)
+	urlFilesRS = flag.String(
+		"urlFilesRS",
+		defaultURLFilesRS,
+		"URL of files for RS",
+	)
+	tinkerActionsVersion = flag.String(
+		"tinkerActionsVersion",
+		defaultTinkerActionsVersion,
+		"Version of tinker actions",
+	)
+	agentsManifestVersion = flag.String(
+		"agentsManifestVersion",
+		defaultAgentsManifestVersion,
+		"Version of agents manifest",
+	)
 )
 
 // IntToint16 safely converts int to int16. This is needed for 64bit systems where int is defined as a 64bit integer.
@@ -95,15 +119,19 @@ func Cfg() (*Config, error) {
 	}
 
 	cfg := &Config{
-		CAPath:        *caPath,
-		KeyPath:       *keyPath,
-		CertPath:      *certPath,
-		GRPCPort:      grpcPort,
-		OrchFQDN:      *orchFQDN,
-		OrchIP:        *orchIP,
-		OrchCAPath:    *orchCAPath,
-		BaseFolder:    *baseFolder,
-		OamServerAddr: *oamServerAddr,
+		CAPath:                *caPath,
+		KeyPath:               *keyPath,
+		CertPath:              *certPath,
+		GRPCPort:              grpcPort,
+		OrchFQDN:              *orchFQDN,
+		OrchIP:                *orchIP,
+		OrchCAPath:            *orchCAPath,
+		BaseFolder:            *baseFolder,
+		OamServerAddr:         *oamServerAddr,
+		EnableDownloads:       *enableDownloads,
+		URLFilesRS:            *urlFilesRS,
+		TinkerActionsVersion:  *tinkerActionsVersion,
+		AgentsManifestVersion: *agentsManifestVersion,
 	}
 	zlog.Info().Msgf("Loaded cfg: %v", cfg)
 	return cfg, nil

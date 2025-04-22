@@ -8,9 +8,29 @@ import (
 	"os/exec"
 
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
+	"gopkg.in/yaml.v3"
 )
 
 type AritfactType string
+
+var agentsNames = []string{
+	"cluster-agent",
+	"hardware-discovery-agent",
+	"node-agent",
+	"platform-observability-agent",
+	"platform-telemetry-agent",
+	"platform-update-agent",
+	"caddy",
+	"inbc-program",
+	"inbm-configuration-agent",
+	"inbm-cloudadapter-agent",
+	"inbm-diagnostic-agent",
+	"inbm-dispatcher-agent",
+	"inbm-telemetry-agent",
+	"mqtt",
+	"tpm-provision",
+	"trtl",
+}
 
 const (
 	ArtifactTypeAgent        AritfactType = "agent"
@@ -28,8 +48,21 @@ type Artifact struct {
 	ArtifactType    AritfactType `json:"artifact_type"`
 }
 
+// Manifest
+type Manifest struct {
+	Metadata   string    `yaml:"metadata"`
+	Repository string    `yaml:"repository"`
+	Packages   []Package `yaml:"packages"`
+}
+
+type Package struct {
+	Name        string `yaml:"name"`
+	Version     string `yaml:"version"`
+	OCIArtifact string `yaml:"ociArtifact"`
+}
+
 // URLArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
-func (a *Artifact) URLArtifact(url string) error {
+func URLArtifact(url string) error {
 	cmd := exec.Command("curl", "-o", "/dev/null", url)
 	if err := cmd.Run(); err != nil {
 		zlog.Error().Err(err).Msgf("Failed to download artifact from URL %s", url)
@@ -39,8 +72,8 @@ func (a *Artifact) URLArtifact(url string) error {
 }
 
 // DownloadArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
-func (a *Artifact) OrasArtifact(url string) error {
-	cmd := exec.Command("oras", "-o", "/dev/null", url)
+func OrasArtifact(url, output string) error {
+	cmd := exec.Command("oras", "-o", output, url)
 	if err := cmd.Run(); err != nil {
 		zlog.Error().Err(err).Msgf("Failed to download oras artifact from URL %s", url)
 		return err
@@ -75,11 +108,11 @@ func (a *Artifact) Download() error {
 	}
 	switch a.ArtifactType {
 	case ArtifactTypeAgent:
-		if err := a.OrasArtifact(artifactURL); err != nil {
+		if err := OrasArtifact(artifactURL, "/dev/null"); err != nil {
 			return err
 		}
 	default:
-		if err := a.URLArtifact(artifactURL); err != nil {
+		if err := URLArtifact(artifactURL); err != nil {
 			return err
 		}
 	}
@@ -111,91 +144,38 @@ func DownloadArtifacts(artifacts []*Artifact) error {
 	return nil
 }
 
-func artifactsAgent(baseURL string) []*Artifact {
-	artifacts := []*Artifact{
-		NewArtifact("caddy",
-			baseURL, "%s/edge-orch/en/deb/caddy:%s", "agent", "1.0.0", ArtifactTypeAgent),
-		NewArtifact("node-agent",
-			baseURL, "%s/edge-orch/en/deb/node-agent:%s", "agent", "1.0.0", ArtifactTypeAgent),
-		NewArtifact(
-			"hardware-discovery-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/hardware-discovery-agent:%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact("cluster-agent",
-			baseURL, "%s/edge-orch/en/deb/cluster-agent:%s", "agent", "1.0.0", ArtifactTypeAgent),
-		NewArtifact(
-			"platform-observability-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/platform-observability-agent:%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact("trtl", baseURL, "%s/edge-orch/en/deb/trtl:%s", "agent", "1.0.0", ArtifactTypeAgent),
-		NewArtifact(
-			"inbm-cloudadapter-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/inbm-cloudadapter-agent:%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact(
-			"inbm-configuration-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/inbm-configuration-agent:%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact(
-			"inbm-dispatcher-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/inbm-dispatcher-agent:%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact(
-			"inbm-telemetry-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/inbm-telemetry-agent%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact(
-			"inbm-diagnostic-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/inbm-diagnostic-agent:%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact("mqtt",
-			baseURL, "%s/edge-orch/en/deb/mqtt:%s", "agent", "1.0.0", ArtifactTypeAgent),
-		NewArtifact("inbc-program",
-			baseURL, "%s/edge-orch/en/deb/inbc-program:%s", "agent", "1.0.0", ArtifactTypeAgent),
-		NewArtifact(
-			"platform-update-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/platform-update-agent%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
-		NewArtifact(
-			"platform-telemetry-agent",
-			baseURL,
-			"%s/edge-orch/en/deb/platform-telemetry-agent:%s",
-			"agent",
-			"1.0.0",
-			ArtifactTypeAgent,
-		),
+func artifactsManifestAgent(baseURL, manifestVersion string) (map[string]string, error) {
+	manifestFilePath := "/tmp/ena-manifest.yaml"
+	manifestURL := fmt.Sprintf("%s/edge-orch/en/files/ena-manifest:%s", baseURL, manifestVersion)
+	if err := OrasArtifact(manifestURL, manifestFilePath); err != nil {
+		return nil, err
+	}
+
+	var manifestData Manifest
+	if err := yaml.Unmarshal([]byte(manifestFilePath), &manifestData); err != nil {
+		return nil, err
+	}
+
+	artifacts := make(map[string]string)
+	for _, pkg := range manifestData.Packages {
+		artifacts[pkg.Name] = pkg.Version
+	}
+
+	for _, agentName := range agentsNames {
+		if _, ok := artifacts[agentName]; !ok {
+			zlog.Error().Msgf("Agent %s not found in manifest", agentName)
+			return nil, fmt.Errorf("agent %s not found in manifest", agentName)
+		}
+	}
+	return artifacts, nil
+}
+
+func artifactsAgent(baseURL string, agentsVersions map[string]string) []*Artifact {
+	artifacts := []*Artifact{}
+	for _, agentName := range agentsNames {
+		artifact := NewArtifact(agentName,
+			baseURL, "%s/edge-orch/en/deb/"+agentName+":%s", agentName, agentsVersions[agentName], ArtifactTypeAgent)
+		artifacts = append(artifacts, artifact)
 	}
 	return artifacts
 }
@@ -346,9 +326,9 @@ func artifactsTinkerAction(baseURL, tinkerVersion string) []*Artifact {
 	return artifacts
 }
 
-func NewArtifacts(cfg *defs.Settings) []*Artifact {
+func NewArtifacts(cfg *defs.Settings, agentsVersions map[string]string) []*Artifact {
 	artifacts := []*Artifact{}
-	artifacts = append(artifacts, artifactsAgent(cfg.URLFilesRS)...)
+	artifacts = append(artifacts, artifactsAgent(cfg.URLFilesRS, agentsVersions)...)
 	artifacts = append(artifacts, artifactsTinker(cfg.OrchFQDN)...)
 	artifacts = append(artifacts, artifactsImage(cfg.URLFilesRS)...)
 	artifacts = append(artifacts, artifactsTinkerAction(cfg.URLFilesRS, cfg.TinkerActionsVersion)...)
@@ -357,8 +337,15 @@ func NewArtifacts(cfg *defs.Settings) []*Artifact {
 
 func GetArtifacts(cfg *defs.Settings) error {
 	if cfg.EnableDownloads {
+		zlog.Info().Msg("Downloading ENA manifest")
+		agentsVersions, err := artifactsManifestAgent(cfg.URLFilesRS, cfg.AgentsManifestVersion)
+		if err != nil {
+			zlog.Error().Err(err).Msg("Failed to download ENA manifest")
+			return err
+		}
+
 		zlog.Info().Msg("Downloading artifacts")
-		artifacts := NewArtifacts(cfg)
+		artifacts := NewArtifacts(cfg, agentsVersions)
 		if err := DownloadArtifacts(artifacts); err != nil {
 			zlog.Error().Err(err).Msg("Failed to download artifacts")
 			return err

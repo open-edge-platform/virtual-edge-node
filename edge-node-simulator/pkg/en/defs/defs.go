@@ -48,27 +48,28 @@ var (
 )
 
 type Settings struct {
-	CertCAPath           string
-	CertCA               string
-	OrchFQDN             string
-	ENGUID               string
-	ENSerial             string
-	EdgeAPIUser          string
-	EdgeAPIPass          string
-	EdgeOnboardUser      string
-	EdgeOnboardPass      string
-	RunAgents            bool
-	NIOnboard            bool
-	SouthOnboard         bool
-	SetupTeardown        bool
-	OamServerAddr        string
-	BaseFolder           string
-	AutoProvision        bool
-	Project              string
-	Org                  string
-	MACAddress           string
-	ENiC                 bool
-	EnableDownloads      bool
-	URLFilesRS           string
-	TinkerActionsVersion string
+	CertCAPath            string
+	CertCA                string
+	OrchFQDN              string
+	ENGUID                string
+	ENSerial              string
+	EdgeAPIUser           string
+	EdgeAPIPass           string
+	EdgeOnboardUser       string
+	EdgeOnboardPass       string
+	RunAgents             bool
+	NIOnboard             bool
+	SouthOnboard          bool
+	SetupTeardown         bool
+	OamServerAddr         string
+	BaseFolder            string
+	AutoProvision         bool
+	Project               string
+	Org                   string
+	MACAddress            string
+	ENiC                  bool
+	EnableDownloads       bool
+	URLFilesRS            string
+	TinkerActionsVersion  string
+	AgentsManifestVersion string
 }
