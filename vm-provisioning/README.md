@@ -244,8 +244,8 @@ wget https://"tinkerbell-nginx.${CLUSTER}"/tink-stack/keys/Full_server.crt --no-
 
 ### Step 7: OS Instance and Providers
 
-VM based provisioning doesn't support secureboot. It needs `"securityFeature":"SECURITY_FEATURE_NONE"` during instance creation.
-Use the following curl to create an OS instance and Provider instance.
+VM-based provisioning does not support Secure Boot; therefore, the "osSecurityFeatureEnable":"false" must be set in the
+provider configuration. Use the following curl command to create an OS instance and a Provider instance.
 
 **Note: The following commands are required to run initially when starting VM provisioning. These configurations will be
 used for further VM provisioning.**
@@ -272,14 +272,15 @@ export JWT_TOKEN=$(curl --location --insecure --request POST "https://keycloak.$
 3. Sample configuration to create a provider with an OS instance:
 curl -X POST "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" -H "accept: application/json" \
 -H "Content-Type: application/json" -d '{"providerKind":"PROVIDER_KIND_BAREMETAL","name":"infra_onboarding", \
-"apiEndpoint":"xyz123", "apiCredentials": ["abc123"], "config": "{\"defaultOs\":\"os-51c4eba0\",\"autoProvision\":true}" }' \
+"apiEndpoint":"xyz123", "apiCredentials": ["abc123"], "config": "{\"defaultOs\":\"os-51c4eba0\",\"autoProvision\":true,\"defaultLocalAccount\":\"\",\"osSecurityFeatureEnable\":false}" }' \
 -H "Authorization: Bearer ${JWT_TOKEN}"
 ```
 
 ### Step 8: VMs Creation with Scripts
 
-Currently, VM onboarding and provisioning are supported only for OS profiles (Ubuntu/Microvisor) where the security
-feature is set to `SECURITY_FEATURE_NONE`, and the selected OS profile must be set as the default in the provider config.
+Currently, VM onboarding and provisioning are supported for OS profiles (Ubuntu/Microvisor) where the security
+feature can be set to `SECURITY_FEATURE_NONE` or `SECURITY_FEATURE_SECURE_BOOT_AND_FULL_DISK_ENCRYPTION`,
+and the selected OS profile must be set as the default in the provider config.
 
 ![sample os profile](docs/Security_feature.png)
 ![sample provider config](docs/provider_config.png)
@@ -766,4 +767,4 @@ The following is a list of makefile targets that support developer activities:
 
 To learn more about internals and software architecture
 
-[contributors-guide-url]: https://literate-adventure-7vjeyem.pages.github.io/edge_orchestrator/user_guide_main/content/user_guide/index.html
+[contributors-guide-url]: https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/contributor_guide/index.html
