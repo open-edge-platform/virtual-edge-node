@@ -128,7 +128,8 @@ func (en *EdgeNode) startRequirements() error {
 	err := en.createFolders()
 	if err != nil {
 		zlog.Error().Err(err).Msg("failed to create base folders")
-		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS, ensimapi.StatusMode_STATUS_MODE_FAILED,
+		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS,
+			ensimapi.StatusMode_STATUS_MODE_FAILED,
 			fmt.Sprintf("failed to create base folders: %s", err.Error()))
 		return err
 	}
@@ -136,14 +137,16 @@ func (en *EdgeNode) startRequirements() error {
 	if en.cfg.NIOnboard && en.cfg.SouthOnboard {
 		err := fmt.Errorf("setup must be south %v OR NIO %v, but not both", en.cfg.SouthOnboard, en.cfg.NIOnboard)
 		zlog.Err(err).Msg("failed to define edge node onboarding method")
-		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS, ensimapi.StatusMode_STATUS_MODE_FAILED, err.Error())
+		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS,
+			ensimapi.StatusMode_STATUS_MODE_FAILED, err.Error())
 		return err
 	}
 
 	errDownloads := ensim_onboard.GetArtifacts(en.cfg)
 	if errDownloads != nil {
 		zlog.Error().Err(errDownloads).Msg("failed to download artifacts")
-		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS, ensimapi.StatusMode_STATUS_MODE_FAILED, errDownloads.Error())
+		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS,
+			ensimapi.StatusMode_STATUS_MODE_FAILED, errDownloads.Error())
 	}
 	en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS, ensimapi.StatusMode_STATUS_MODE_OK, "")
 	return nil
