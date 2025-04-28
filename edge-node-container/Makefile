@@ -90,8 +90,6 @@ helm-version-check: ##  validates that the version is the same in the VERSION fi
 helm-build: bma_versions helm-package
 
 helm-push: ##  Push helm charts.
-	aws ecr create-repository --region us-west-2 --repository-name $(HELM_REPOSITORY)/enic || true
-
 	chartToPush=`find . -name enic-$(VERSION).tgz`; \
 	chartVersion=`echo $$chartToPush | sed -n 's/.*$*-\(.*\).tgz/\1/p'`; \
 	isChartDev=`echo $$chartVersion | grep -c dev || true`; \
