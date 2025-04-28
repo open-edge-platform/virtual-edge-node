@@ -106,7 +106,7 @@ spec:
             - configMapRef:
                 name: env-vars
           securityContext:
-            privileged: true
+            {{- toYaml .Values.securityContext | nindent 12 }}
           {{- if hasKey $registryEnic "name" }}
           image: "{{ $registryEnic.name }}{{ .Values.images.enic.repository }}:{{ .Values.images.enic.tag | default .Chart.AppVersion }}"
           {{- else }}

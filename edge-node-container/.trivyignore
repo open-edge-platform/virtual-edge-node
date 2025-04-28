@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Requires update of golang-jwt/jwt, will be done post-3.0
+CVE-2025-30204
+
+# Dockerfile issues, will be addressed, when possible, post-3.0
+AVD-DS-0002
+AVD-DS-0029
+
+# Helm chart issues, will be addressed post-3.0
+AVD-KSV-0109
+AVD-KSV-0014
+AVD-KSV-0017
+
+# enic-utils issues, will be addresses post-3.0
+CVE-2025-31115
+CVE-2024-56406
