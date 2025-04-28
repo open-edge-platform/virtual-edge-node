@@ -93,7 +93,7 @@ func URLArtifact(url string) error {
 
 // DownloadArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
 func OrasArtifact(url, output string) error {
-	cmd := exec.Command("oras", "-o", output, url)
+	cmd := exec.Command("oras", "pull", "-o", output, url)
 	if err := cmd.Run(); err != nil {
 		zlog.Error().Err(err).Msgf("Failed to download oras artifact from URL %s", url)
 		return err

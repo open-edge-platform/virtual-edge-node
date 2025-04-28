@@ -13,7 +13,7 @@ import (
 
 var (
 	// Test data for the test cases
-	urlFilesRS            = "registry-rs.edgeorchestration.intel.com/"
+	urlFilesRS            = "registry-rs.edgeorchestration.intel.com"
 	tinkerActionsVersion  = "1.17.1"
 	agentsManifestVersion = "1.0.0"
 )
