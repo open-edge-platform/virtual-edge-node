@@ -40,7 +40,7 @@ Select Create Nodes option, define amount of hosts and the batch size (50 is rec
 All test cases in day 1 use keycloak user/passwd to retrieve token to Infrastructure Manager REST API interactions.
 
 ```bash
-GOPRIVATE="github.com/open-edge-platform/*" go test -timeout=60m -count=1 -v ./test/day1/ -orchFQDN=$FQDN  -apiURL=$API_URL -caFilepath=$CA_PATH -keyCloakUser=$KCUSER -keyCloakPass=$KCPASS -run TestDay1_Case01
+go test -timeout=60m -count=1 -v ./test/day1/ -orchFQDN=$FQDN  -apiURL=$API_URL -caFilepath=$CA_PATH -keyCloakUser=$KCUSER -keyCloakPass=$KCPASS -run TestDay1_Case01
 ```
 
 ## Run day 2
@@ -48,5 +48,5 @@ GOPRIVATE="github.com/open-edge-platform/*" go test -timeout=60m -count=1 -v ./t
 All test cases in day 2 use keycloak user/passwd to retrieve token to Infrastructure Manager REST API interactions.
 
 ```bash
-GOPRIVATE="github.com/open-edge-platform/*" go test -timeout=60m -count=1 -v ./test/day2/ -orchFQDN=$FQDN -apiURL=$API_URL -caFilepath=$CA_PATH -keyCloakUser=$KCUSER -keyCloakPass=$KCPASS -run TestDay2_Case01
+go test -timeout=60m -count=1 -v ./test/day2/ -orchFQDN=$FQDN -apiURL=$API_URL -caFilepath=$CA_PATH -keyCloakUser=$KCUSER -keyCloakPass=$KCPASS -run TestDay2_Case01
 ```
