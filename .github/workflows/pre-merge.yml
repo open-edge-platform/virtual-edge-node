@@ -96,6 +96,7 @@ jobs:
       artifacts_path: ${{ needs.pre-checks.outputs.artifact_path }}
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
+      trivy_config_path: '${{ matrix.project_folder }}/trivy.yaml'
     secrets: inherit
   final-check:
     runs-on: ubuntu-latest
