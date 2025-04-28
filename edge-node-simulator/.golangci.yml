@@ -157,7 +157,6 @@ linters-settings:
           - github.com/stretchr/testify/assert
           - github.com/manifoldco/promptui
           - github.com/go-co-op/gocron
-          - github.com/golang-jwt/jwt
         deny: []
       Test:
         files:
