@@ -141,17 +141,17 @@ func ListHostsAPI(ctx context.Context, apiClient *http.Client,
 	offset := 0
 	pageSize := 100
 	for {
-		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		defer cancel()
-
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 		if filter != nil {
 			fmtURL = fmt.Sprintf("%s&filter=%s", fmtURL, *filter)
 		}
 
+		rCtx, cancel := context.WithTimeout(ctx, waitTime)
 		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+			cancel()
 			return hostsList, err
 		}
+		cancel()
 
 		if allListed {
 			zlog.Info().Msg("All listed")
@@ -198,17 +198,17 @@ func ListInstancesAPI(ctx context.Context, apiClient *http.Client,
 	offset := 0
 	pageSize := 100
 	for {
-		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		defer cancel()
-
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 		if filter != nil {
 			fmtURL = fmt.Sprintf("%s&filter=%s", fmtURL, *filter)
 		}
 
+		rCtx, cancel := context.WithTimeout(ctx, waitTime)
 		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+			cancel()
 			return resList, err
 		}
+		cancel()
 
 		if allListed {
 			zlog.Info().Msg("All listed")
@@ -274,7 +274,7 @@ func DeleteAllInstancesAPI(ctx context.Context, client *http.Client, cfg *flags_
 	return nil
 }
 
-func HelperCleanupHostsAPI(ctx context.Context, client *http.Client, cfg *flags_test.TestConfig) error {
+func HelperCleanupHostsAPI(_ context.Context, client *http.Client, cfg *flags_test.TestConfig) error {
 	err := DeleteAllInstancesAPI(context.Background(), client, cfg, nil)
 	if err != nil {
 		return err

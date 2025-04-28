@@ -101,9 +101,7 @@ message AgentsStates {
 // I.e., enable the edge node to communicate with the orchestrator.
 message NodeCredentials {
   // Project to be associated to the edge node.
-  string project = 1 [
-    (buf.validate.field).required = true
-  ];
+  string project = 1 [(buf.validate.field).required = true];
   // Username to retrieve the project JWT token.
   // This user must be added to keycloak, be part of the project and have the correct roles.
   // Among them be part of the following keycloak group:
