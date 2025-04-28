@@ -43,6 +43,8 @@ podSecurityContext: {}
 # podSecurityContext:
 #   seccompProfile:
 #     type: RuntimeDefault
+securityContext:
+  privileged: true
 
 autoscaling:
   enabled: false
