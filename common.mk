@@ -19,7 +19,7 @@ endif
 
 # GO variables
 GOARCH	:= $(shell go env GOARCH)
-GOCMD   := GOPRIVATE="github.com/open-edge-platform/*" go
+GOCMD   := go
 
 # Docker variables
 IMG_VERSION             ?= $(shell git branch --show-current)
