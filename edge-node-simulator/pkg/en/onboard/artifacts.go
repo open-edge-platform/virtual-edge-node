@@ -14,6 +14,11 @@ import (
 
 type AritfactType string
 
+var (
+	manifestFileFolder = "/tmp/"
+	manifestFilePath   = "/tmp/ena-manifest.yaml"
+)
+
 var agentsNames = []string{
 	"cluster-agent",
 	"hardware-discovery-agent",
@@ -165,9 +170,8 @@ func DownloadArtifacts(artifacts []*Artifact) error {
 }
 
 func artifactsManifestAgent(baseURL, manifestVersion string) (map[string]string, error) {
-	manifestFilePath := "/tmp/ena-manifest.yaml"
 	manifestURL := fmt.Sprintf("%s/edge-orch/en/files/ena-manifest:%s", baseURL, manifestVersion)
-	if err := OrasArtifact(manifestURL, manifestFilePath); err != nil {
+	if err := OrasArtifact(manifestURL, manifestFileFolder); err != nil {
 		return nil, err
 	}
 
