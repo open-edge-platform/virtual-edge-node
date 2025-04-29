@@ -133,7 +133,7 @@ func (a *Artifact) Download() error {
 	zlog.Debug().Msgf("Downloading artifact %s from URL %s", a.ArtifactName, artifactURL)
 	switch a.ArtifactType {
 	case ArtifactTypeAgent:
-		if err := OrasArtifact(artifactURL, "/dev/null"); err != nil {
+		if err := OrasArtifact(artifactURL, a.ArtifactOutput); err != nil {
 			return err
 		}
 	default:
