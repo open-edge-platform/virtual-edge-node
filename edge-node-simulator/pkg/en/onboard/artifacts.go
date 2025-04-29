@@ -87,7 +87,7 @@ type Package struct {
 
 // URLArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
 func URLArtifact(url string) error {
-	cmd := exec.Command("curl", "-o", "/dev/null", url)
+	cmd := exec.Command("curl", "-k", "-o", "/dev/null", url)
 	if err := cmd.Run(); err != nil {
 		zlog.Error().Err(err).Msgf("Failed to download artifact from URL %s", url)
 		return err
