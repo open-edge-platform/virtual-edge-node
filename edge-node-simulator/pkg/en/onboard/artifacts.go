@@ -118,7 +118,7 @@ func (a *Artifact) ParseURL() (string, error) {
 	case ArtifactTypeTinker:
 		parsedURL = fmt.Sprintf(a.ArtifactURL, a.ArtifactBaseURL)
 	case ArtifactTypeImage:
-		parsedURL = fmt.Sprintf(a.ArtifactURL, a.ArtifactBaseURL)
+		parsedURL = fmt.Sprintf(a.ArtifactURL, a.ArtifactBaseURL, a.ArtifactVersion)
 	case ArtifactTypeTinkerAction:
 		parsedURL = fmt.Sprintf(a.ArtifactURL, a.ArtifactBaseURL, a.ArtifactVersion)
 	default:
