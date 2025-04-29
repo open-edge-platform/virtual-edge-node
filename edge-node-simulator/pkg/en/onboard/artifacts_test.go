@@ -16,10 +16,12 @@ var (
 	urlFilesRS            = "registry-rs.edgeorchestration.intel.com"
 	tinkerActionsVersion  = "1.17.1"
 	agentsManifestVersion = "1.0.0"
+	orchFQDN              = "kind.internal"
 )
 
 func TestGetArtifacts(t *testing.T) {
 	cfg := &defs.Settings{
+		OrchFQDN:              orchFQDN,
 		BaseFolder:            "/tmp",
 		EnableDownloads:       true,
 		URLFilesRS:            urlFilesRS,
