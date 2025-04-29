@@ -23,6 +23,7 @@ type Config struct {
 	URLFilesRS            string
 	TinkerActionsVersion  string
 	AgentsManifestVersion string
+	TiberOSVersion        string
 }
 
 var (
@@ -93,6 +94,11 @@ var (
 		defaultAgentsManifestVersion,
 		"Version of agents manifest",
 	)
+	tiberOSVersion = flag.String(
+		"tiberOSVersion",
+		defaultTiberOSVersion,
+		"Version of TiberOS",
+	)
 )
 
 // IntToint16 safely converts int to int16. This is needed for 64bit systems where int is defined as a 64bit integer.
@@ -132,6 +138,7 @@ func Cfg() (*Config, error) {
 		URLFilesRS:            *urlFilesRS,
 		TinkerActionsVersion:  *tinkerActionsVersion,
 		AgentsManifestVersion: *agentsManifestVersion,
+		TiberOSVersion:        *tiberOSVersion,
 	}
 	zlog.Info().Msgf("Loaded cfg: %v", cfg)
 	return cfg, nil

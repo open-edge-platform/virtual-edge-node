@@ -114,6 +114,7 @@ func (s *Server) buildENSettings(enUUID, enProjectID,
 		URLFilesRS:            s.cfg.URLFilesRS,
 		TinkerActionsVersion:  s.cfg.TinkerActionsVersion,
 		AgentsManifestVersion: s.cfg.AgentsManifestVersion,
+		TiberOSVersion:        s.cfg.TiberOSVersion,
 	}
 	zlog.Info().Msgf("Node settings %v", setting)
 	return setting, nil

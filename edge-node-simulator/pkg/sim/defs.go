@@ -12,4 +12,5 @@ var (
 	defaultURLFilesRS            = "registry-rs.edgeorchestration.intel.com/"
 	defaultTinkerActionsVersion  = "1.0.0"
 	defaultAgentsManifestVersion = "1.0.0"
+	defaultTiberOSVersion        = "1.0.0"
 )

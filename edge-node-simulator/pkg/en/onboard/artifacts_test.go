@@ -17,6 +17,7 @@ var (
 	tinkerActionsVersion  = "1.17.1"
 	agentsManifestVersion = "1.0.0"
 	orchFQDN              = "kind.internal"
+	tiverOsVersion        = "1.0.0"
 )
 
 func TestGetArtifacts(t *testing.T) {
@@ -27,6 +28,7 @@ func TestGetArtifacts(t *testing.T) {
 		URLFilesRS:            urlFilesRS,
 		TinkerActionsVersion:  tinkerActionsVersion,
 		AgentsManifestVersion: agentsManifestVersion,
+		TiberOSVersion:        tiverOsVersion,
 	}
 
 	err := onboard.GetArtifacts(cfg)

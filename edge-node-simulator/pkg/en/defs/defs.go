@@ -72,4 +72,5 @@ type Settings struct {
 	URLFilesRS            string
 	TinkerActionsVersion  string
 	AgentsManifestVersion string
+	TiberOSVersion        string
 }

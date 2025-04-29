@@ -238,7 +238,7 @@ func artifactsTinker(baseURL string) []*Artifact {
 	return artifacts
 }
 
-func artifactsImage(baseURL string) []*Artifact {
+func artifactsImage(baseURL, tiberOSVersion string) []*Artifact {
 	artifacts := []*Artifact{
 		NewArtifact(
 			"UbuntuOS",
@@ -254,7 +254,7 @@ func artifactsImage(baseURL string) []*Artifact {
 			baseURL,
 			"https://%s/files-edge-orch/repository/TiberMicrovisor/TiberMicrovisor_nonRT/tiber-readonly-%s",
 			"image",
-			"",
+			tiberOSVersion,
 			"",
 			ArtifactTypeImage,
 		),
@@ -283,7 +283,7 @@ func NewArtifacts(cfg *defs.Settings, agentsVersions map[string]string) []*Artif
 	artifacts := []*Artifact{}
 	artifacts = append(artifacts, artifactsAgent(cfg.URLFilesRS, cfg.BaseFolder, agentsVersions)...)
 	artifacts = append(artifacts, artifactsTinker(cfg.OrchFQDN)...)
-	artifacts = append(artifacts, artifactsImage(cfg.URLFilesRS)...)
+	artifacts = append(artifacts, artifactsImage(cfg.URLFilesRS, cfg.TiberOSVersion)...)
 	artifacts = append(artifacts, artifactsTinkerAction(cfg.URLFilesRS, cfg.TinkerActionsVersion)...)
 	return artifacts
 }
