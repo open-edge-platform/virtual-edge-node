@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
+	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/utils"
 )
 
 type AritfactType string
@@ -175,8 +176,15 @@ func artifactsManifestAgent(baseURL, manifestVersion string) (map[string]string,
 		return nil, err
 	}
 
+	// Read the manifest file
+	manifestRawData, err := utils.LoadFile(manifestFilePath)
+	if err != nil {
+		zlog.Error().Err(err).Msgf("Failed to read manifest file %s", manifestFilePath)
+		return nil, err
+	}
+
 	var manifestData Manifest
-	if err := yaml.Unmarshal([]byte(manifestFilePath), &manifestData); err != nil {
+	if err := yaml.Unmarshal([]byte(manifestRawData), &manifestData); err != nil {
 		return nil, err
 	}
 
