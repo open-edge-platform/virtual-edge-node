@@ -107,6 +107,11 @@ func OrasArtifact(url, output string) error {
 
 func (a *Artifact) ParseURL() (string, error) {
 	var parsedURL string
+
+	if a.ArtifactBaseURL == "" {
+		zlog.Warn().Msgf("Base URL is empty for artifact %s", a.ArtifactName)
+		return a.ArtifactURL, nil
+	}
 	switch a.ArtifactType {
 	case ArtifactTypeAgent:
 		parsedURL = fmt.Sprintf(a.ArtifactURL, a.ArtifactBaseURL, a.ArtifactVersion)
