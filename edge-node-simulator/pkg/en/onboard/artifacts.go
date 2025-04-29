@@ -208,7 +208,7 @@ func artifactsManifestAgent(baseURL, manifestVersion string) (map[string]string,
 	return artifacts, nil
 }
 
-func artifactsAgent(baseURL string, outputDir string, agentsVersions map[string]string) []*Artifact {
+func artifactsAgent(baseURL, outputDir string, agentsVersions map[string]string) []*Artifact {
 	artifacts := []*Artifact{}
 	for _, agentName := range agentsNames {
 		artifact := NewArtifact(agentName,

@@ -6,13 +6,14 @@ package onboard_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/onboard"
-	"github.com/stretchr/testify/assert"
 )
 
 var (
-	// Test data for the test cases
+	// Test data for the test cases.
 	urlFilesRS            = "registry-rs.edgeorchestration.intel.com"
 	tinkerActionsVersion  = "1.17.1"
 	agentsManifestVersion = "1.0.0"
