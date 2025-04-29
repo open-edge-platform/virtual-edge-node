@@ -20,6 +20,7 @@ var (
 
 func TestGetArtifacts(t *testing.T) {
 	cfg := &defs.Settings{
+		BaseFolder:            "/tmp",
 		EnableDownloads:       true,
 		URLFilesRS:            urlFilesRS,
 		TinkerActionsVersion:  tinkerActionsVersion,

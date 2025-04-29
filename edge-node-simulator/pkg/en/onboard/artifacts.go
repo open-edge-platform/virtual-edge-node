@@ -73,18 +73,16 @@ type Artifact struct {
 	ArtifactName    string       `json:"artifact_name"`
 	ArtifactVersion string       `json:"artifact_version"`
 	ArtifactType    AritfactType `json:"artifact_type"`
+	ArtifactOutput  string       `json:"artifact_output"`
 }
 
 type Manifest struct {
-	Metadata   string    `yaml:"metadata,omitempty"`
-	Repository string    `yaml:"repository,omitempty"`
-	Packages   []Package `yaml:"packages"`
+	Packages []Package `yaml:"packages"`
 }
 
 type Package struct {
-	Name        string `yaml:"name"`
-	Version     string `yaml:"version"`
-	OCIArtifact string `yaml:"oci_artifact,omitempty"`
+	Name    string `yaml:"name"`
+	Version string `yaml:"version"`
 }
 
 // URLArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
@@ -132,6 +130,7 @@ func (a *Artifact) Download() error {
 		zlog.Error().Err(err).Msgf("Failed to parse URL for artifact %s", a.ArtifactName)
 		return err
 	}
+	zlog.Debug().Msgf("Downloading artifact %s from URL %s", a.ArtifactName, artifactURL)
 	switch a.ArtifactType {
 	case ArtifactTypeAgent:
 		if err := OrasArtifact(artifactURL, "/dev/null"); err != nil {
@@ -146,7 +145,9 @@ func (a *Artifact) Download() error {
 }
 
 func NewArtifact(
-	artifactID, artifactBaseURL, artifactURL, artifactName, artifactVersion string,
+	artifactID, artifactBaseURL, artifactURL,
+	artifactName, artifactVersion,
+	artifactOutput string,
 	artifactType AritfactType,
 ) *Artifact {
 	return &Artifact{
@@ -156,12 +157,12 @@ func NewArtifact(
 		ArtifactName:    artifactName,
 		ArtifactVersion: artifactVersion,
 		ArtifactType:    artifactType,
+		ArtifactOutput:  artifactOutput,
 	}
 }
 
 func DownloadArtifacts(artifacts []*Artifact) error {
 	for _, artifact := range artifacts {
-		zlog.Debug().Msgf("Downloading %s from URL %s", artifact.ArtifactName, artifact.ArtifactURL)
 		if err := artifact.Download(); err != nil {
 			zlog.Error().Err(err).Msgf("Failed to download %s from URL %s", artifact.ArtifactName, artifact.ArtifactURL)
 			return err
@@ -202,11 +203,14 @@ func artifactsManifestAgent(baseURL, manifestVersion string) (map[string]string,
 	return artifacts, nil
 }
 
-func artifactsAgent(baseURL string, agentsVersions map[string]string) []*Artifact {
+func artifactsAgent(baseURL string, outputDir string, agentsVersions map[string]string) []*Artifact {
 	artifacts := []*Artifact{}
 	for _, agentName := range agentsNames {
 		artifact := NewArtifact(agentName,
-			baseURL, "%s/edge-orch/en/deb/"+agentName+":%s", agentName, agentsVersions[agentName], ArtifactTypeAgent)
+			baseURL, "%s/edge-orch/en/deb/"+agentName+":%s",
+			agentName, agentsVersions[agentName],
+			outputDir,
+			ArtifactTypeAgent)
 		artifacts = append(artifacts, artifact)
 	}
 	return artifacts
@@ -220,6 +224,7 @@ func artifactsTinker(baseURL string) []*Artifact {
 			baseURL,
 			"https://tinkerbell-nginx.%s/tink-stack/"+artifactName,
 			artifactName,
+			"",
 			"",
 			ArtifactTypeTinker,
 		)
@@ -236,6 +241,7 @@ func artifactsImage(baseURL string) []*Artifact {
 			"https://cloud-images.ubuntu.com/releases/22.04/release-20250228/ubuntu-22.04-server-cloudimg-amd64.img",
 			"image",
 			"",
+			"",
 			ArtifactTypeImage,
 		),
 		NewArtifact(
@@ -243,6 +249,7 @@ func artifactsImage(baseURL string) []*Artifact {
 			baseURL,
 			"https://%s/files-edge-orch/repository/TiberMicrovisor/TiberMicrovisor_nonRT/tiber-readonly-%s",
 			"image",
+			"",
 			"",
 			ArtifactTypeImage,
 		),
@@ -259,6 +266,7 @@ func artifactsTinkerAction(baseURL, tinkerVersion string) []*Artifact {
 			"%s/edge-orch/infra/tinker-actions/"+actionName+":%s",
 			actionName,
 			tinkerVersion,
+			"",
 			ArtifactTypeTinkerAction,
 		)
 		artifacts = append(artifacts, artifact)
@@ -268,11 +276,22 @@ func artifactsTinkerAction(baseURL, tinkerVersion string) []*Artifact {
 
 func NewArtifacts(cfg *defs.Settings, agentsVersions map[string]string) []*Artifact {
 	artifacts := []*Artifact{}
-	artifacts = append(artifacts, artifactsAgent(cfg.URLFilesRS, agentsVersions)...)
+	artifacts = append(artifacts, artifactsAgent(cfg.URLFilesRS, cfg.BaseFolder, agentsVersions)...)
 	artifacts = append(artifacts, artifactsTinker(cfg.OrchFQDN)...)
 	artifacts = append(artifacts, artifactsImage(cfg.URLFilesRS)...)
 	artifacts = append(artifacts, artifactsTinkerAction(cfg.URLFilesRS, cfg.TinkerActionsVersion)...)
 	return artifacts
+}
+
+func cleanArtifacts(outputDirs []string) error {
+	for _, dir := range outputDirs {
+		zlog.Debug().Msgf("Cleaning artifact %s", dir)
+		if err := exec.Command("rm", "-rf", dir).Run(); err != nil {
+			zlog.Error().Err(err).Msgf("Failed to clean artifacts folder %s", dir)
+			return err
+		}
+	}
+	return nil
 }
 
 func GetArtifacts(cfg *defs.Settings) error {
@@ -288,6 +307,15 @@ func GetArtifacts(cfg *defs.Settings) error {
 		artifacts := NewArtifacts(cfg, agentsVersions)
 		if err := DownloadArtifacts(artifacts); err != nil {
 			zlog.Error().Err(err).Msg("Failed to download artifacts")
+			return err
+		}
+
+		zlog.Info().Msg("Cleaning artifacts")
+		outputDirs := []string{
+			cfg.BaseFolder + "/*.deb",
+		}
+		if err := cleanArtifacts(outputDirs); err != nil {
+			zlog.Error().Err(err).Msg("Failed to clean artifacts")
 			return err
 		}
 	}
