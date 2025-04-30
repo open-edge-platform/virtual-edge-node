@@ -414,20 +414,20 @@ func getHostSystemInfoMessage(enUUID, enSerial string) *hostmgr.UpdateHostSystem
 					Arch:    "x86_64",
 				},
 				Memory: &hostmgr.SystemMemory{
-					Size: 64000000,
+					Size: 68719476736, // 64GB in bytes
 				},
 				Gpu: []*hostmgr.SystemGPU{
 					{
 						PciId:       "0000:00:1f.6",
 						Product:     "some product",
-						Vendor:      "Intel",
+						Vendor:      "Vendor",
 						Name:        "gpu0",
 						Description: "some desc",
 					},
 					{
 						PciId:       "0000:00:1f.7",
 						Product:     "some product",
-						Vendor:      "Intel",
+						Vendor:      "Vendor",
 						Name:        "gpu1",
 						Description: "some desc",
 					},
@@ -438,15 +438,15 @@ func getHostSystemInfoMessage(enUUID, enSerial string) *hostmgr.UpdateHostSystem
 							Name:         "sda1",
 							SerialNumber: "1234W45678A",
 							Vendor:       "Foobar Corp.",
-							Model:        "SUN",
-							Size:         1000000000,
+							Model:        "Model",
+							Size:         1099511627776, // 1TB in bytes
 						},
 						{
 							Name:         "sda2",
 							SerialNumber: "1434W45678B",
 							Vendor:       "Foobar Corp.",
-							Model:        "SUN",
-							Size:         1000000000,
+							Model:        "Model",
+							Size:         1099511627776, // 1TB in bytes
 						},
 					},
 					Features: []string{},
@@ -489,7 +489,7 @@ func getHostSystemInfoMessage(enUUID, enSerial string) *hostmgr.UpdateHostSystem
 			BiosInfo: &hostmgr.BiosInfo{
 				Version:     "1.0.18",
 				ReleaseDate: "09/30/2022",
-				Vendor:      "American Megatrends Inc.",
+				Vendor:      "Vendor.",
 			},
 			OsInfo: &hostmgr.OsInfo{},
 		},
@@ -522,7 +522,7 @@ func (a *Agents) gatherStatus() (string, bool) {
 		return true
 	})
 
-	zlog.Info().Msgf("%d of %d components running", counter, total)
+	zlog.Debug().Msgf("%s: %d of %d components running", a.cfg.ENGUID, counter, total)
 	if counter != total {
 		zlog.Warn().Msgf("Unhealthy components: %v", unhealthy)
 	}

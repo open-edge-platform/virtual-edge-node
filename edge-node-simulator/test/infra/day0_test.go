@@ -59,7 +59,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 		It("should do IO by create/check/delete/verify edge nodes with Infrastructure Manager simulator", func(ctx SpecContext) {
 			By("creating edge nodes in Infrastructure Manager simulator")
 			enCredentals := &ensimapi.NodeCredentials{
-				ProjectId:       cfg.ProjectID,
+				Project:         cfg.Project,
 				OnboardUsername: cfg.EdgeOnboardUser,
 				OnboardPassword: cfg.EdgeOnboardPass,
 				ApiUsername:     cfg.EdgeAPIUser,
@@ -77,7 +77,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			Expect(len(listNodes)).To(Equal(cfg.AmountEdgeNodes))
 
 			for _, simNode := range listNodes {
-				Expect(simNode.Credentials.ProjectId).To(Equal(cfg.ProjectID))
+				Expect(simNode.Credentials.Project).To(Equal(cfg.Project))
 				Expect(simNode.Credentials.OnboardUsername).To(Equal(cfg.EdgeOnboardUser))
 				Expect(simNode.Credentials.OnboardPassword).To(Equal(cfg.EdgeOnboardPass))
 
@@ -124,7 +124,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 
 			By("creating edge nodes in Infrastructure Manager simulator")
 			enCredentals := &ensimapi.NodeCredentials{
-				ProjectId:       cfg.ProjectID,
+				Project:         cfg.Project,
 				OnboardUsername: cfg.EdgeOnboardUser,
 				OnboardPassword: cfg.EdgeOnboardPass,
 				ApiUsername:     cfg.EdgeAPIUser,
@@ -142,7 +142,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			Expect(len(listNodes)).To(Equal(cfg.AmountEdgeNodes))
 
 			for _, simNode := range listNodes {
-				Expect(simNode.Credentials.ProjectId).To(Equal(cfg.ProjectID))
+				Expect(simNode.Credentials.Project).To(Equal(cfg.Project))
 				Expect(simNode.Credentials.OnboardUsername).To(Equal(cfg.EdgeOnboardUser))
 				Expect(simNode.Credentials.OnboardPassword).To(Equal(cfg.EdgeOnboardPass))
 

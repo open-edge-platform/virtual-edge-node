@@ -267,7 +267,7 @@ func (m *NodeCredentials) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ProjectId
+	// no validation rules for Project
 
 	// no validation rules for OnboardUsername
 

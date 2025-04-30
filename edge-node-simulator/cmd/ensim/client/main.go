@@ -25,10 +25,10 @@ var (
 		"",
 		"gRPC address (ip:port) of the Edge Node simulator",
 	)
-	orchProjectID = flag.String(
-		"projectID",
+	orchProject = flag.String(
+		"project",
 		"",
-		"default project ID",
+		"default project",
 	)
 	orchEdgeOnboardPasswd = flag.String(
 		"onbPass",
@@ -81,7 +81,7 @@ func main() {
 	defer client.Close()
 
 	cliCfg := &ensim.CliCfg{
-		ProjectID:       *orchProjectID,
+		Project:         *orchProject,
 		OnboardUsername: *orchEdgeOnboardUser,
 		OnboardPassword: *orchEdgeOnboardPasswd,
 		APIUsername:     *orchEdgeAPIUser,

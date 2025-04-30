@@ -100,21 +100,18 @@ message AgentsStates {
 // NodeCredentials define all the credentials needed to simulate an edge node
 // I.e., enable the edge node to communicate with the orchestrator.
 message NodeCredentials {
-  // Project ID to be associated to the edge node.
-  string project_id = 1 [
-    (buf.validate.field).string = {uuid: true},
-    (buf.validate.field).required = true
-  ];
-  // Username to retrieve the project_id JWT token.
-  // This user must be added to keycloak, be part of the project_id and have the correct roles.
+  // Project to be associated to the edge node.
+  string project = 1 [(buf.validate.field).required = true];
+  // Username to retrieve the project JWT token.
+  // This user must be added to keycloak, be part of the project and have the correct roles.
   // Among them be part of the following keycloak group:
   // "${proj_uuid}_Edge-Onboarding-Group"
   string onboard_username = 2 [(buf.validate.field).required = true];
   // Password associated to username.
   string onboard_password = 3 [(buf.validate.field).required = true];
 
-  // Username to retrieve the project_id JWT token.
-  // This user must be added to keycloak, be part of the project_id and have the correct roles.
+  // Username to retrieve the project JWT token.
+  // This user must be added to keycloak, be part of the project and have the correct roles.
   // Among them be part of the following keycloak group:
   //  "${proj_uuid}_Host-Manager-Group"
   string api_username = 4 [(buf.validate.field).required = true];

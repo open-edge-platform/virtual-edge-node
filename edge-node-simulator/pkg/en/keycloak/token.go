@@ -157,7 +157,7 @@ func createRefreshTokens(tokMgr *TokenManager, confAuth *ConfigAuth, authCli *Cl
 				}
 				tokMgr.TokenClients[i].AccessToken = token.AccessToken
 				tokMgr.TokenClients[i].Expiry = token.Expiry
-				zlog.Info().
+				zlog.Debug().
 					Msgf("JWT token refreshed for client %s successfully %s",
 						tokenClient.ClientName, tokMgr.AuthCfg.UUID)
 			}

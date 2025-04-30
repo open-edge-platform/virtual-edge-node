@@ -147,7 +147,7 @@ linters-settings:
           - github.com/goccy/go-json
           - github.com/google
           - github.com/mennanov/fmutils
-          - github.com/golang-jwt/jwt/v4
+          - github.com/golang-jwt/jwt/v5
           - github.com/onosproject
           - github.com/pkg/errors
           - github.com/rs/zerolog
@@ -157,7 +157,6 @@ linters-settings:
           - github.com/stretchr/testify/assert
           - github.com/manifoldco/promptui
           - github.com/go-co-op/gocron
-          - github.com/golang-jwt/jwt
         deny: []
       Test:
         files:

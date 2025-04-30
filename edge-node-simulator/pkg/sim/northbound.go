@@ -6,6 +6,7 @@ package sim
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/google/uuid"
@@ -68,7 +69,7 @@ func NewUUID(enUUID string) (string, error) {
 	return newUUID, nil
 }
 
-func (s *Server) buildENSettings(enUUID, enProjectID,
+func (s *Server) buildENSettings(enUUID, enProject,
 	enUser, enPasswd, enAPIUser, enAPIPasswd string,
 	enableNIO, enableTeardown bool,
 ) (*defs.Settings, error) {
@@ -91,7 +92,8 @@ func (s *Server) buildENSettings(enUUID, enProjectID,
 	}
 
 	enBasePath := s.cfg.BaseFolder + "/" + enUUID
-	enSerial := enUUID[:8]
+	enSerial := strings.ReplaceAll(enUUID, "-", "")[:20]
+
 	setting := &defs.Settings{
 		OrchFQDN:              s.cfg.OrchFQDN,
 		CertCAPath:            s.cfg.OrchCAPath,
@@ -106,10 +108,11 @@ func (s *Server) buildENSettings(enUUID, enProjectID,
 		NIOnboard:             enableNIO,
 		SouthOnboard:          !enableNIO,
 		SetupTeardown:         enableTeardown,
-		Project:               enProjectID,
+		Project:               enProject,
 		Org:                   "",
 		BaseFolder:            enBasePath,
 		MACAddress:            macAddress,
+		AutoProvision:         true,
 		EnableDownloads:       s.cfg.EnableDownloads,
 		URLFilesRS:            s.cfg.URLFilesRS,
 		TinkerActionsVersion:  s.cfg.TinkerActionsVersion,
@@ -153,7 +156,7 @@ func (s *Server) CreateNodes(
 			defer wg.Done()
 			zlog.Info().Msgf("Create Node %d out of %d", id, total)
 			enUUID, errUUID := s.helperCreateNode("",
-				req.GetCredentials().GetProjectId(),
+				req.GetCredentials().GetProject(),
 				req.GetCredentials().GetOnboardUsername(),
 				req.GetCredentials().GetOnboardPassword(),
 				req.GetCredentials().GetApiUsername(),
@@ -211,7 +214,7 @@ func (s *Server) CreateNode(
 		req.GetUuid(), req.GetCredentials())
 
 	_, err = s.helperCreateNode(req.GetUuid(),
-		req.GetCredentials().GetProjectId(),
+		req.GetCredentials().GetProject(),
 		req.GetCredentials().GetOnboardUsername(),
 		req.GetCredentials().GetOnboardPassword(),
 		req.GetCredentials().GetApiUsername(),
@@ -273,7 +276,7 @@ func enToProto(en *EdgeNode) *ensimapi.Node {
 		AgentsStates: agents,
 		EnableNio:    en.cfg.NIOnboard,
 		Credentials: &ensimapi.NodeCredentials{
-			ProjectId:       en.cfg.Project,
+			Project:         en.cfg.Project,
 			OnboardUsername: en.cfg.EdgeOnboardUser,
 			OnboardPassword: en.cfg.EdgeOnboardPass,
 			ApiUsername:     en.cfg.EdgeAPIUser,
@@ -439,11 +442,11 @@ func (s *Server) DeleteNodes(
 	return &ensimapi.DeleteNodesResponse{}, nil
 }
 
-func (s *Server) helperCreateNode(enUUID, enProjectID,
+func (s *Server) helperCreateNode(enUUID, enProject,
 	enUser, enPasswd, enAPIUser, enAPIPasswd string,
 	enableNIO, enableTeardown bool,
 ) (string, error) {
-	enCfg, err := s.buildENSettings(enUUID, enProjectID,
+	enCfg, err := s.buildENSettings(enUUID, enProject,
 		enUser, enPasswd, enAPIUser, enAPIPasswd,
 		enableNIO, enableTeardown,
 	)

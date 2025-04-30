@@ -60,7 +60,7 @@ func GenerateUUIDs(cfg *flags_test.TestConfig) []string {
 
 func GetInfraAPIClient(ctx context.Context, cfg *flags_test.TestConfig) (*api.ClientWithResponses, error) {
 	// Set the environment variables - projectID
-	os.Setenv(utils.ProjectIDEnvVar, cfg.ProjectID)
+	os.Setenv(utils.ProjectIDEnvVar, cfg.Project)
 
 	certCA, err := utils_test.LoadFile(cfg.CAPath)
 	if err != nil {
@@ -150,7 +150,7 @@ func ENSIMCreateNodes(ctx context.Context,
 	enUUIDs []string,
 ) error {
 	enCredentals := &ensimapi.NodeCredentials{
-		ProjectId:       cfg.ProjectID,
+		Project:         cfg.Project,
 		OnboardUsername: cfg.EdgeOnboardUser,
 		OnboardPassword: cfg.EdgeOnboardPass,
 		ApiUsername:     cfg.EdgeAPIUser,
