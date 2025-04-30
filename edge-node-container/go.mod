@@ -7,8 +7,8 @@ go 1.24.1
 
 require (
 	github.com/magefile/mage v1.15.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.0
-	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.1
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.2
+	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.5.2
 )
 
 require (
@@ -28,7 +28,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
-	github.com/getkin/kin-openapi v0.130.0 // indirect
+	github.com/getkin/kin-openapi v0.131.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/errors v0.22.1 // indirect
@@ -58,8 +58,8 @@ require (
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/open-edge-platform/infra-core/api v1.32.0 // indirect
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0 // indirect
+	github.com/open-edge-platform/infra-core/api v1.33.1 // indirect
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.34.4 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect

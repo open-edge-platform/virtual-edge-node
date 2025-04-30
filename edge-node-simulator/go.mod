@@ -16,13 +16,13 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/onsi/ginkgo/v2 v2.23.3
 	github.com/onsi/gomega v1.36.3
-	github.com/open-edge-platform/infra-core/api v1.32.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.0
-	github.com/open-edge-platform/infra-managers/host v1.21.0
-	github.com/open-edge-platform/infra-managers/maintenance v1.21.0
-	github.com/open-edge-platform/infra-managers/telemetry v1.21.0
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0
-	github.com/open-edge-platform/orch-library/go v0.5.29
+	github.com/open-edge-platform/infra-core/api v1.33.1
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.23.2
+	github.com/open-edge-platform/infra-managers/host v1.21.1
+	github.com/open-edge-platform/infra-managers/maintenance v1.21.1
+	github.com/open-edge-platform/infra-managers/telemetry v1.21.1
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.34.2
+	github.com/open-edge-platform/orch-library/go v0.6.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/term v0.30.0
@@ -52,7 +52,7 @@ require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
-	github.com/getkin/kin-openapi v0.130.0 // indirect
+	github.com/getkin/kin-openapi v0.131.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
