@@ -137,6 +137,18 @@ spec:
             readOnly: true
           - name: rancher-vol
             mountPath: /var/lib/rancher
+          - mountPath: /sys/fs/cgroup
+            name: cgroup
+            readOnly: true
+          - name: tmp
+            mountPath: /tmp
+            subPath: tmp
+          - name: tmp
+            mountPath: /run
+            subPath: run
+          - name: tmp
+            mountPath: /run/lock
+            subPath: run-lock
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -152,6 +164,14 @@ spec:
           items:
             - key: ca.crt
               path: ca.crt
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+          type: Directory
+      - name: tmp
+        emptyDir:
+        medium: Memory
+        sizeLimit: 128Mi
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
