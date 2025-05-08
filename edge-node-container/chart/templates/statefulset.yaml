@@ -137,23 +137,16 @@ spec:
             readOnly: true
           - name: rancher-vol
             mountPath: /var/lib/rancher
-          {{- with .Values.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
           - mountPath: /run
             name: tmpfs-run
           - mountPath: /sys/fs/cgroup
             name: cgroup
             readOnly: true
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       volumes:
-      - name: tmpfs-run
-        emptyDir:
-          medium: Memory
-      - name: cgroup
-        hostPath:
-          path: /sys/fs/cgroup
-          type: DirectoryOrCreate
       {{/* This is a shared volume to store the FakeUUID generated files */}}
       - name: edge-init-vol
         emptyDir: {}
@@ -164,6 +157,13 @@ spec:
           items:
             - key: ca.crt
               path: ca.crt
+      - name: tmpfs-run
+        emptyDir:
+          medium: Memory
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+          type: DirectoryOrCreate
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
