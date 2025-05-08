@@ -44,7 +44,9 @@ podSecurityContext: {}
 #   seccompProfile:
 #     type: RuntimeDefault
 securityContext:
-  privileged: true
+  privileged: false
+  capabilities:
+    add: ["SYS_ADMIN"]
 
 autoscaling:
   enabled: false
