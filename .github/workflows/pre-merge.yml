@@ -30,10 +30,10 @@ jobs:
         with:
           persist-credentials: false
       - name: "Verify Branch Name"
-        uses: open-edge-platform/orch-ci/verify-branch-name@main
+        uses: open-edge-platform/orch-ci/verify-branch-name@0.1.5
       - name: "Discover Changed Subfolders"
         id: discover-changes
-        uses: open-edge-platform/orch-ci/discover-changed-subfolders@main
+        uses: open-edge-platform/orch-ci/discover-changed-subfolders@0.1.5
       - name: "Filter Out Unwanted Changed Subfolders"
         id: filter-changes
         run: |
@@ -102,7 +102,7 @@ jobs:
       run_dep_version_check: true
       run_build: true
       run_lint: true
-      run_test: false #only for testing 
+      run_test: false # only for testing
       run_validate_clean_folder: true
       run_docker_build: true
       run_artifact: true
@@ -126,7 +126,7 @@ jobs:
 
           results=("pre_merge_root_pipeline" "pre_merge_pipeline")
           status="OK"
-          
+        
           for result in "${results[@]}"; do
             pipeline_result=$(eval echo \$$result)
             echo "${result} result: $pipeline_result"
@@ -134,7 +134,7 @@ jobs:
               status="KO"
             fi
           done
-          
+        
           if [[ "$status" == "OK" ]]; then
             echo "Pre-merge check passed successfully."
           else
