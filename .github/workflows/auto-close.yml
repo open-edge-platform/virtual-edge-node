@@ -4,8 +4,8 @@
 
 name: Stale Pull Requests
 
-# After 30 days of no activity on a PR, the PR should be marked as stale, 
-# a comment made on the PR informing the author of the new status, 
+# After 30 days of no activity on a PR, the PR should be marked as stale,
+# a comment made on the PR informing the author of the new status,
 # and closed after 15 days if there is no further activity from the change to stale state.
 on:
   schedule:
@@ -15,6 +15,9 @@ on:
 jobs:
   stale-auto-close:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
     steps:
       - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639  # v9.1.0
         with:

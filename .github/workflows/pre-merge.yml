@@ -18,17 +18,22 @@ concurrency:
 jobs:
   pre-checks:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     outputs:
       filtered_projects: ${{ steps.filter-changes.outputs.filtered_projects }}
       other_changed_projects: ${{ steps.filter-changes.outputs.other_changed_projects }}
       artifact_path: ${{ steps.arti-path.outputs.artifact_path }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: "Verify Branch Name"
-        uses: open-edge-platform/orch-ci/verify-branch-name@main
+        uses: open-edge-platform/orch-ci/verify-branch-name@0.1.5
       - name: "Discover Changed Subfolders"
         id: discover-changes
-        uses: open-edge-platform/orch-ci/discover-changed-subfolders@main
+        uses: open-edge-platform/orch-ci/discover-changed-subfolders@0.1.5
       - name: "Filter Out Unwanted Changed Subfolders"
         id: filter-changes
         run: |
@@ -53,8 +58,13 @@ jobs:
     needs: pre-checks
     if: ${{ contains(needs.pre-checks.outputs.other_changed_projects, '.github') || contains(needs.pre-checks.outputs.other_changed_projects, '.reuse') || contains(needs.pre-checks.outputs.other_changed_projects, 'LICENSES') || contains(needs.pre-checks.outputs.other_changed_projects, '""' ) || contains(needs.pre-checks.outputs.other_changed_projects, 'tools')}}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version: '18'
@@ -83,13 +93,16 @@ jobs:
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
     uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       run_security_scans: true
       run_version_check: true
       run_dep_version_check: true
       run_build: true
       run_lint: true
-      run_test: false #only for testing 
+      run_test: false # only for testing
       run_validate_clean_folder: true
       run_docker_build: true
       run_artifact: true
@@ -100,6 +113,9 @@ jobs:
     secrets: inherit
   final-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     if: ${{ always() }}
     needs: [pre-merge-root, pre-merge-pipeline]
     steps:
@@ -110,7 +126,7 @@ jobs:
 
           results=("pre_merge_root_pipeline" "pre_merge_pipeline")
           status="OK"
-          
+        
           for result in "${results[@]}"; do
             pipeline_result=$(eval echo \$$result)
             echo "${result} result: $pipeline_result"
@@ -118,7 +134,7 @@ jobs:
               status="KO"
             fi
           done
-          
+        
           if [[ "$status" == "OK" ]]; then
             echo "Pre-merge check passed successfully."
           else
