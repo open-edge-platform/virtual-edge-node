@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	edgeinfraapi "github.com/open-edge-platform/infra-core/api/pkg/api/v0"
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
 	ensim_kc "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/keycloak"
@@ -25,7 +26,9 @@ const (
 	waitTime = 5 * time.Second
 )
 
-func httpPost(ctx context.Context, client *http.Client, url, token string, data []byte, responseHooker func(*http.Response) error) error {
+func httpPost(ctx context.Context, client *http.Client, url, token string,
+	data []byte, responseHooker func(*http.Response) error,
+) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(data))
 	if err != nil {
 		return err
@@ -235,8 +238,8 @@ func WaitTeardown(wg *sync.WaitGroup, termChan chan bool, cfg *defs.Settings) er
 	return nil
 }
 
-func HttpInfraOnboardNewInstance(instanceUrl, token, hostID, osID string, client *http.Client) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func HTTPInfraOnboardNewInstance(instanceURL, token, hostID, osID string, client *http.Client) error {
+	ctx, cancel := context.WithTimeout(context.Background(), waitTime)
 	defer cancel()
 
 	instKind := edgeinfraapi.INSTANCEKINDMETAL
@@ -262,15 +265,15 @@ func HttpInfraOnboardNewInstance(instanceUrl, token, hostID, osID string, client
 		return nil
 	}
 
-	if err := httpPost(ctx, client, instanceUrl, token, data, responseHooker); err != nil {
+	if err := httpPost(ctx, client, instanceURL, token, data, responseHooker); err != nil {
 		return fmt.Errorf("HTTP POST request failed: %w", err)
 	}
 
 	return nil
 }
 
-func HttpInfraOnboardGetOSID(ctx context.Context, url string, token string, client *http.Client) (string, error) {
-	rCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func HTTPInfraOnboardGetOSID(ctx context.Context, url, token string, client *http.Client) (string, error) {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
 	defer cancel()
 
 	osID := ""
@@ -306,19 +309,19 @@ func HttpInfraOnboardGetOSID(ctx context.Context, url string, token string, clie
 	return osID, nil
 }
 
-func HttpInfraOnboardNewRegisterHost(
+func HTTPInfraOnboardNewRegisterHost(
 	url, token string,
 	client *http.Client,
-	hostUuid uuid.UUID,
+	hostUUID uuid.UUID,
 	autoOnboard bool,
 ) (*edgeinfraapi.Host, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), waitTime)
 	defer cancel()
 
-	name := "host-" + hostUuid.String()[0:4]
+	name := "host-" + hostUUID.String()[0:4]
 	hostRegisterInfo := &edgeinfraapi.HostRegisterInfo{
 		Name:        &name,
-		Uuid:        &hostUuid,
+		Uuid:        &hostUUID,
 		AutoOnboard: &autoOnboard,
 	}
 
@@ -352,8 +355,8 @@ func HttpInfraOnboardNewRegisterHost(
 	return &registeredHost, nil
 }
 
-func HttpInfraOnboardGetHostID(ctx context.Context, url string, token string, client *http.Client, uuid string) (string, error) {
-	rCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func HTTPInfraOnboardGetHostID(ctx context.Context, url, token string, client *http.Client, uuid string) (string, error) {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
 	defer cancel()
 
 	hostID := ""
@@ -403,33 +406,33 @@ func RegisterProvisionEdgeNode(ctx context.Context, cfg *defs.Settings) error {
 	}
 
 	apiBaseURLTemplate := "https://api.%s/v1/projects/%s"
-	baseProjAPIUrl := fmt.Sprintf(apiBaseURLTemplate, cfg.OrchFQDN, cfg.Project)
-	hostRegUrl := baseProjAPIUrl + "/compute/hosts/register"
-	hostUrl := baseProjAPIUrl + "/compute/hosts"
-	instanceUrl := baseProjAPIUrl + "/compute/instances"
-	osUrl := baseProjAPIUrl + "/compute/os"
+	baseProjAPIURL := fmt.Sprintf(apiBaseURLTemplate, cfg.OrchFQDN, cfg.Project)
+	hostRegURL := baseProjAPIURL + "/compute/hosts/register"
+	hostURL := baseProjAPIURL + "/compute/hosts"
+	instanceURL := baseProjAPIURL + "/compute/instances"
+	osURL := baseProjAPIURL + "/compute/os"
 
 	enUUID, err := uuid.Parse(cfg.ENGUID)
 	if err != nil {
 		return fmt.Errorf("error parsing edge node UUID: %w", err)
 	}
 
-	_, err = HttpInfraOnboardNewRegisterHost(hostRegUrl, apiToken, httpClient, enUUID, true)
+	_, err = HTTPInfraOnboardNewRegisterHost(hostRegURL, apiToken, httpClient, enUUID, true)
 	if err != nil {
 		return fmt.Errorf("error registering edge node: %w", err)
 	}
 
-	hostID, err := HttpInfraOnboardGetHostID(ctx, hostUrl, apiToken, httpClient, cfg.ENGUID)
+	hostID, err := HTTPInfraOnboardGetHostID(ctx, hostURL, apiToken, httpClient, cfg.ENGUID)
 	if err != nil {
 		return fmt.Errorf("error getting edge node resourceID: %w", err)
 	}
 
-	osID, err := HttpInfraOnboardGetOSID(ctx, osUrl, apiToken, httpClient)
+	osID, err := HTTPInfraOnboardGetOSID(ctx, osURL, apiToken, httpClient)
 	if err != nil {
 		return fmt.Errorf("error getting OS Ubuntu resourceID: %w", err)
 	}
 
-	err = HttpInfraOnboardNewInstance(instanceUrl, apiToken, hostID, osID, httpClient)
+	err = HTTPInfraOnboardNewInstance(instanceURL, apiToken, hostID, osID, httpClient)
 	if err != nil {
 		return fmt.Errorf("error provisioning edge node: %w", err)
 	}

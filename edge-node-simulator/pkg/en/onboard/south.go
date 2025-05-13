@@ -18,8 +18,6 @@ import (
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/utils"
 )
 
-type onboardOperation int
-
 var (
 	tinkerTimeout = 11 * time.Minute // Waits for 11 minutes before timing out tinker worker.
 	kcTimeout     = 60 * time.Second
@@ -30,42 +28,6 @@ const (
 	backoffInterval = 10 * time.Second
 	backoffRetries  = 100
 )
-
-var onboardingOperationCreate onboardOperation = 1
-
-func buildNodeRequest(hwData *onboarding_pb.HwData) *onboarding_pb.CreateNodesRequest {
-	hwdatas := []*onboarding_pb.HwData{hwData}
-	payload := onboarding_pb.NodeData{Hwdata: hwdatas}
-	payloads := []*onboarding_pb.NodeData{&payload}
-	request := &onboarding_pb.CreateNodesRequest{
-		Payload: payloads,
-	}
-	return request
-}
-
-func southOnboardOperation(
-	ctx context.Context,
-	client onboarding_pb.InteractiveOnboardingServiceClient,
-	hwData *onboarding_pb.HwData,
-	operation onboardOperation,
-) error {
-	req := buildNodeRequest(hwData)
-	var resp *onboarding_pb.CreateNodesResponse
-	var err error
-	switch operation {
-	case onboardingOperationCreate:
-		resp, err = client.CreateNodes(ctx, req)
-	default:
-		err = fmt.Errorf("invalid south onboard operation")
-	}
-
-	if err != nil {
-		zlog.Error().Err(err).Msgf("failed to call southbound operation %d", operation)
-		return err
-	}
-	zlog.Info().Msgf("Onboarding Op %d successful, response: %s", operation, resp)
-	return nil
-}
 
 // receiveFromStream receive a message from the stream.
 func receiveFromStream(stream onboarding_pb.NonInteractiveOnboardingService_OnboardNodeStreamClient) (
