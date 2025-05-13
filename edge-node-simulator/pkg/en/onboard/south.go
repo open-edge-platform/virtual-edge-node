@@ -170,48 +170,6 @@ func SouthOnboardNIO(ctx context.Context, cfg *defs.Settings) error {
 	return nil
 }
 
-// Interactive onboarding.
-func SouthOnboard(ctx context.Context, cfg *defs.Settings) error {
-	zlog.Info().Msgf("Start Onboarding Edge Node %s", cfg.ENGUID)
-	kcToken, err := ensim_kc.GetKeycloakToken(
-		ctx,
-		cfg.CertCA,
-		cfg.OrchFQDN,
-		cfg.EdgeOnboardUser,
-		cfg.EdgeOnboardPass,
-		defs.OrchKcClientID,
-	)
-	if err != nil {
-		zlog.Err(err).Msgf("failed to get keycloak API token")
-		return err
-	}
-
-	omAddress := fmt.Sprintf("onboarding-node.%s:443", cfg.OrchFQDN)
-	zlog.Info().Msgf("Connecting to Onboarding Manager %s", omAddress)
-	conn, err := utils.Connect(omAddress, cfg.CertCAPath, kcToken)
-	if err != nil {
-		zlog.Error().Err(err).Msgf("failed to connect to Onboarding Manager %s", cfg.ENGUID)
-		return err
-	}
-	defer conn.Close()
-	client := onboarding_pb.NewInteractiveOnboardingServiceClient(conn)
-
-	hwdata := &onboarding_pb.HwData{
-		SutIp:     "192.168.1.1",
-		MacId:     cfg.MACAddress,
-		Uuid:      cfg.ENGUID,
-		Serialnum: cfg.ENSerial,
-	}
-
-	zlog.Info().Msgf("Calling Onboarding Manager Create with hwdata: %v", hwdata)
-	err = southOnboardOperation(ctx, client, hwdata, onboardingOperationCreate)
-	if err != nil {
-		zlog.Err(err).Msgf("failed to southOnboardOperation")
-		return err
-	}
-	return nil
-}
-
 // SouthProvision fakes the tinker workflow execution, waiting for the edge node to be configured/provisioned.
 func SouthProvision(_ context.Context, cfg *defs.Settings) error {
 	// Make sure keycloak folders are created before tinker actions (enable write of clientID/clientSecret).

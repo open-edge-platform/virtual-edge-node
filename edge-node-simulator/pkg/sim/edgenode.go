@@ -134,14 +134,6 @@ func (en *EdgeNode) startRequirements() error {
 		return err
 	}
 
-	if en.cfg.NIOnboard && en.cfg.SouthOnboard {
-		err := fmt.Errorf("setup must be south %v OR NIO %v, but not both", en.cfg.SouthOnboard, en.cfg.NIOnboard)
-		zlog.Err(err).Msg("failed to define edge node onboarding method")
-		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_REQUIREMENTS,
-			ensimapi.StatusMode_STATUS_MODE_FAILED, err.Error())
-		return err
-	}
-
 	errDownloads := ensim_onboard.GetArtifacts(en.cfg)
 	if errDownloads != nil {
 		zlog.Error().Err(errDownloads).Msg("failed to download artifacts")
@@ -156,37 +148,28 @@ func (en *EdgeNode) startOnboardProvision() error {
 	ctx, cancel := context.WithTimeout(context.Background(), onboardTimeout)
 	defer cancel()
 
-	if en.cfg.NIOnboard {
-		errOnb := ensim_onboard.SouthOnboardNIO(ctx, en.cfg)
-		if errOnb != nil {
-			zlog.Error().Err(errOnb).Msg("failed to onboard")
-			en.pushStatsEvent(
-				ensimapi.StatusSource_STATUS_SOURCE_ONBOARDED,
-				ensimapi.StatusMode_STATUS_MODE_FAILED,
-				errOnb.Error(),
-			)
-			return errOnb
-		}
-		en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_ONBOARDED, ensimapi.StatusMode_STATUS_MODE_OK, "NIO successful")
-	}
-
-	if en.cfg.SouthOnboard {
-		errOnb := ensim_onboard.SouthOnboard(ctx, en.cfg)
-		if errOnb != nil {
-			zlog.Error().Err(errOnb).Msg("failed to onboard")
-			en.pushStatsEvent(
-				ensimapi.StatusSource_STATUS_SOURCE_ONBOARDED,
-				ensimapi.StatusMode_STATUS_MODE_FAILED,
-				errOnb.Error(),
-			)
-			return errOnb
-		}
+	errRegister := ensim_onboard.RegisterProvisionEdgeNode(ctx, en.cfg)
+	if errRegister != nil {
+		zlog.Error().Err(errRegister).Msg("failed to register/provision edge node")
 		en.pushStatsEvent(
 			ensimapi.StatusSource_STATUS_SOURCE_ONBOARDED,
-			ensimapi.StatusMode_STATUS_MODE_OK,
-			"Onboard successful",
+			ensimapi.StatusMode_STATUS_MODE_FAILED,
+			errRegister.Error(),
 		)
+		return errRegister
 	}
+
+	errOnb := ensim_onboard.SouthOnboardNIO(ctx, en.cfg)
+	if errOnb != nil {
+		zlog.Error().Err(errOnb).Msg("failed to onboard")
+		en.pushStatsEvent(
+			ensimapi.StatusSource_STATUS_SOURCE_ONBOARDED,
+			ensimapi.StatusMode_STATUS_MODE_FAILED,
+			errOnb.Error(),
+		)
+		return errOnb
+	}
+	en.pushStatsEvent(ensimapi.StatusSource_STATUS_SOURCE_ONBOARDED, ensimapi.StatusMode_STATUS_MODE_OK, "NIO successful")
 
 	errProv := ensim_onboard.SouthProvision(ctx, en.cfg)
 	if errProv != nil {

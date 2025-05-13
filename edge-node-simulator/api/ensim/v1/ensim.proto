@@ -135,9 +135,6 @@ message Node {
   // The state of each one of the AgentType for the simulated edge node
   repeated AgentsStates agents_states = 4;
 
-  // Check if the node is enabled to use NIO (Non-Interactive Onboarding)
-  bool enable_nio = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
-
   // Check if the node is enabled to perform teardown,
   // i.e., remove the node from the orchestrator via Infrastructure Manager REST API.
   bool enable_teardown = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
@@ -149,9 +146,6 @@ message CreateNodeRequest {
   string uuid = 1 [(buf.validate.field).string = {uuid: true}];
 
   NodeCredentials credentials = 2 [(buf.validate.field).required = true];
-
-  // Check if the node is enabled to use NIO (Non-Interactive Onboarding)
-  bool enable_nio = 5;
 
   // Check if the node is enabled to perform teardown,
   // i.e., remove the node from the orchestrator via Infrastructure Manager REST API.
@@ -171,9 +165,6 @@ message CreateNodesRequest {
 
   // The credentials associated to the edge nodes
   NodeCredentials credentials = 3 [(buf.validate.field).required = true];
-
-  // Check if the node is enabled to use NIO (Non-Interactive Onboarding)
-  bool enable_nio = 5;
 
   // Check if the node is enabled to perform teardown,
   // i.e., remove the node from the orchestrator via Infrastructure Manager REST API.

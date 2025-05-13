@@ -58,8 +58,6 @@ type Settings struct {
 	EdgeOnboardUser       string
 	EdgeOnboardPass       string
 	RunAgents             bool
-	NIOnboard             bool
-	SouthOnboard          bool
 	SetupTeardown         bool
 	OamServerAddr         string
 	BaseFolder            string

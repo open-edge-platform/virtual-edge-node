@@ -158,7 +158,7 @@ func ENSIMCreateNodes(ctx context.Context,
 	}
 	for _, enUUID := range enUUIDs {
 		zlog.Info().Msgf("Creating node %v", enUUID)
-		err := simClient.Create(ctx, enUUID, enCredentals, false, true)
+		err := simClient.Create(ctx, enUUID, enCredentals, true)
 		if err != nil {
 			return err
 		}
