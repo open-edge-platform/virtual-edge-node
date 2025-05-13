@@ -57,10 +57,6 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 
 	Describe("day0 - Non Interactive Onboarding (NIO)", Label(day0Label), func() {
 		It("should do NIO by create/check/delete/verify edge nodes with Infrastructure Manager simulator", func(ctx SpecContext) {
-			By("registering hosts in Infrastructure Manager REST API")
-			err := InfrastructureManagerAPIRegisterHosts(ctx, infraAPIClient, cfg, enUUIDs)
-			Expect(err).To(BeNil())
-
 			By("creating edge nodes in Infrastructure Manager simulator")
 			enCredentals := &ensimapi.NodeCredentials{
 				Project:         cfg.Project,

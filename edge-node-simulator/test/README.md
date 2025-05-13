@@ -1,52 +1,88 @@
 # Integration Tests
 
-TODO: update, examples are outdated.
-
-The following steps provide guidance on how to run the scale tests for days 1 and 2 using the Infrastructure Manager simulator.
+The following steps provide guidance on how to run the integration tests for days 0, 1 and 2 using
+the Edge Node simulator.
 All test cases have descriptions in their respective files/definitions.
 
 ## Requirements
 
-For all the day1 and day2 tests the following environment variables need to be defined.
+For all the day0, day1 and day2 tests the following environment variables need to be defined.
 
 ```bash
-FQDN="" # The FQDN of the target orchestrator cluster
-ENSIM_ADDR="" # The gRPC server address of the Infrastructure Manager simulator (if/when needed) - e.g., localhost:3196
+ORCH_FQDN="" # The FQDN of the target orchestrator cluster
+ENSIM_ADDR="${ENSIM_ADDR}" # The gRPC server address of the Edge Node simulator (if/when needed) - e.g., localhost:3196
 CA_PATH="" # The file path of the CA certificate of the target orchestrator cluster
 API_URL="" # Defines the Infrastructure Manager REST API URL of the target orchestrator cluster
-KCUSER="" # The orch keycloak user - to retrieve token for Infrastructure Manager REST API interactions - if not specified goes to default
-KCPASS="" # The orch keycloak user password - to retrieve token for Infrastructure Manager REST API interactions - if not specified goes to default
+ONBUSER="" # The orch keycloak user - to retrieve token for Infrastructure Manager SBI interactions of ENSIM
+ONBPASS="" # The orch keycloak user password - to retrieve token for Infrastructure Manager SBI interactions of ENSIM
+APIUSER="" # The orch keycloak user - to retrieve token for Infrastructure Manager REST API interactions - if not specified goes to default
+APIPASS="" # The orch keycloak user password - to retrieve token for Infrastructure Manager REST API interactions - if not specified goes to default
 ```
 
-## Infrastructure Manager Simulator - Adds/Dels simulated edge nodes
+## Edge Node Simulator Deployment
 
-Compile and run the Infrastructure Manager simulator, for instance:
+Deploy the edge node simulator in the same namespace as orch-infra (Edge Infrastructure Manager).
 
 ```bash
-make go-build
-cd out/ensim/
- ./server/main -globalLogLevel debug  -orchCAPath $CA_PATH  -orchFQDN $FQDN -oamServerAddress 0.0.0.0:6379
+helm upgrade --install -n orch-infra ensim \
+    oci://registry-rs.edgeorchestration.intel.com/edge-orch/infra/charts/ensim \
+    --set global.registry.name=registry-rs.edgeorchestration.intel.com/edge-orch/ \
+    --set configArgs.server.orchFQDN=kind.internal \
+    --set tlsSecretName=gateway-ca-cert
+
+sleep 5
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=ensim -n orch-infra --timeout=5m
 ```
 
-Use the interactive CLI of en-sim client to add edge nodes.
-Select Create Nodes option, define amount of hosts and the batch size (50 is recommended).
+
+## Run Integration Tests
+
+Set port-forward to the following targets:
 
 ```bash
-./client/main -addressSimulator $ENSIM_ADDR
+kubectl port-forward svc/ensim -n orch-infra --address 0.0.0.0 3196:3196 &
+kubectl port-forward svc/api -n orch-infra --address 0.0.0.0 8080:8080 &
 ```
 
-## Run day 1
-
-All test cases in day 1 use keycloak user/passwd to retrieve token to Infrastructure Manager REST API interactions.
-
+### Runs day0 integration tests
 ```bash
-go test -timeout=60m -count=1 -v ./test/day1/ -orchFQDN=$FQDN  -apiURL=$API_URL -caFilepath=$CA_PATH -keyCloakUser=$KCUSER -keyCloakPass=$KCPASS -run TestDay1_Case01
+ginkgo -v -r --fail-fast --race --json-report infra-tests-day0.json --output-dir . --label-filter="infra-tests-day0" ./test/infra -- \
+    -projectID=${PROJECT_ID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
+    -orchFQDN=${ORCH_FQDN} -infraURL=${API_URL} \
+    -edgeAPIUser=${APIUSER}  -edgeAPIPass=${PASSWORD} \
+    -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
+```
+### Runs day1 integration tests
+```bash
+ginkgo -v -r --fail-fast --race --json-report infra-tests-day1.json --output-dir . --label-filter="infra-tests-day1" ./test/infra -- \
+    -projectID=${PROJECT_ID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
+    -orchFQDN=${ORCH_FQDN} -infraURL=${API_URL} \
+    -edgeAPIUser=${APIUSER}  -edgeAPIPass=${PASSWORD} \
+    -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```
 
-## Run day 2
-
-All test cases in day 2 use keycloak user/passwd to retrieve token to Infrastructure Manager REST API interactions.
+### Runs day2 integration tests
 
 ```bash
-go test -timeout=60m -count=1 -v ./test/day2/ -orchFQDN=$FQDN -apiURL=$API_URL -caFilepath=$CA_PATH -keyCloakUser=$KCUSER -keyCloakPass=$KCPASS -run TestDay2_Case01
+ginkgo -v -r --fail-fast --race --json-report infra-tests-day2.json --output-dir . --label-filter="infra-tests-day2" ./test/infra --  \
+    -projectID=${PROJECT_ID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
+    -orchFQDN=${ORCH_FQDN} -infraURL=${API_URL} \
+    -edgeAPIUser=${APIUSER}  -edgeAPIPass=${PASSWORD} \
+    -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
+```
+
+## Run hosts/locations cleanup
+```bash
+ginkgo -v -r --fail-fast --race --label-filter="cleanup" ./test/infra --  \
+    -projectID=${PROJECT_ID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
+    -orchFQDN=${ORCH_FQDN} -infraURL=${API_URL} \
+    -edgeAPIUser=${APIUSER}  -edgeAPIPass=${PASSWORD} \
+    -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
+```
+
+## Kill port-forward to ensim/api
+
+```bash
+kill $(ps -eaf | grep 'kubectl' | grep 'port-forward svc/ensim' | awk '{print $2}')
+kill $(ps -eaf | grep 'kubectl' | grep 'port-forward svc/api' | awk '{print $2}')
 ```
