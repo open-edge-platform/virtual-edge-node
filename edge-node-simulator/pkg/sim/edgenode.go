@@ -256,6 +256,7 @@ func (en *EdgeNode) Start() error {
 		zlog.Error().Err(err).Msg("failed to start onboard/provision")
 		return err
 	}
+	// Waits for the provision to be reconciled by Infra Manager
 	time.Sleep(waitProvisionDone)
 	err = en.startAgents()
 	if err != nil {
