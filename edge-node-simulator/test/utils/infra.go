@@ -1449,3 +1449,85 @@ func AssertInMaintenance(
 		assert.Equal(tb, http.StatusOK, sReply.StatusCode())
 	}
 }
+
+func APICheckHosts(ctx context.Context,
+	apiClient *http.Client,
+	url string,
+	filter *string,
+	amount int,
+) error {
+	listItems, err := ListHostsAPI(ctx, apiClient, url, filter)
+	if err != nil {
+		return err
+	}
+
+	if amount != len(listItems) {
+		return fmt.Errorf("expected %d, got %d", amount, len(listItems))
+	}
+
+	return nil
+}
+
+func APICheckInstances(ctx context.Context,
+	apiClient *http.Client,
+	url string,
+	filter *string,
+	amount int,
+) error {
+	listItems, err := ListInstancesAPI(ctx, apiClient, url, filter)
+	if err != nil {
+		return err
+	}
+
+	if amount != len(listItems) {
+		return fmt.Errorf("expected %d, got %d", amount, len(listItems))
+	}
+
+	return nil
+}
+
+func InfraAPICheckHosts(ctx context.Context,
+	apiClient *api.ClientWithResponses,
+	filter *string,
+	amount int,
+) error {
+	resList, err := apiClient.GetComputeHostsWithResponse(
+		ctx,
+		&api.GetComputeHostsParams{
+			Filter: filter,
+		},
+		utils.AddJWTtoTheHeader,
+		utils.AddProjectIDtoTheHeader,
+	)
+
+	if http.StatusOK != resList.StatusCode() {
+		return err
+	}
+	if amount != *resList.JSON200.TotalElements {
+		return err
+	}
+	return nil
+}
+
+func InfraAPICheckInstances(ctx context.Context,
+	apiClient *api.ClientWithResponses,
+	filter *string,
+	amount int,
+) error {
+	resList, err := apiClient.GetInstancesWithResponse(
+		ctx,
+		&api.GetInstancesParams{
+			Filter: filter,
+		},
+		utils.AddJWTtoTheHeader,
+		utils.AddProjectIDtoTheHeader,
+	)
+
+	if http.StatusOK != resList.StatusCode() {
+		return err
+	}
+	if amount != *resList.JSON200.TotalElements {
+		return err
+	}
+	return nil
+}

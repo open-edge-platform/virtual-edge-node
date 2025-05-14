@@ -4,6 +4,7 @@
 package onboard
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 
 	edgeinfraapi "github.com/open-edge-platform/infra-core/api/pkg/api/v0"
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
@@ -22,6 +25,36 @@ const (
 	// wait time for HTTP request.
 	waitTime = 5 * time.Second
 )
+
+func httpPost(ctx context.Context, client *http.Client, url, token string,
+	data []byte, responseHooker func(*http.Response) error,
+) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("HTTP POST to %s failed, status: %s", url, resp.Status)
+		return err
+	}
+
+	if responseHooker != nil {
+		if err := responseHooker(resp); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 func httpGet(ctx context.Context, client *http.Client, url, token string, responseHooker func(*http.Response) error) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
@@ -162,7 +195,7 @@ func cleanupHost(ctx context.Context, hostURL, instanceURL, apiToken string, api
 }
 
 func Teardown(ctx context.Context, cfg *defs.Settings) error {
-	zlog.Info().Msgf("Deleting Host/Instance of ENiC in Edge Infra %s project %s", cfg.ENGUID, cfg.Project)
+	zlog.Info().Msgf("Deleting Host/Instance of edge node in Edge Infra %s project %s", cfg.ENGUID, cfg.Project)
 	apiToken, err := ensim_kc.GetKeycloakToken(
 		ctx,
 		cfg.CertCA,
@@ -201,6 +234,211 @@ func WaitTeardown(wg *sync.WaitGroup, termChan chan bool, cfg *defs.Settings) er
 			zlog.Error().Err(err).Msgf("Failed to teardown %s", cfg.ENGUID)
 		}
 	}()
+
+	return nil
+}
+
+func HTTPInfraOnboardNewInstance(instanceURL, token, hostID, osID string, client *http.Client) error {
+	ctx, cancel := context.WithTimeout(context.Background(), waitTime)
+	defer cancel()
+
+	instKind := edgeinfraapi.INSTANCEKINDMETAL
+	instanceName := "test-instance"
+	sf := edgeinfraapi.SECURITYFEATURENONE
+	instance := edgeinfraapi.Instance{
+		HostID:          &hostID,
+		OsID:            &osID,
+		Kind:            &instKind,
+		Name:            &instanceName,
+		SecurityFeature: &sf,
+	}
+
+	data, err := json.Marshal(instance)
+	if err != nil {
+		return fmt.Errorf("failed to marshal instance data: %w", err)
+	}
+
+	responseHooker := func(res *http.Response) error {
+		if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK {
+			return fmt.Errorf("failed to create instance, status: %s", res.Status)
+		}
+		return nil
+	}
+
+	if err := httpPost(ctx, client, instanceURL, token, data, responseHooker); err != nil {
+		return fmt.Errorf("HTTP POST request failed: %w", err)
+	}
+
+	return nil
+}
+
+func HTTPInfraOnboardGetOSID(ctx context.Context, url, token string, client *http.Client) (string, error) {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
+	defer cancel()
+
+	osID := ""
+	responseHooker := func(res *http.Response) error {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		os := &edgeinfraapi.OperatingSystemResourceList{}
+		err = json.Unmarshal(b, &os)
+		if err != nil {
+			return err
+		}
+		if os.OperatingSystemResources == nil || len(*os.OperatingSystemResources) == 0 {
+			return fmt.Errorf("empty os resources")
+		}
+		for _, osr := range *os.OperatingSystemResources {
+			if *osr.ProfileName == "ubuntu-22.04-lts-generic" {
+				osID = *osr.ResourceId
+				zlog.Debug().Msgf("Found OS: %s", osID)
+				break
+			}
+		}
+		if osID == "" {
+			return fmt.Errorf("ubuntu-22.04-lts-generic profile not found")
+		}
+		return nil
+	}
+	if err := httpGet(rCtx, client, url, token, responseHooker); err != nil {
+		return osID, err
+	}
+
+	return osID, nil
+}
+
+func HTTPInfraOnboardNewRegisterHost(
+	url, token string,
+	client *http.Client,
+	hostUUID uuid.UUID,
+	autoOnboard bool,
+) (*edgeinfraapi.Host, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), waitTime)
+	defer cancel()
+
+	name := "host-" + hostUUID.String()[0:4]
+	hostRegisterInfo := &edgeinfraapi.HostRegisterInfo{
+		Name:        &name,
+		Uuid:        &hostUUID,
+		AutoOnboard: &autoOnboard,
+	}
+
+	data, err := json.Marshal(hostRegisterInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	zlog.Debug().Msgf("HostRegisterInfo %s", data)
+	var registeredHost edgeinfraapi.Host
+
+	responseHooker := func(res *http.Response) error {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(b, &registeredHost)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	zlog.Debug().Msgf("Sending POST request to %s with token %s", url, token)
+	if err := httpPost(ctx, client, url, token, data, responseHooker); err != nil {
+		zlog.Debug().Msgf("HTTP POST request failed: %v", err)
+		return nil, err
+	}
+
+	return &registeredHost, nil
+}
+
+func HTTPInfraOnboardGetHostID(ctx context.Context, url, token string, client *http.Client, uuid string) (string, error) {
+	rCtx, cancel := context.WithTimeout(ctx, waitTime)
+	defer cancel()
+
+	hostID := ""
+	responseHooker := func(res *http.Response) error {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		ps := &edgeinfraapi.HostsList{}
+		err = json.Unmarshal(b, &ps)
+		if err != nil {
+			return err
+		}
+		if ps.Hosts == nil || len(*ps.Hosts) == 0 {
+			return fmt.Errorf("empty host result for uuid %s", uuid)
+		}
+		zlog.Debug().Msgf("HostResource %#v", ps)
+		hostID = *(*ps.Hosts)[0].ResourceId
+		return nil
+	}
+	if err := httpGet(rCtx, client, fmt.Sprintf("%s?uuid=%s", url, uuid), token, responseHooker); err != nil {
+		return hostID, err
+	}
+
+	return hostID, nil
+}
+
+func RegisterProvisionEdgeNode(ctx context.Context, cfg *defs.Settings) error {
+	zlog.Info().Msgf("Registering/Provisioning Edge Node on %s (project: %s) with user %s and password %s",
+		cfg.OrchFQDN, cfg.Project, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
+
+	apiToken, err := ensim_kc.GetKeycloakToken(
+		ctx,
+		cfg.CertCA,
+		cfg.OrchFQDN,
+		cfg.EdgeAPIUser,
+		cfg.EdgeAPIPass,
+		defs.OrchKcClientID,
+	)
+	if err != nil {
+		return err
+	}
+
+	httpClient, err := utils.GetClientWithCA(cfg.CertCA)
+	if err != nil {
+		return err
+	}
+
+	apiBaseURLTemplate := "https://api.%s/v1/projects/%s"
+	baseProjAPIURL := fmt.Sprintf(apiBaseURLTemplate, cfg.OrchFQDN, cfg.Project)
+	hostRegURL := baseProjAPIURL + "/compute/hosts/register"
+	hostURL := baseProjAPIURL + "/compute/hosts"
+	instanceURL := baseProjAPIURL + "/compute/instances"
+	osURL := baseProjAPIURL + "/compute/os"
+
+	enUUID, err := uuid.Parse(cfg.ENGUID)
+	if err != nil {
+		return fmt.Errorf("error parsing edge node UUID: %w", err)
+	}
+
+	_, err = HTTPInfraOnboardNewRegisterHost(hostRegURL, apiToken, httpClient, enUUID, true)
+	if err != nil {
+		return fmt.Errorf("error registering edge node: %w", err)
+	}
+
+	hostID, err := HTTPInfraOnboardGetHostID(ctx, hostURL, apiToken, httpClient, cfg.ENGUID)
+	if err != nil {
+		return fmt.Errorf("error getting edge node resourceID: %w", err)
+	}
+
+	osID, err := HTTPInfraOnboardGetOSID(ctx, osURL, apiToken, httpClient)
+	if err != nil {
+		return fmt.Errorf("error getting OS Ubuntu resourceID: %w", err)
+	}
+
+	err = HTTPInfraOnboardNewInstance(instanceURL, apiToken, hostID, osID, httpClient)
+	if err != nil {
+		return fmt.Errorf("error provisioning edge node: %w", err)
+	}
+
+	zlog.Info().Msgf("Registered/Provisioned Edge Node on %s (project: %s) with user %s and password %s",
+		cfg.OrchFQDN, cfg.Project, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
 
 	return nil
 }

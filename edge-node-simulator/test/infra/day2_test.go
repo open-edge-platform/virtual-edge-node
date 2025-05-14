@@ -65,7 +65,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
 			By("setting all hosts OS with update sources / installed packages")
@@ -100,7 +100,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if site/hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
 			hosts, err := utils_test.ListHosts(ctx, infraAPIClient, nil)
@@ -136,7 +136,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if region/site/hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
 			hosts, err := utils_test.ListHosts(ctx, infraAPIClient, nil)
@@ -181,7 +181,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if region/region/site/hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
 			hosts, err := utils_test.ListHosts(ctx, infraAPIClient, nil)

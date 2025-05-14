@@ -14,8 +14,8 @@ import (
 )
 
 type Client interface {
-	Create(context.Context, string, *ensimapi.NodeCredentials, bool, bool) error
-	CreateNodes(context.Context, uint32, uint32, *ensimapi.NodeCredentials, bool, bool) error
+	Create(context.Context, string, *ensimapi.NodeCredentials, bool) error
+	CreateNodes(context.Context, uint32, uint32, *ensimapi.NodeCredentials, bool) error
 	DeleteNodes(context.Context, uint32) error
 	Update(context.Context, string, map[ensimapi.AgentType]ensimapi.AgentState) error
 	Get(context.Context, string) (*ensimapi.Node, error)
@@ -53,10 +53,10 @@ func (c *ifmsimClient) Create(
 	ctx context.Context,
 	enUUID string,
 	enCredentials *ensimapi.NodeCredentials,
-	enNIO, enTeardown bool,
+	enTeardown bool,
 ) error {
 	zlog.Info().Msg("Create")
-	req := &ensimapi.CreateNodeRequest{Uuid: enUUID, Credentials: enCredentials, EnableNio: enNIO, EnableTeardown: enTeardown}
+	req := &ensimapi.CreateNodeRequest{Uuid: enUUID, Credentials: enCredentials, EnableTeardown: enTeardown}
 	_, err := c.client.CreateNode(ctx, req)
 	if err != nil {
 		zlog.Error().Err(err).Msgf("failed to create node %s", enUUID)
@@ -70,14 +70,13 @@ func (c *ifmsimClient) CreateNodes(
 	ctx context.Context,
 	number, batch uint32,
 	enCredentials *ensimapi.NodeCredentials,
-	enNIO, enTeardown bool,
+	enTeardown bool,
 ) error {
 	zlog.Info().Msg("CreateNodes")
 	req := &ensimapi.CreateNodesRequest{
 		Number:         number,
 		BatchSize:      batch,
 		Credentials:    enCredentials,
-		EnableNio:      enNIO,
 		EnableTeardown: enTeardown,
 	}
 	resp, err := c.client.CreateNodes(ctx, req)

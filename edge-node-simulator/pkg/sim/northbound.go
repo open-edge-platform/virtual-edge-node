@@ -71,7 +71,7 @@ func NewUUID(enUUID string) (string, error) {
 
 func (s *Server) buildENSettings(enUUID, enProject,
 	enUser, enPasswd, enAPIUser, enAPIPasswd string,
-	enableNIO, enableTeardown bool,
+	enableTeardown bool,
 ) (*defs.Settings, error) {
 	enUUID, err := NewUUID(enUUID)
 	if err != nil {
@@ -105,8 +105,6 @@ func (s *Server) buildENSettings(enUUID, enProject,
 		EdgeAPIUser:           enAPIUser,
 		EdgeAPIPass:           enAPIPasswd,
 		RunAgents:             true,
-		NIOnboard:             enableNIO,
-		SouthOnboard:          !enableNIO,
 		SetupTeardown:         enableTeardown,
 		Project:               enProject,
 		Org:                   "",
@@ -161,7 +159,6 @@ func (s *Server) CreateNodes(
 				req.GetCredentials().GetOnboardPassword(),
 				req.GetCredentials().GetApiUsername(),
 				req.GetCredentials().GetApiPassword(),
-				req.GetEnableNio(),
 				req.GetEnableTeardown(),
 			)
 			if errUUID != nil {
@@ -219,7 +216,6 @@ func (s *Server) CreateNode(
 		req.GetCredentials().GetOnboardPassword(),
 		req.GetCredentials().GetApiUsername(),
 		req.GetCredentials().GetApiPassword(),
-		req.GetEnableNio(),
 		req.GetEnableTeardown(),
 	)
 	if err != nil {
@@ -274,7 +270,6 @@ func enToProto(en *EdgeNode) *ensimapi.Node {
 		Uuid:         string(en.UUID),
 		Status:       enStatus,
 		AgentsStates: agents,
-		EnableNio:    en.cfg.NIOnboard,
 		Credentials: &ensimapi.NodeCredentials{
 			Project:         en.cfg.Project,
 			OnboardUsername: en.cfg.EdgeOnboardUser,
@@ -444,11 +439,11 @@ func (s *Server) DeleteNodes(
 
 func (s *Server) helperCreateNode(enUUID, enProject,
 	enUser, enPasswd, enAPIUser, enAPIPasswd string,
-	enableNIO, enableTeardown bool,
+	enableTeardown bool,
 ) (string, error) {
 	enCfg, err := s.buildENSettings(enUUID, enProject,
 		enUser, enPasswd, enAPIUser, enAPIPasswd,
-		enableNIO, enableTeardown,
+		enableTeardown,
 	)
 	if err != nil {
 		zlog.Error().Err(err).Msgf("failed to build edge node settings")

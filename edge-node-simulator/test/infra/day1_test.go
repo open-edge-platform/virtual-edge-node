@@ -65,7 +65,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			"and Infrastructure Manager simulator", func(ctx SpecContext) {
 			By("checking all hosts in running status in Infrastructure Manager REST API")
 			time.Sleep(waitHostsRunning)
-			err := InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
 			By("should be able to list edge nodes state/status ok from Infrastructure Manager simulator")
@@ -95,7 +95,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			"Infrastructure Manager REST API and Infrastructure Manager simulator", func(ctx SpecContext) {
 			By("checking all hosts in running status")
 			time.Sleep(waitUntilHostsRunning)
-			err := InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 			By("should be able to list edge nodes state/status ok from Infrastructure Manager simulator")
 			listNodes, err := ensimClient.List(ctx)
@@ -150,10 +150,10 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 
 			By("checking waiting all hosts in no connection status")
 			time.Sleep(waitHostsConnectionLost)
-			err = InfraAPICheckHosts(ctx, infraAPIClient, &filterNoConnection, cfg.AmountEdgeNodes)
+			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterNoConnection, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
-			err = InfraAPICheckInstances(ctx, infraAPIClient, &filterInstanceStatusError, cfg.AmountEdgeNodes)
+			err = utils_test.InfraAPICheckInstances(ctx, infraAPIClient, &filterInstanceStatusError, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
 			By("turning on all agents in all edge nodes")
@@ -196,7 +196,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 
 			By("listing all hosts exist in running status")
 			time.Sleep(waitHostsRunning)
-			err = InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 		})
 	})

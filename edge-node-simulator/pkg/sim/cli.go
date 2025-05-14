@@ -199,12 +199,6 @@ func (c *Cli) PromptNodeCreate(_ interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	labelNIO := fmt.Sprintf("Create Node - enable NIO (default: %v)", c.cfg.EnableNIO)
-	nodeNIO, err := c.runConfirmPrompt(labelNIO, "N")
-	if err != nil {
-		zlog.Error().Err(err).Msg("Prompt failed.")
-		return nil, err
-	}
 	labelTeardown := fmt.Sprintf("Create Node - enable Teardown (default: %v)", c.cfg.EnableTeardown)
 	nodeTeardown, err := c.runConfirmPrompt(labelTeardown, "y")
 	if err != nil {
@@ -212,7 +206,7 @@ func (c *Cli) PromptNodeCreate(_ interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	err = c.client.Create(c.ctx, nodeUUID, enCredentials, nodeNIO, nodeTeardown)
+	err = c.client.Create(c.ctx, nodeUUID, enCredentials, nodeTeardown)
 	if err != nil {
 		zlog.Fatal().Err(err).Msg("failed to create Node")
 	}
@@ -447,12 +441,6 @@ func (c *Cli) PromptNodeCreateMany(_ interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	labelNIO := fmt.Sprintf("Create Node - enable NIO (default: %v)", c.cfg.EnableNIO)
-	nodeNIO, err := c.runConfirmPrompt(labelNIO, "N")
-	if err != nil {
-		zlog.Error().Err(err).Msg("Prompt failed.")
-		return nil, err
-	}
 	labelTeardown := fmt.Sprintf("Create Node - enable Teardown (default: %v)", c.cfg.EnableTeardown)
 	nodeTeardown, err := c.runConfirmPrompt(labelTeardown, "y")
 	if err != nil {
@@ -466,7 +454,7 @@ func (c *Cli) PromptNodeCreateMany(_ interface{}) (interface{}, error) {
 		return nil, err
 	}
 	if ack {
-		err = c.client.CreateNodes(c.ctx, unumber, ubatch, enCredentials, nodeNIO, nodeTeardown)
+		err = c.client.CreateNodes(c.ctx, unumber, ubatch, enCredentials, nodeTeardown)
 		if err != nil {
 			return nil, err
 		}

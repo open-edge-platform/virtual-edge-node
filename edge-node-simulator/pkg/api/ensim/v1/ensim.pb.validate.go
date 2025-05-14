@@ -475,8 +475,6 @@ func (m *Node) validate(all bool) error {
 
 	}
 
-	// no validation rules for EnableNio
-
 	// no validation rules for EnableTeardown
 
 	if len(errors) > 0 {
@@ -608,8 +606,6 @@ func (m *CreateNodeRequest) validate(all bool) error {
 			}
 		}
 	}
-
-	// no validation rules for EnableNio
 
 	// no validation rules for EnableTeardown
 
@@ -849,8 +845,6 @@ func (m *CreateNodesRequest) validate(all bool) error {
 			}
 		}
 	}
-
-	// no validation rules for EnableNio
 
 	// no validation rules for EnableTeardown
 

@@ -6,7 +6,6 @@ package infra_test
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
@@ -32,7 +31,7 @@ var (
 )
 
 var (
-	waitUntilHostsRunning   = time.Second * 2
+	waitUntilHostsRunning   = time.Second * 5
 	waitHostsRunning        = time.Minute * 5
 	waitHostsConnectionLost = time.Minute * 5
 	waitHostsMaintenance    = time.Minute * 1
@@ -60,7 +59,7 @@ func GenerateUUIDs(cfg *flags_test.TestConfig) []string {
 
 func GetInfraAPIClient(ctx context.Context, cfg *flags_test.TestConfig) (*api.ClientWithResponses, error) {
 	// Set the environment variables - projectID
-	os.Setenv(utils.ProjectIDEnvVar, cfg.Project)
+	os.Setenv(utils.ProjectIDEnvVar, cfg.ProjectID)
 
 	certCA, err := utils_test.LoadFile(cfg.CAPath)
 	if err != nil {
@@ -90,52 +89,6 @@ func GetENSimClient(ctx context.Context, cfg *flags_test.TestConfig) (ensim.Clie
 	return simClient, err
 }
 
-func InfraAPICheckHosts(ctx context.Context,
-	apiClient *api.ClientWithResponses,
-	filter *string,
-	amount int,
-) error {
-	resList, err := apiClient.GetComputeHostsWithResponse(
-		ctx,
-		&api.GetComputeHostsParams{
-			Filter: filter,
-		},
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
-
-	if http.StatusOK != resList.StatusCode() {
-		return err
-	}
-	if amount != *resList.JSON200.TotalElements {
-		return err
-	}
-	return nil
-}
-
-func InfraAPICheckInstances(ctx context.Context,
-	apiClient *api.ClientWithResponses,
-	filter *string,
-	amount int,
-) error {
-	resList, err := apiClient.GetInstancesWithResponse(
-		ctx,
-		&api.GetInstancesParams{
-			Filter: filter,
-		},
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
-
-	if http.StatusOK != resList.StatusCode() {
-		return err
-	}
-	if amount != *resList.JSON200.TotalElements {
-		return err
-	}
-	return nil
-}
-
 func ENSIMCheckNodes(ctx context.Context, simClient ensim.Client, amount int) error {
 	listNodes, err := simClient.List(ctx)
 	if amount != len(listNodes) {
@@ -158,49 +111,9 @@ func ENSIMCreateNodes(ctx context.Context,
 	}
 	for _, enUUID := range enUUIDs {
 		zlog.Info().Msgf("Creating node %v", enUUID)
-		err := simClient.Create(ctx, enUUID, enCredentals, false, true)
+		err := simClient.Create(ctx, enUUID, enCredentals, true)
 		if err != nil {
 			return err
-		}
-	}
-	return nil
-}
-
-func InfrastructureManagerAPIRegisterHosts(ctx context.Context,
-	apiClient *api.ClientWithResponses,
-	cfg *flags_test.TestConfig,
-	enUUIDs []string,
-) error {
-	for i := 0; i < cfg.AmountEdgeNodes; i++ {
-		enUUID := enUUIDs[i]
-		enSerial := enUUID[:8]
-		enName := "TestHost"
-
-		hostUUID, err := uuid.Parse(enUUID)
-		if err != nil {
-			return err
-		}
-
-		// Register Hosts
-		AutoOnboardTrue := true
-		hostRegisterReq := api.HostRegisterInfo{
-			Name:         &enName,
-			Uuid:         &hostUUID,
-			SerialNumber: &enSerial,
-			AutoOnboard:  &AutoOnboardTrue,
-		}
-		zlog.Info().Msgf("Registering node %v", enUUID)
-		hostRegister, err := apiClient.PostComputeHostsRegisterWithResponse(
-			ctx,
-			hostRegisterReq,
-			utils.AddJWTtoTheHeader,
-			utils.AddProjectIDtoTheHeader,
-		)
-		if err != nil {
-			return err
-		}
-		if http.StatusCreated != hostRegister.StatusCode() {
-			return fmt.Errorf("failed to register host %v", enUUID)
 		}
 	}
 	return nil
