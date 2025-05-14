@@ -24,7 +24,7 @@ require (
 	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0
 	github.com/open-edge-platform/orch-library/go v0.5.29
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/oauth2 v0.28.0
+	golang.org/x/oauth2 v0.30.0
 	golang.org/x/term v0.32.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250313205543-e70fdf4c4cb4
 	google.golang.org/grpc v1.72.0
