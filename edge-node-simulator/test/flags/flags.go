@@ -21,6 +21,7 @@ type TestConfig struct {
 	ENSimAddress        string
 	InfraRESTAPIAddress string
 	Project             string
+	ProjectID           string
 	AmountEdgeNodes     int
 	DeployEdgeNodes     bool
 	CreateOrgProject    bool
@@ -38,6 +39,7 @@ func GetDefaultConfig() *TestConfig {
 		ENSimAddress:        "localhost:5001",
 		InfraRESTAPIAddress: "http://127.0.0.1:8080/edge-infra.orchestrator.apis/v1",
 		Project:             "",
+		ProjectID:           "",
 		AmountEdgeNodes:     1,
 		DeployEdgeNodes:     false,
 		CreateOrgProject:    false,
@@ -93,6 +95,11 @@ var (
 		defaultCfg.Project, "The project name",
 	)
 
+	projectID = flag.String(
+		"projectID",
+		defaultCfg.Project, "The project ID",
+	)
+
 	amountEdgeNodes = flag.Int(
 		"amountEdgeNodes",
 		defaultCfg.AmountEdgeNodes, "The amount of edge nodes to be used in the tests",
@@ -127,6 +134,7 @@ func GetConfig() *TestConfig {
 		ENSimAddress:        *simAddress,
 		CAPath:              *caPath,
 		Project:             *project,
+		ProjectID:           *projectID,
 		AmountEdgeNodes:     *amountEdgeNodes,
 		DeployEdgeNodes:     *deployEdgeNodes,
 		CreateOrgProject:    *createOrgProject,

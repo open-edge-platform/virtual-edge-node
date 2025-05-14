@@ -93,7 +93,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			time.Sleep(waitUntilHostsRunning)
 
 			By("checking all hosts in running status from Infrastructure Manager REST API")
-			err = InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
 			Expect(err).To(BeNil())
 
 			By("checking all hosts status from Infrastructure Manager REST API")
@@ -111,7 +111,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			Expect(len(listNodes)).To(Equal(0))
 
 			By("checking no hosts exist in Infrastructure Manager REST API")
-			err = InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, 0)
+			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, 0)
 			Expect(err).To(BeNil())
 		})
 	})
