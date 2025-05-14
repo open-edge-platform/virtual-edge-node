@@ -22,7 +22,10 @@ const (
 	statusChanSize = 10
 )
 
-var onboardTimeout = 120 * time.Second
+var (
+	onboardTimeout    = 120 * time.Second
+	waitProvisionDone = 5 * time.Second
+)
 
 // UUID is an alias for string subscription UUID.
 type UUID string
@@ -253,6 +256,7 @@ func (en *EdgeNode) Start() error {
 		zlog.Error().Err(err).Msg("failed to start onboard/provision")
 		return err
 	}
+	time.Sleep(waitProvisionDone)
 	err = en.startAgents()
 	if err != nil {
 		zlog.Error().Err(err).Msg("failed to start agents")
