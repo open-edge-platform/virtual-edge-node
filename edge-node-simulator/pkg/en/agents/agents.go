@@ -27,8 +27,9 @@ import (
 var zlog = logging.GetLogger("agents")
 
 const (
-	backoffRetries  = 3
-	backoffInterval = time.Second * 10
+	backoffRetries      = 3
+	backoffInterval     = time.Second * 10
+	backoffIntervalInit = time.Second * 2 // Sets agents initialization backoff interval to 2 seconds
 )
 
 var (
@@ -775,9 +776,11 @@ func (a *Agents) setupAgent(agentType AgentType, agentInterval time.Duration, ag
 	go func() {
 		defer a.wg.Done()
 		zlog.Info().Msgf("Agent %s - Setup routine to InfrastructureManager: UUID %s", agentType, a.cfg.ENGUID)
-		err := agentUpdateFunc()
-		if err != nil {
-			zlog.Warn().Err(err).Msgf("Agent %s - failed to setup initial state: UUID %s", agentType, a.cfg.ENGUID)
+
+		initRetryErr := backoff.Retry(agentUpdateFunc,
+			backoff.WithMaxRetries(backoff.NewConstantBackOff(backoffIntervalInit), backoffRetries))
+		if initRetryErr != nil {
+			zlog.Warn().Err(initRetryErr).Msgf("Agent %s - failed to setup initial state: UUID %s", agentType, a.cfg.ENGUID)
 		}
 		tickerInterval := time.NewTicker(agentInterval)
 		defer tickerInterval.Stop()
