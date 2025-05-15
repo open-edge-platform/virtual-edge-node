@@ -20,7 +20,7 @@ WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-contai
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
 
-FROM debian:12.9-slim
+FROM debian:12.10-slim
 
 ARG REPO_URL
 ARG VERSION
