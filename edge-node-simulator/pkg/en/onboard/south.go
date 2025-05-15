@@ -23,10 +23,10 @@ var (
 	kcTimeout     = 60 * time.Second
 )
 
-// Defines constants for NIO - it will repeat at a max of 100 times with a backoff interval of 10 seconds.
+// Defines constants for NIO - it will repeat at a max of 10 times with a backoff interval of 10 seconds.
 const (
 	backoffInterval = 10 * time.Second
-	backoffRetries  = 100
+	backoffRetries  = 10
 )
 
 // receiveFromStream receive a message from the stream.
