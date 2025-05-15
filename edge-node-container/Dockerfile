@@ -38,7 +38,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     debian-archive-keyring dialog dmidecode gpg incron intel-gpu-tools\
     ipmitool iptables jq libcap2-bin libpq5 libyaml-0-2 lsb-release lshw \
     lxc needrestart net-tools nginx pciutils unzip rasdaemon smartmontools \
-    sudo systemd udev ufw usbutils uuid-runtime wget rsyslog clevis-initramfs \
+    sudo systemd systemd-sysv udev ufw usbutils uuid-runtime wget rsyslog clevis-initramfs \
     console-setup console-setup-linux cpio cryptsetup cryptsetup-bin \
     cryptsetup-initramfs initramfs-tools initramfs-tools-core \
     kbd keyboard-configuration klibc-utils kmod libcjson1 libdlt2 libev4 libklibc \
@@ -108,4 +108,5 @@ RUN systemctl disable ufw && \
 ENV PATH="${PATH}:/opt/enic/bin"
 
 COPY ./entrypoint.sh ./entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
+# ENTRYPOINT ["./entrypoint.sh"]
+CMD ["/sbin/init"]
