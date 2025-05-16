@@ -22,7 +22,7 @@ RUN apk add --no-cache make=4.4.1-r2
 WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-simulator
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
-FROM alpine:3.21
+FROM alpine:3.21@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
 
 ARG REPO_URL
 ARG VERSION

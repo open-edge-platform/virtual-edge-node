@@ -13,6 +13,8 @@ on:
       - 'edge-node-simulator/**'
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   post-merge-pipeline:
     permissions:
