@@ -1,5 +1,10 @@
 # Virtual Edge Node
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
+ [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/virtual-edge-node/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/virtual-edge-node)
+
 ## Overview
 
 The Virtual Edge Node (VEN) is designed to streamline the onboarding and provisioning of virtual machines, as well as
