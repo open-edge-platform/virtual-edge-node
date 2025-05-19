@@ -13,6 +13,8 @@ on:
       - main
       - release-*
 
+permissions: {}
+
 jobs:
   Auto-Update-PR:
     runs-on: ubuntu-latest

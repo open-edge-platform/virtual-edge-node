@@ -13,12 +13,14 @@ on:
       - 'vm-provisioning/**'
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   post-merge-pipeline:
     permissions:
       contents: read
       deployments: write
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@0.1.8
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@31986a986cab0a87721ecb694388029e94e55ff7 # v0.1.8
     with:
       run_version_check: true
       run_dep_version_check: true
