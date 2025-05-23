@@ -21,7 +21,7 @@ jobs:
       contents: read
       security-events: write
       id-token: write
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@@31986a986cab0a87721ecb694388029e94e55ff7 # v0.1.8
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@f341738d975c38b2b91f25d405baeb2d39bf2ddb # v0.1.14
     with:
       run_version_check: true
       run_dep_version_check: true
@@ -34,4 +34,9 @@ jobs:
       run_artifact: false
       prefix_tag_separator: "/"
       project_folder: "edge-node-simulator"
-    secrets: inherit
+    secrets:
+      SYS_ORCH_GITHUB: ${{ secrets.SYS_ORCH_GITHUB }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
+      NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
