@@ -38,9 +38,10 @@ jobs:
         uses: open-edge-platform/orch-ci/discover-changed-subfolders@31986a986cab0a87721ecb694388029e94e55ff7 # v0.1.8
       - name: "Filter Out Unwanted Changed Subfolders"
         id: filter-changes
+        env:
+          changed_projects: ${{ steps.discover-changes.outputs.changed_projects }}
         run: |
           folders_to_remove='[".github",".reuse","LICENSES",".git","tools",""]'
-          changed_projects='${{ steps.discover-changes.outputs.changed_projects }}'
           filtered_projects=$(echo "$changed_projects" | jq -cr --argjson folders_to_remove "$folders_to_remove" 'map(select(. as $item | $folders_to_remove | index($item) | not))')
           other_changed_projects=$(echo "$changed_projects" | jq -cr --argjson filtered_projects "$filtered_projects" 'map(select(. as $item | $filtered_projects | index($item) | not))')
           echo "filtered_projects=$filtered_projects" >> $GITHUB_OUTPUT
@@ -94,7 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@31986a986cab0a87721ecb694388029e94e55ff7 # v0.1.8
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@f341738d975c38b2b91f25d405baeb2d39bf2ddb # v0.1.14
     permissions:
       contents: read
       pull-requests: write
@@ -112,7 +113,9 @@ jobs:
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       trivy_config_path: '${{ matrix.project_folder }}/trivy.yaml'
-    secrets: inherit
+    secrets:
+      NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
+      NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
   final-check:
     runs-on: ubuntu-latest
     permissions:
@@ -122,10 +125,10 @@ jobs:
     needs: [pre-merge-root, pre-merge-pipeline]
     steps:
       - name: Final Status Check
+        env:
+          pre_merge_root_pipeline: ${{ needs.pre-merge-root.result }}
+          pre_merge_pipeline: ${{ needs.pre-merge-pipeline.result }}
         run: |
-          pre_merge_root_pipeline="${{ needs.pre-merge-root.result }}"
-          pre_merge_pipeline="${{ needs.pre-merge-pipeline.result }}"
-
           results=("pre_merge_root_pipeline" "pre_merge_pipeline")
           status="OK"
         
