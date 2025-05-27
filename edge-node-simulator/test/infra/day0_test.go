@@ -193,5 +193,4 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			Expect(err).To(BeNil())
 		})
 	})
-
 })
