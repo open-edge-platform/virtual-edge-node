@@ -55,7 +55,6 @@ function delete_host() {
     index_len=$((index_len - 1))
 
     host_id=""
-    status=""
     instance_id=""
 
     for i in $(seq 0 $index_len); do
