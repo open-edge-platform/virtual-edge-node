@@ -3,7 +3,6 @@
 
 *.swp
 venv*
-.github/*
 out/*
 .vscode
 .DS_Store
