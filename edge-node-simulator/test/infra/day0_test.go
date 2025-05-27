@@ -115,4 +115,83 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			Expect(err).To(BeNil())
 		})
 	})
+	Describe("day0 - Non Interactive Onboarding (NIO) - onboard only", Label(day0CreateLabel), func() {
+		BeforeEach(func() {
+			cfg.Cleanup = false
+		})
+		It("should onboard edge nodes and verify they are up", func(ctx SpecContext) {
+			By("creating edge nodes in Infrastructure Manager simulator")
+			enCredentals := &ensimapi.NodeCredentials{
+				Project:         cfg.Project,
+				OnboardUsername: cfg.EdgeOnboardUser,
+				OnboardPassword: cfg.EdgeOnboardPass,
+				ApiUsername:     cfg.EdgeAPIUser,
+				ApiPassword:     cfg.EdgeAPIPass,
+			}
+			for _, enUUID := range enUUIDs {
+				zlog.Info().Msgf("Creating node %v", enUUID)
+				errCreate := ensimClient.Create(ctx, enUUID, enCredentals, true)
+				Expect(errCreate).To(BeNil())
+			}
+
+			By("checking edge nodes state/status ok from Infrastructure Manager simulator")
+			listNodes, err := ensimClient.List(ctx)
+			Expect(err).To(BeNil())
+			Expect(len(listNodes)).To(Equal(cfg.AmountEdgeNodes))
+
+			for _, simNode := range listNodes {
+				for _, state := range simNode.AgentsStates {
+					Expect(state.CurrentState).To(Equal(ensimapi.AgentState_AGENT_STATE_ON))
+					Expect(state.DesiredState).To(Equal(ensimapi.AgentState_AGENT_STATE_ON))
+				}
+				for _, status := range simNode.Status {
+					Expect(status.GetMode().String()).To(Equal(ensimapi.StatusMode_STATUS_MODE_OK.String()))
+				}
+			}
+
+			By("checking all hosts in running status from Infrastructure Manager REST API")
+			time.Sleep(waitUntilHostsRunning)
+			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			Expect(err).To(BeNil())
+		})
+	})
+	Describe("day0 - Non Interactive Onboarding (NIO) - delete only", Label(day0DeleteLabel), func() {
+		BeforeEach(func() {
+			cfg.Cleanup = true
+		})
+		It("should verify existing edge nodes are up and remove them", func(ctx SpecContext) {
+			By("checking edge nodes state/status ok from Infrastructure Manager simulator")
+			listNodes, err := ensimClient.List(ctx)
+			Expect(err).To(BeNil())
+			Expect(len(listNodes)).To(Equal(cfg.AmountEdgeNodes))
+
+			for _, simNode := range listNodes {
+				for _, state := range simNode.AgentsStates {
+					Expect(state.CurrentState).To(Equal(ensimapi.AgentState_AGENT_STATE_ON))
+					Expect(state.DesiredState).To(Equal(ensimapi.AgentState_AGENT_STATE_ON))
+				}
+				for _, status := range simNode.Status {
+					Expect(status.GetMode().String()).To(Equal(ensimapi.StatusMode_STATUS_MODE_OK.String()))
+				}
+			}
+
+			By("checking all hosts in running status from Infrastructure Manager REST API")
+			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			Expect(err).To(BeNil())
+
+			By("deleting all edge nodes from Infrastructure Manager simulator")
+			err = ensimClient.DeleteNodes(ctx, 0)
+			Expect(err).To(BeNil())
+
+			By("checking no edge nodes exist in Infrastructure Manager simulator")
+			listNodes, err = ensimClient.List(ctx)
+			Expect(err).To(BeNil())
+			Expect(len(listNodes)).To(Equal(0))
+
+			By("checking no hosts exist in Infrastructure Manager REST API")
+			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, 0)
+			Expect(err).To(BeNil())
+		})
+	})
+
 })
