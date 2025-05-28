@@ -158,6 +158,9 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 	})
 	Describe("day0 - Non Interactive Onboarding (NIO) - delete only", Label(day0DeleteLabel), func() {
 		It("should verify existing edge nodes are up and remove them", func(ctx SpecContext) {
+			BeforeEach(func() {
+				cfg.Cleanup = false
+			})
 			By("checking edge nodes state/status ok from Infrastructure Manager simulator")
 			listNodes, err := ensimClient.List(ctx)
 			Expect(err).To(BeNil())
