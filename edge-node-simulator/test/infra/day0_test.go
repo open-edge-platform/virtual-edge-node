@@ -29,6 +29,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 		cfg = flags_test.GetConfig()
 		Expect(cfg).NotTo(BeNil())
 	})
+
 	JustBeforeEach(func() {
 		enUUIDs = GenerateUUIDs(cfg)
 		Expect(enUUIDs).NotTo(BeNil())
@@ -117,9 +118,6 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 		})
 	})
 	Describe("day0 - Non Interactive Onboarding (NIO) - onboard only", Label(day0CreateLabel), func() {
-		BeforeEach(func() {
-			cfg.Cleanup = false
-		})
 		It("should onboard edge nodes and verify they are up", func(ctx SpecContext) {
 			By("creating edge nodes in Infrastructure Manager simulator")
 			enCredentals := &ensimapi.NodeCredentials{
