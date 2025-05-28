@@ -28,7 +28,8 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 	BeforeEach(func() {
 		cfg = flags_test.GetConfig()
 		Expect(cfg).NotTo(BeNil())
-
+	})
+	JustBeforeEach(func() {
 		enUUIDs = GenerateUUIDs(cfg)
 		Expect(enUUIDs).NotTo(BeNil())
 
@@ -156,9 +157,6 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 		})
 	})
 	Describe("day0 - Non Interactive Onboarding (NIO) - delete only", Label(day0DeleteLabel), func() {
-		BeforeEach(func() {
-			cfg.Cleanup = true
-		})
 		It("should verify existing edge nodes are up and remove them", func(ctx SpecContext) {
 			By("checking edge nodes state/status ok from Infrastructure Manager simulator")
 			listNodes, err := ensimClient.List(ctx)
@@ -171,6 +169,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 					Expect(state.DesiredState).To(Equal(ensimapi.AgentState_AGENT_STATE_ON))
 				}
 				for _, status := range simNode.Status {
+					time.Sleep(30 * time.Second)
 					Expect(status.GetMode().String()).To(Equal(ensimapi.StatusMode_STATUS_MODE_OK.String()))
 				}
 			}
