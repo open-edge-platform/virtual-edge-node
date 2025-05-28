@@ -163,6 +163,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			listNodes, err := ensimClient.List(ctx)
 			Expect(err).To(BeNil())
 			Expect(len(listNodes)).To(Equal(cfg.AmountEdgeNodes))
+			time.Sleep(waitUntilStatusAvailable)
 
 			for _, simNode := range listNodes {
 				for _, state := range simNode.AgentsStates {
@@ -170,7 +171,6 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 					Expect(state.DesiredState).To(Equal(ensimapi.AgentState_AGENT_STATE_ON))
 				}
 				for _, status := range simNode.Status {
-					time.Sleep(5 * time.Second)
 					Expect(status.GetMode().String()).To(Equal(ensimapi.StatusMode_STATUS_MODE_OK.String()))
 				}
 			}

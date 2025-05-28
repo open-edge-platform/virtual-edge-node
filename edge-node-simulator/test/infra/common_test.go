@@ -33,10 +33,11 @@ var (
 )
 
 var (
-	waitUntilHostsRunning   = time.Second * 5
-	waitHostsRunning        = time.Minute * 5
-	waitHostsConnectionLost = time.Minute * 5
-	waitHostsMaintenance    = time.Minute * 1
+	waitUntilHostsRunning    = time.Second * 5
+	waitHostsRunning         = time.Minute * 5
+	waitHostsConnectionLost  = time.Minute * 5
+	waitHostsMaintenance     = time.Minute * 1
+	waitUntilStatusAvailable = time.Second * 10
 
 	TimeNow       = int(time.Now().UTC().Unix())
 	SafeTimeDelay = 600
