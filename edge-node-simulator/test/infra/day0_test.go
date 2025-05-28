@@ -170,6 +170,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 					Expect(state.DesiredState).To(Equal(ensimapi.AgentState_AGENT_STATE_ON))
 				}
 				for _, status := range simNode.Status {
+					time.Sleep(30 * time.Second)
 					Expect(status.GetMode().String()).To(Equal(ensimapi.StatusMode_STATUS_MODE_OK.String()))
 				}
 			}
