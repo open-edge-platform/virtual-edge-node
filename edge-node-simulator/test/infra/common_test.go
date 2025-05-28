@@ -27,8 +27,8 @@ var (
 	day2Label       = "infra-tests-day2"
 	day1Label       = "infra-tests-day1"
 	day0Label       = "infra-tests-day0"
-	day0CreateLabel = "infra-tests-day0-create"
-	day0DeleteLabel = "infra-tests-day0-delete"
+	day0CreateLabel = "infra-tests-custom-day0-create"
+	day0DeleteLabel = "infra-tests-custom-day0-delete"
 	cleanupLabel    = "cleanup"
 )
 
