@@ -13,10 +13,8 @@ export ORCH_TOKEN_URL=keycloak.${_ORCH_FQDN_}
 export RS_TOKEN_URL=release.${_ORCH_FQDN_}
 export RS_TYPE=no-auth
 export APT_SOURCE_URL=files-rs.edgeorchestration.intel.com
-export IMG_REGISTRY_URL=registry-rs.edgeorchestration.intel.com
 export APT_SOURCE_REPO_ROOT=files-edge-orch
 export APT_SOURCE_PROXY_PORT=60444
-export IMG_REGISTRY_PROXY_PORT=9443
 # Agents version
 export NODE_AGENT_VERSION=${_NODE_AGENT_VERSION_}
 export CLUSTER_AGENT_VERSION=${_CLUSTER_AGENT_VERSION_}
