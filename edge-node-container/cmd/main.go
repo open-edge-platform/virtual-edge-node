@@ -83,11 +83,6 @@ var (
 		defaultAPIUser,
 		"default API username of orch keycloak",
 	)
-	enableNIO = flag.Bool(
-		"enableNIO",
-		false,
-		"enables NIO in edge node",
-	)
 )
 
 func setOAM(oamServerAddr string, termChan, readyChan chan bool, wg *sync.WaitGroup) {
@@ -183,7 +178,6 @@ func getCfg() (*en_defs.Settings, error) {
 		BaseFolder:      *baseFolder,
 		MACAddress:      macAddress,
 		OamServerAddr:   *oamServerAddr,
-		NIOnboard:       *enableNIO,
 		ENiC:            true,
 	}
 	zlog.Info().Msgf("Init cfg: %v", cfg)
@@ -218,21 +212,13 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if cfg.NIOnboard {
-		err = ensim_onboard.SouthOnboardNIO(ctx, cfg)
-		if err != nil {
-			zlog.Error().Err(err).Msg("failed to onboard")
-			errFatal = err
-			return
-		}
-	} else {
-		err = ensim_onboard.SouthOnboard(ctx, cfg)
-		if err != nil {
-			zlog.Error().Err(err).Msg("failed to onboard")
-			errFatal = err
-			return
-		}
+	err = ensim_onboard.SouthOnboardNIO(ctx, cfg)
+	if err != nil {
+		zlog.Error().Err(err).Msg("failed to onboard")
+		errFatal = err
+		return
 	}
+
 	err = ensim_onboard.SouthProvision(ctx, cfg)
 	if err != nil {
 		zlog.Error().Err(err).Msg("failed to provision")

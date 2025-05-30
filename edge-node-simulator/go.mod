@@ -18,10 +18,10 @@ require (
 	github.com/onsi/gomega v1.36.3
 	github.com/open-edge-platform/infra-core/api v1.34.1-0.20250516161957-abc3d04b4692
 	github.com/open-edge-platform/infra-core/inventory/v2 v2.24.1-0.20250516161957-abc3d04b4692
-	github.com/open-edge-platform/infra-managers/host v1.21.0
-	github.com/open-edge-platform/infra-managers/maintenance v1.21.0
-	github.com/open-edge-platform/infra-managers/telemetry v1.21.0
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0
+	github.com/open-edge-platform/infra-managers/host v1.21.1
+	github.com/open-edge-platform/infra-managers/maintenance v1.21.1
+	github.com/open-edge-platform/infra-managers/telemetry v1.21.1
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.34.2
 	github.com/open-edge-platform/orch-library/go v0.6.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.30.0
