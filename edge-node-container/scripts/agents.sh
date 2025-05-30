@@ -192,8 +192,7 @@ function install-node-agent() {
   echo "node-agent node-agent/auth.RSType string ${RS_TYPE}" | debconf-set-selections
   echo "node-agent node-agent/proxy.aptSourceURL string ${APT_SOURCE_URL}" | debconf-set-selections
   echo "node-agent node-agent/proxy.aptSourceProxyPort string ${APT_SOURCE_PROXY_PORT}" | debconf-set-selections
-  echo "node-agent node-agent/proxy.imgRegistryURL string ${IMG_REGISTRY_URL}" | debconf-set-selections
-  echo "node-agent node-agent/proxy.imgRegistryProxyPort string ${IMG_REGISTRY_PROXY_PORT}" | debconf-set-selections
+  echo "node-agent node-agent/proxy.aptSourceFilesRSRoot string ${APT_SOURCE_REPO_ROOT}" | debconf-set-selections
   apt-get install -y -o Dpkg::Options::="--force-confnew" "/opt/bma_packages/node-agent_${NODE_AGENT_VERSION}_amd64.deb"
 }
 
@@ -338,21 +337,9 @@ function configure-node-agent() {
 
   echo "Wait for node agent and pua proxy to start"
   while true; do
-  http_status=$(curl -s -o /dev/null -w "%{http_code}" "https://localhost:${APT_SOURCE_PROXY_PORT}/${APT_SOURCE_REPO_ROOT}/edge-node.asc")
+  http_status=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${APT_SOURCE_PROXY_PORT}/${APT_SOURCE_REPO_ROOT}/edge-node.asc")
   if [ "$http_status" -eq 200 ]; then
     echo "PUA client proxy is active"
-    break
-  else
-    echo "HTTP status code is $http_status. Retrying in 5 seconds..."
-    sleep 5
-  fi
-  done
-
-  echo "Wait for node agent and containerd proxy to start"
-  while true; do
-  http_status=$(curl -s -o /dev/null -w "%{http_code}" "https://localhost:${IMG_REGISTRY_PROXY_PORT}")
-  if [ "$http_status" -eq 200 ]; then
-    echo "Containerd client proxy is active"
     break
   else
     echo "HTTP status code is $http_status. Retrying in 5 seconds..."
