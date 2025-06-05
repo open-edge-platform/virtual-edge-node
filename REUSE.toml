@@ -1,7 +1,7 @@
 version = 1
 
 [[annotations]]
-path = ["VERSION", ".tool-versions", "**.md", "vm-provisioning/**", "edge-node-container/**", "edge-node-simulator/**"]
+path = ["**/VERSION", ".tool-versions", "**.md", "vm-provisioning/**", "edge-node-container/**", "edge-node-simulator/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 Intel Corporation"
 SPDX-License-Identifier = "Apache-2.0"
