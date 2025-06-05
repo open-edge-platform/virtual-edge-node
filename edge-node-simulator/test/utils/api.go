@@ -14,13 +14,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+	"gotest.tools/assert"
+
 	edgeinfraapi "github.com/open-edge-platform/infra-core/apiv2/v2/pkg/api/v2"
 	host_status "github.com/open-edge-platform/infra-managers/host/pkg/status"
 	maint_status "github.com/open-edge-platform/infra-managers/maintenance/pkg/status"
 	onb_status "github.com/open-edge-platform/infra-onboarding/onboarding-manager/pkg/status"
 	flags_test "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/test/flags"
-	"github.com/stretchr/testify/require"
-	"gotest.tools/assert"
 )
 
 const (
@@ -513,8 +514,8 @@ func HelperCleanupLocationsAPI(_ context.Context, client *http.Client, cfg *flag
 	}
 	for regionID := range regionsList {
 		delRegionURL := fmt.Sprintf("%s/%s", regionsURL, regionID)
-		if err := DeleteResourceAPI(context.Background(), client, delRegionURL); err != nil {
-			return err
+		if errDel := DeleteResourceAPI(context.Background(), client, delRegionURL); errDel != nil {
+			return errDel
 		}
 	}
 
@@ -526,8 +527,8 @@ func HelperCleanupLocationsAPI(_ context.Context, client *http.Client, cfg *flag
 	}
 	for siteID := range sitesList {
 		delSiteURL := fmt.Sprintf("%s/%s", sitesURL, siteID)
-		if err := DeleteResourceAPI(context.Background(), client, delSiteURL); err != nil {
-			return err
+		if errDel := DeleteResourceAPI(context.Background(), client, delSiteURL); errDel != nil {
+			return errDel
 		}
 	}
 
@@ -544,8 +545,8 @@ func HelperCleanupSchedulesAPI(_ context.Context, client *http.Client, cfg *flag
 	}
 	for scheduleID := range singleSchedulesList {
 		delScheduleURL := fmt.Sprintf("%s/%s", singleSchedulesURL, scheduleID)
-		if err := DeleteResourceAPI(context.Background(), client, delScheduleURL); err != nil {
-			return err
+		if errDel := DeleteResourceAPI(context.Background(), client, delScheduleURL); errDel != nil {
+			return errDel
 		}
 	}
 
@@ -556,8 +557,8 @@ func HelperCleanupSchedulesAPI(_ context.Context, client *http.Client, cfg *flag
 	}
 	for scheduleID := range repeatedSchedulesList {
 		delScheduleURL := fmt.Sprintf("%s/%s", repeatedSchedulesURL, scheduleID)
-		if err := DeleteResourceAPI(context.Background(), client, delScheduleURL); err != nil {
-			return err
+		if errDel := DeleteResourceAPI(context.Background(), client, delScheduleURL); errDel != nil {
+			return errDel
 		}
 	}
 
@@ -730,7 +731,11 @@ func ListInstances(ctx context.Context, apiClient *http.Client, filter *string) 
 }
 
 // UpdateHostOS updates the OS of a host using PATCH request.
-func UpdateHostOS(ctx context.Context, tb testing.TB, apiClient *http.Client, hostID string, updateSources []string, installedPkgs string, kernelCmd string) {
+func UpdateHostOS(ctx context.Context, tb testing.TB,
+	apiClient *http.Client, hostID string,
+	updateSources []string,
+	installedPkgs, kernelCmd string,
+) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
 	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.OrchFQDN, cfg.Project)
@@ -774,7 +779,10 @@ func UpdateHostOS(ctx context.Context, tb testing.TB, apiClient *http.Client, ho
 		Sha256:            sha,
 		KernelCommand:     &kernelCmd,
 	}
-	osBodyBytes, _ := json.Marshal(osBody)
+	osBodyBytes, err := json.Marshal(osBody)
+	if err != nil {
+		tb.Fatalf("failed to marshall patch request: %v", err)
+	}
 	osURL := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/os/%s", cfg.OrchFQDN, cfg.Project, osID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, osURL, io.NopCloser(strings.NewReader(string(osBodyBytes))))
 	if err != nil {
@@ -802,16 +810,18 @@ func SetHostsSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Cli
 	cfg := flags_test.GetConfig()
 	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.OrchFQDN, cfg.Project)
 	for _, hostID := range hostIDs {
-		schedName := "schedSingle"
 		now := time.Now().Unix()
-		schedStart := int(now + 5) // DelayStart5
+		schedStart := int(now + DelayStart5) // DelayStart5
 		body := map[string]interface{}{
 			"name":           schedName,
 			"startSeconds":   schedStart,
 			"scheduleStatus": "OS_UPDATE",
 			"targetHostId":   hostID,
 		}
-		bodyBytes, _ := json.Marshal(body)
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			tb.Fatalf("failed to marshall schedule request: %v", err)
+		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, schedURL, io.NopCloser(strings.NewReader(string(bodyBytes))))
 		if err != nil {
 			tb.Fatalf("failed to create schedule request: %v", err)
@@ -841,14 +851,17 @@ func SetSitesSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Cli
 	for _, siteID := range siteIDs {
 		schedName := "schedSingle"
 		now := time.Now().Unix()
-		schedStart := int(now + 5)
+		schedStart := int(now + DelayStart5)
 		body := map[string]interface{}{
 			"name":           schedName,
 			"startSeconds":   schedStart,
 			"scheduleStatus": "OS_UPDATE",
 			"targetSiteId":   siteID,
 		}
-		bodyBytes, _ := json.Marshal(body)
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			tb.Fatalf("failed marshal: %v", err)
+		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, schedURL, io.NopCloser(strings.NewReader(string(bodyBytes))))
 		if err != nil {
 			tb.Fatalf("failed to create schedule request: %v", err)
@@ -878,14 +891,17 @@ func SetRegionSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Cl
 	for _, regionID := range regionIDs {
 		schedName := "schedSingle"
 		now := time.Now().Unix()
-		schedStart := int(now + 5)
+		schedStart := int(now + DelayStart5)
 		body := map[string]interface{}{
 			"name":           schedName,
 			"startSeconds":   schedStart,
 			"scheduleStatus": "OS_UPDATE",
 			"targetRegionId": regionID,
 		}
-		bodyBytes, _ := json.Marshal(body)
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			tb.Fatalf("failed to create schedule request: %v", err)
+		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, schedURL, io.NopCloser(strings.NewReader(string(bodyBytes))))
 		if err != nil {
 			tb.Fatalf("failed to create schedule request: %v", err)
@@ -1004,8 +1020,13 @@ func ConfigureHostsbyID(ctx context.Context, apiClient *http.Client, hostIDs []s
 		body := edgeinfraapi.HostResource{
 			SiteId: &siteID, // Assign the site by setting SiteId
 		}
-		bodyBytes, _ := json.Marshal(body)
-		req, err := http.NewRequestWithContext(ctx, http.MethodPatch, patchURL, io.NopCloser(strings.NewReader(string(bodyBytes))))
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodPatch, patchURL,
+			io.NopCloser(strings.NewReader(string(bodyBytes))))
 		if err != nil {
 			return err
 		}
@@ -1040,8 +1061,13 @@ func UnconfigureAllHosts(ctx context.Context, apiClient *http.Client) error {
 		body := edgeinfraapi.HostResource{
 			SiteId: nil, // Unassign the site by setting SiteId to nil
 		}
-		bodyBytes, _ := json.Marshal(body)
-		req, err := http.NewRequestWithContext(ctx, http.MethodPatch, patchURL, io.NopCloser(strings.NewReader(string(bodyBytes))))
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodPatch, patchURL,
+			io.NopCloser(strings.NewReader(string(bodyBytes))))
 		if err != nil {
 			return err
 		}
@@ -1064,12 +1090,20 @@ func UnconfigureAllHosts(ctx context.Context, apiClient *http.Client) error {
 }
 
 // CreateRegionAPI creates a new region in the Infrastructure Manager.
-func CreateRegionAPI(ctx context.Context, apiClient *http.Client, cfg *flags_test.TestConfig, body *edgeinfraapi.RegionResource) (string, error) {
+func CreateRegionAPI(ctx context.Context,
+	apiClient *http.Client,
+	cfg *flags_test.TestConfig,
+	body *edgeinfraapi.RegionResource,
+) (string, error) {
 	zlog.Info().Msg("CreateRegionAPI")
 	regionURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions", cfg.OrchFQDN, cfg.Project)
 
-	bodyBytes, _ := json.Marshal(body)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, regionURL, io.NopCloser(strings.NewReader(string(bodyBytes))))
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, regionURL,
+		io.NopCloser(strings.NewReader(string(bodyBytes))))
 	if err != nil {
 		return "", err
 	}
@@ -1093,29 +1127,37 @@ func CreateRegionAPI(ctx context.Context, apiClient *http.Client, cfg *flags_tes
 	// Extract the region ID from the response
 	var regionID string
 	if responseHooker := func(res *http.Response) error {
-		b, err := io.ReadAll(res.Body)
-		if err != nil {
-			return err
+		b, errRes := io.ReadAll(res.Body)
+		if errRes != nil {
+			return errRes
 		}
 		ps := &edgeinfraapi.CreateRegionResponse{}
-		err = json.Unmarshal(b, &ps)
-		if err != nil {
-			return err
+		errMarsh := json.Unmarshal(b, &ps)
+		if errMarsh != nil {
+			return errMarsh
 		}
 		regionID = *ps.Region.ResourceId
 		return nil
 	}; responseHooker(resp) != nil {
-		return "", fmt.Errorf("failed to parse response: %v", err)
+		return "", fmt.Errorf("failed to parse response: %w", err)
 	}
 	return regionID, nil
 }
 
 // CreateSiteAPI creates a new site in the Infrastructure Manager.
-func CreateSiteAPI(ctx context.Context, apiClient *http.Client, cfg *flags_test.TestConfig, body *edgeinfraapi.SiteResource) (string, error) {
+func CreateSiteAPI(ctx context.Context,
+	apiClient *http.Client,
+	cfg *flags_test.TestConfig,
+	body *edgeinfraapi.SiteResource,
+) (string, error) {
 	zlog.Info().Msg("CreateSiteAPI")
 	siteURL := fmt.Sprintf("https://api.%s/v1/projects/%s/sites", cfg.OrchFQDN, cfg.Project)
 
-	bodyBytes, _ := json.Marshal(body)
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return "", err
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, siteURL, io.NopCloser(strings.NewReader(string(bodyBytes))))
 	if err != nil {
 		return "", err
@@ -1140,19 +1182,19 @@ func CreateSiteAPI(ctx context.Context, apiClient *http.Client, cfg *flags_test.
 	// Extract the site ID from the response
 	var siteID string
 	if responseHooker := func(res *http.Response) error {
-		b, err := io.ReadAll(res.Body)
-		if err != nil {
-			return err
+		b, errRead := io.ReadAll(res.Body)
+		if errRead != nil {
+			return errRead
 		}
 		ps := &edgeinfraapi.CreateSiteResponse{}
-		err = json.Unmarshal(b, &ps)
-		if err != nil {
-			return err
+		errMarsh := json.Unmarshal(b, &ps)
+		if errMarsh != nil {
+			return errMarsh
 		}
 		siteID = *ps.Site.ResourceId
 		return nil
 	}; responseHooker(resp) != nil {
-		return "", fmt.Errorf("failed to parse response: %v", err)
+		return "", fmt.Errorf("failed to parse response: %w", err)
 	}
 	return siteID, nil
 }

@@ -20,12 +20,10 @@ const (
 	DelayStart20  = 20
 	DelayStart50  = 50
 	DurationTest  = 10
+	schedName     = "schedSingle"
 )
 
 var (
-	emptyString       = ""
-	batchRequestsSize = 100
-
 	TimeNow = uint64(time.Now().UTC().Unix())
 
 	MmSingleSchedulePastContinuing = pb.SingleSchedule{
