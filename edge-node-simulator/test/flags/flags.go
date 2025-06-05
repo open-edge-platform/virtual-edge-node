@@ -12,36 +12,34 @@ import (
 var zlog = logging.GetLogger("flags")
 
 type TestConfig struct {
-	OrchFQDN            string
-	EdgeAPIUser         string
-	EdgeAPIPass         string
-	EdgeOnboardUser     string
-	EdgeOnboardPass     string
-	CAPath              string
-	ENSimAddress        string
-	InfraRESTAPIAddress string
-	Project             string
-	AmountEdgeNodes     int
-	DeployEdgeNodes     bool
-	CreateOrgProject    bool
-	Cleanup             bool
+	OrchFQDN         string
+	EdgeAPIUser      string
+	EdgeAPIPass      string
+	EdgeOnboardUser  string
+	EdgeOnboardPass  string
+	CAPath           string
+	ENSimAddress     string
+	Project          string
+	AmountEdgeNodes  int
+	DeployEdgeNodes  bool
+	CreateOrgProject bool
+	Cleanup          bool
 }
 
 func GetDefaultConfig() *TestConfig {
 	return &TestConfig{
-		OrchFQDN:            "kind.internal",
-		EdgeAPIUser:         "", // update <api-user>
-		EdgeAPIPass:         "", // update <api-pass>
-		EdgeOnboardUser:     "", // update <onb-user>
-		EdgeOnboardPass:     "", // update <onb-pass>
-		CAPath:              "",
-		ENSimAddress:        "localhost:5001",
-		InfraRESTAPIAddress: "http://127.0.0.1:8080/edge-infra.orchestrator.apis/v1",
-		Project:             "",
-		AmountEdgeNodes:     1,
-		DeployEdgeNodes:     false,
-		CreateOrgProject:    false,
-		Cleanup:             false,
+		OrchFQDN:         "kind.internal",
+		EdgeAPIUser:      "", // update <api-user>
+		EdgeAPIPass:      "", // update <api-pass>
+		EdgeOnboardUser:  "", // update <onb-user>
+		EdgeOnboardPass:  "", // update <onb-pass>
+		CAPath:           "",
+		ENSimAddress:     "localhost:5001",
+		Project:          "",
+		AmountEdgeNodes:  1,
+		DeployEdgeNodes:  false,
+		CreateOrgProject: false,
+		Cleanup:          false,
 	}
 }
 
@@ -49,13 +47,8 @@ var (
 	defaultCfg = GetDefaultConfig()
 
 	flagOrchestratorFQDN = flag.String(
-		"clusterFQDN", defaultCfg.OrchFQDN,
+		"orchFQDN", defaultCfg.OrchFQDN,
 		"The orch cluster FQDN",
-	)
-
-	flagInfraURL = flag.String(
-		"infraURL", defaultCfg.InfraRESTAPIAddress,
-		"The edge infrastructure manager URL",
 	)
 
 	flagEdgeAPIUser = flag.String(
@@ -118,19 +111,18 @@ func GetConfig() *TestConfig {
 	flag.Parse()
 
 	cfg := &TestConfig{
-		OrchFQDN:            *flagOrchestratorFQDN,
-		EdgeAPIUser:         *flagEdgeAPIUser,
-		EdgeAPIPass:         *flagEdgeAPIPass,
-		EdgeOnboardUser:     *flagEdgeOnboardUser,
-		EdgeOnboardPass:     *flagEdgeOnboardPass,
-		InfraRESTAPIAddress: *flagInfraURL,
-		ENSimAddress:        *simAddress,
-		CAPath:              *caPath,
-		Project:             *project,
-		AmountEdgeNodes:     *amountEdgeNodes,
-		DeployEdgeNodes:     *deployEdgeNodes,
-		CreateOrgProject:    *createOrgProject,
-		Cleanup:             *cleanup,
+		OrchFQDN:         *flagOrchestratorFQDN,
+		EdgeAPIUser:      *flagEdgeAPIUser,
+		EdgeAPIPass:      *flagEdgeAPIPass,
+		EdgeOnboardUser:  *flagEdgeOnboardUser,
+		EdgeOnboardPass:  *flagEdgeOnboardPass,
+		ENSimAddress:     *simAddress,
+		CAPath:           *caPath,
+		Project:          *project,
+		AmountEdgeNodes:  *amountEdgeNodes,
+		DeployEdgeNodes:  *deployEdgeNodes,
+		CreateOrgProject: *createOrgProject,
+		Cleanup:          *cleanup,
 	}
 	zlog.Info().Msgf("GetConfig %v", cfg)
 	return cfg
