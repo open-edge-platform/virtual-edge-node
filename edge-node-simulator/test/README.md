@@ -18,7 +18,6 @@ ONBPASS="" # The orch keycloak user password - to retrieve token for Infrastruct
 APIUSER="" # The orch keycloak user - to retrieve token for Infrastructure Manager REST API interactions - if not specified goes to default
 APIPASS="" # The orch keycloak user password - to retrieve token for Infrastructure Manager REST API interactions - if not specified goes to default
 PROJECT="" # The project name in which the ONBUSER and APIUSER belong to.
-PROJECTID="" # The project ID in which the APIUSER and APIPASS belong to.
 ```
 
 ## Edge Node Simulator Deployment

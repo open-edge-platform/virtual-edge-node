@@ -6,7 +6,7 @@ package utils_test
 import (
 	"time"
 
-	"github.com/open-edge-platform/infra-core/api/pkg/api/v0"
+	"github.com/open-edge-platform/infra-core/apiv2/v2/pkg/api/v2"
 	os_v1 "github.com/open-edge-platform/infra-core/inventory/v2/pkg/api/os/v1"
 	inv_testing "github.com/open-edge-platform/infra-core/inventory/v2/pkg/testing"
 	pb "github.com/open-edge-platform/infra-managers/maintenance/pkg/api/maintmgr/v1"
@@ -128,18 +128,18 @@ var (
 	Site1Name = "site-12345678"
 	Site2Name = "site-12345679"
 
-	Site1Request = api.Site{
+	Site1Request = api.SiteResource{
 		Name: &Site1Name,
 	}
-	Site2Request = api.Site{
+	Site2Request = api.SiteResource{
 		Name: &Site2Name,
 	}
 
-	Region1Request = api.Region{
+	Region1Request = api.RegionResource{
 		Name: &Region1Name,
 	}
 
-	Region2Request = api.Region{
+	Region2Request = api.RegionResource{
 		Name: &Region2Name,
 	}
 )
