@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 // TODO: Add serial and uuid outputs for the VM
 # output "vm_serial" {
 #   description = "SMBIOS serial number of the virtual machine"

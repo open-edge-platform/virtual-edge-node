@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 resource "null_resource" "generate_uefi_boot_image" {
   provisioner "local-exec" {
     command = <<EOT

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 locals {
   boot_image_name = "${var.vm_name}-uefi-boot.img"
   vm_uuid         = length(var.smbios_uuid) > 0 ? var.smbios_uuid : random_uuid.vm_uuid.result

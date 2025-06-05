@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 variable "cpu_cores" {
   description = "Number of CPU cores for the VM"
   type        = number

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 output "vm_name" {
   value = proxmox_virtual_environment_vm.node_vm.name
 }

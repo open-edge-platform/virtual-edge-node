@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 variable "proxmox_endpoint" {
   description = "Proxmox API endpoint"
   type        = string

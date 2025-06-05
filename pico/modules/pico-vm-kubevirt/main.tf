@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 resource "random_integer" "vm_name_suffix" {
   min = 1000
   max = 100000
