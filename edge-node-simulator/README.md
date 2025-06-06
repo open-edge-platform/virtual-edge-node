@@ -67,7 +67,7 @@ You can install Go dependencies by running `make go-dependency`.
 ### Requirement
 
 Both ensim and ensim charts require the CA certificate of the target orchestrator,
-this one can be obtained in the target cluster using (TODO: add example from orch-infra namespace).
+this one can be obtained in the target cluster using the orch-gateway namespace.
 Then save it and apply the secret in the orchestrator cluster where ensim is going to be deployed.
 Edit the namespace keyword in the secret, make sure it matches the namespace where you are going to apply it.
 
@@ -80,9 +80,6 @@ sed -i'' -e "s|name: .*|name: tls-orch|" cert.yaml
 
 kubectl apply --namespace=ensim -f cert.yaml
 ```
-
-Update the values for \<onb-user\>,  \<orch-user\>, \<onb-pass\> & \<orch-pass\> whereas
- \<api-pass\> and \<api-user\> are not mandatory
 
 Notice: if running the binary directly, extract the CA certificate from the cert.yaml and save it to a file.
 
@@ -112,8 +109,11 @@ The option `globalLogLevel` can be specified as `info` or `debug`.
 The server is going to start a gRPC server on port `5001`. To connect to the server run the client as:
 
 ```bash
-./out/ensim/client/main -addressSimulator localhost:5001
+./out/ensim/client/main -addressSimulator localhost:5001 -project sample-project -apiUser <api-user> -apiPass <api-pass> -onbUser <onb-user> -onbPass <onb-pass>
 ```
+
+Update the values for \<onb-user\> and \<onb-pass\> whereas
+\<api-pass\> and \<api-user\> are not mandatory.
 
 The server and client don't need to run in the same machine.
 The client CLI is intuitive, as long as the server is running,
@@ -160,7 +160,7 @@ configArgs:
 To execute the ensim CLI client run the following command:
 
 ```bash
-./out/ensim/client/main -addressSimulator localhost:3196 -projectID 8e202529-f980-4bc2-9e34-e2e927336d36 -apiUser adminTestUser1 -apiPass adminTestPassword1! -onbUser adminTestUser1 -onbPass adminTestPassword1!
+./out/ensim/client/main -addressSimulator localhost:3196 -project sample-project -apiUser adminTestUser1 -apiPass adminTestPassword1! -onbUser adminTestUser1 -onbPass adminTestPassword1!
 ```
 
 The parameters are the following:
@@ -171,8 +171,8 @@ onbUser: "<onb-user>" # Keycloak username to perform onboarding/provisioning of 
 onbPass: "<onb-pass>" # Password for the onbUser.
 apiUser: "<api-user>" # Keycloak username to perform teardown of ensim.
 apiPass: "<api-pass>" # Password for the apiUser.
-projectID: "" # Project UUID to be used by ensim to retrieve keycloak 
-              # credentials to access orchestrator interfaces.
+project: "" # Project name to be used by ensim to retrieve keycloak 
+            # credentials to access orchestrator interfaces.
 ```
 
 These flags are not mandatory, with the exception of `addressSimulator`.
