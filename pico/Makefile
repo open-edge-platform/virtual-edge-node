@@ -15,3 +15,7 @@ dependency-check:
 build:
 	@# Help: Does nothing.
 	@echo "Does nothing."
+
+docker-build:
+	@# Help: Does nothing.
+	@echo "Does nothing."
