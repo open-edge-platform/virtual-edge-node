@@ -8,12 +8,6 @@ variable "cpu_cores" {
   default     = 8
 }
 
-variable "cpu_type" {
-  description = "CPU type for the VM"
-  type        = string
-  default     = "host"
-}
-
 variable "memory" {
   description = "Dedicated memory for the VM in MB"
   type        = number
@@ -81,12 +75,6 @@ variable "libvirt_network_name" {
   description = "The name of the libvirt network"
   type        = string
   default     = "default"
-}
-
-variable "libvirt_uri" {
-  description = "The URI of the libvirt connection"
-  type        = string
-  default     = "qemu:///system"
 }
 
 variable "libvirt_firmware" {
