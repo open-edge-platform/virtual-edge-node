@@ -23,18 +23,21 @@ import (
 var zlog = logging.GetLogger("en-test")
 
 var (
-	e2eLabel     = "infra-e2e"
-	day2Label    = "infra-tests-day2"
-	day1Label    = "infra-tests-day1"
-	day0Label    = "infra-tests-day0"
-	cleanupLabel = "cleanup"
+	e2eLabel        = "infra-e2e"
+	day2Label       = "infra-tests-day2"
+	day1Label       = "infra-tests-day1"
+	day0Label       = "infra-tests-day0"
+	day0CreateLabel = "infra-tests-custom-day0-create"
+	day0DeleteLabel = "infra-tests-custom-day0-delete"
+	cleanupLabel    = "cleanup"
 )
 
 var (
-	waitUntilHostsRunning   = time.Second * 5
-	waitHostsRunning        = time.Minute * 5
-	waitHostsConnectionLost = time.Minute * 5
-	waitHostsMaintenance    = time.Minute * 1
+	waitUntilHostsRunning    = time.Second * 5
+	waitHostsRunning         = time.Minute * 5
+	waitHostsConnectionLost  = time.Minute * 5
+	waitHostsMaintenance     = time.Minute * 1
+	waitUntilStatusAvailable = time.Second * 10
 
 	TimeNow       = int(time.Now().UTC().Unix())
 	SafeTimeDelay = 600
