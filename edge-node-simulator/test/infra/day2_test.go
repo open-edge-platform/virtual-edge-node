@@ -5,12 +5,13 @@ package infra_test
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-edge-platform/infra-core/api/pkg/api/v0"
+	"github.com/open-edge-platform/infra-core/apiv2/v2/pkg/api/v2"
 	ensim "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/sim"
 	flags_test "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/test/flags"
 	utils_test "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/test/utils"
@@ -18,13 +19,13 @@ import (
 
 var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), func() {
 	var ensimClient ensim.Client
-	var infraAPIClient *api.ClientWithResponses
+	var httpClient *http.Client
 	var cancel context.CancelFunc
 	var ctx context.Context
 	var cfg *flags_test.TestConfig
 	var enUUIDs []string
-	var site *api.Site
-	var region *api.Region
+	var site *api.SiteResource
+	var region *api.RegionResource
 
 	BeforeEach(func() {
 		cfg = flags_test.GetConfig()
@@ -36,15 +37,18 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		var err error
 		ctx, cancel = context.WithCancel(context.Background())
 
-		infraAPIClient, err = GetInfraAPIClient(ctx, cfg)
+		certCA, err := utils_test.LoadFile(cfg.CAPath)
+		Expect(err).To(BeNil())
+
+		httpClient, err = utils_test.GetClientWithCA(certCA)
 		Expect(err).To(BeNil())
 
 		if cfg.Cleanup {
-			errCleanup := utils_test.HelperCleanupHosts(ctx, infraAPIClient)
+			errCleanup := utils_test.HelperCleanupHostsAPI(ctx, httpClient, cfg)
 			Expect(errCleanup).To(BeNil())
-			errCleanup = utils_test.HelperCleanupSchedules(ctx, infraAPIClient)
+			errCleanup = utils_test.HelperCleanupSchedulesAPI(ctx, httpClient, cfg)
 			Expect(errCleanup).To(BeNil())
-			errCleanup = utils_test.HelperCleanupLocations(ctx, infraAPIClient)
+			errCleanup = utils_test.HelperCleanupLocationsAPI(ctx, httpClient, cfg)
 			Expect(errCleanup).To(BeNil())
 		}
 
@@ -65,18 +69,19 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 
 			By("setting all hosts OS with update sources / installed packages")
-			hosts, err := utils_test.ListHosts(ctx, infraAPIClient, nil)
+			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
 			Expect(hosts).ToNot(BeNil())
 			hostIDs := []string{}
 			for hostID := range hosts {
 				hostIDs = append(hostIDs, hostID)
 				utils_test.UpdateHostOS(ctx, GinkgoTB(),
-					infraAPIClient,
+					httpClient,
 					hostID,
 					utils_test.OSUpdateSources,
 					utils_test.OSInstalledPackages,
@@ -85,12 +90,12 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			}
 
 			By("setting all hosts into maintenance mode - single schedule")
-			utils_test.SetHostsSingleSched(ctx, GinkgoTB(), infraAPIClient, hostIDs)
+			utils_test.SetHostsSingleSched(ctx, GinkgoTB(), httpClient, hostIDs)
 
 			By("verifying that all hosts are in maintenance state")
 			time.Sleep(waitHostsMaintenance)
 			Expect(err).To(BeNil())
-			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), infraAPIClient, hostIDs)
+			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), httpClient, hostIDs)
 
 			// ToDo check the update agent status (i.e., UPDATING) of the edge node(s) in ensim
 		})
@@ -100,34 +105,36 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if site/hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 
-			hosts, err := utils_test.ListHosts(ctx, infraAPIClient, nil)
+			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
 			hostIDs := []string{}
 			for hostID := range hosts {
 				hostIDs = append(hostIDs, hostID)
 			}
 			By("creating a site")
-			site1 := utils_test.CreateSite(ctx, GinkgoTB(), infraAPIClient, utils_test.Site1Request)
-			site = site1.JSON201
+			site1ResourceID, err := utils_test.CreateSiteAPI(ctx, httpClient, cfg, &utils_test.Site1Request)
+			Expect(err).To(BeNil())
+
 			By("configuring hosts to the site")
-			err = utils_test.ConfigureHostsbyID(ctx, infraAPIClient, hostIDs, *site1.JSON201.ResourceId)
+			err = utils_test.ConfigureHostsbyID(ctx, httpClient, hostIDs, site1ResourceID)
 			Expect(err).To(BeNil())
 			By("setting site into maintenance mode - single schedule")
-			utils_test.SetSitesSingleSched(ctx, GinkgoTB(), infraAPIClient, []string{*site1.JSON201.ResourceId})
+			utils_test.SetSitesSingleSched(ctx, GinkgoTB(), httpClient, []string{site1ResourceID})
 
 			time.Sleep(waitHostsMaintenance)
 			By("checking if site is in maintenance state")
-			utils_test.CheckSiteMaintenance(ctx, GinkgoTB(), infraAPIClient, *site.ResourceId)
+			utils_test.CheckSiteMaintenance(ctx, GinkgoTB(), httpClient, *site.ResourceId)
 
 			By("checking if all hosts are in maintenance state")
 			Expect(err).To(BeNil())
-			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), infraAPIClient, hostIDs)
+			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), httpClient, hostIDs)
 
 			By("setting hosts to be unconfigured from site")
-			err = utils_test.UnconfigureAllHosts(ctx, infraAPIClient)
+			err = utils_test.UnconfigureAllHosts(ctx, httpClient)
 			Expect(err).To(BeNil())
 		})
 	})
@@ -136,43 +143,45 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if region/site/hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 
-			hosts, err := utils_test.ListHosts(ctx, infraAPIClient, nil)
+			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
 			hostIDs := []string{}
 			for hostID := range hosts {
 				hostIDs = append(hostIDs, hostID)
 			}
 			By("creating a region")
-			region1 := utils_test.CreateRegion(ctx, GinkgoTB(), infraAPIClient, utils_test.Region1Request)
-			region = region1.JSON201
+			region1ResourceID, err := utils_test.CreateRegionAPI(ctx, httpClient, cfg, &utils_test.Region1Request)
+			Expect(err).To(BeNil())
 			siteReq := utils_test.Site1Request
-			siteReq.RegionId = region.ResourceId
+			siteReq.RegionId = &region1ResourceID
 
 			By("creating a site and assigning it to the region")
-			site1 := utils_test.CreateSite(ctx, GinkgoTB(), infraAPIClient, siteReq)
-			site = site1.JSON201
-			err = utils_test.ConfigureHostsbyID(ctx, infraAPIClient, hostIDs, *site1.JSON201.ResourceId)
+			site1ResourceID, err := utils_test.CreateSiteAPI(ctx, httpClient, cfg, &siteReq)
+			Expect(err).To(BeNil())
+
+			err = utils_test.ConfigureHostsbyID(ctx, httpClient, hostIDs, site1ResourceID)
 			Expect(err).To(BeNil())
 
 			By("setting the region into maintenance state - single schedule")
-			utils_test.SetRegionSingleSched(ctx, GinkgoTB(), infraAPIClient, []string{*region1.JSON201.ResourceId})
+			utils_test.SetRegionSingleSched(ctx, GinkgoTB(), httpClient, []string{region1ResourceID})
 
 			time.Sleep(waitHostsMaintenance)
 			By("checking the region is in maintenance state")
-			utils_test.CheckRegionMaintenance(ctx, GinkgoTB(), infraAPIClient, *region.ResourceId)
+			utils_test.CheckRegionMaintenance(ctx, GinkgoTB(), httpClient, *region.ResourceId)
 
 			By("checkint the site is in maintenance state")
-			utils_test.CheckSiteMaintenance(ctx, GinkgoTB(), infraAPIClient, *site.ResourceId)
+			utils_test.CheckSiteMaintenance(ctx, GinkgoTB(), httpClient, *site.ResourceId)
 
 			By("checking all hosts are in maintenance state")
 			Expect(err).To(BeNil())
-			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), infraAPIClient, hostIDs)
+			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), httpClient, hostIDs)
 
 			By("checking all hosts are unconfigured from site")
-			err = utils_test.UnconfigureAllHosts(ctx, infraAPIClient)
+			err = utils_test.UnconfigureAllHosts(ctx, httpClient)
 			Expect(err).To(BeNil())
 		})
 	})
@@ -181,10 +190,11 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		It("should check if region/region/site/hosts can be scheduled in maintenance state", func(ctx SpecContext) {
 			time.Sleep(waitUntilHostsRunning)
 			By("listing all hosts in running status")
-			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 
-			hosts, err := utils_test.ListHosts(ctx, infraAPIClient, nil)
+			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
 
 			hostIDs := []string{}
@@ -193,41 +203,44 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			}
 
 			By("creating a root region 1")
-			region1 := utils_test.CreateRegion(ctx, GinkgoTB(), infraAPIClient, utils_test.Region1Request)
+			region1ResourceID, err := utils_test.CreateRegionAPI(ctx, httpClient, cfg, &utils_test.Region1Request)
+			Expect(err).To(BeNil())
 
 			By("creating a root region 2")
-			utils_test.Region2Request.ParentId = region1.JSON201.ResourceId
-			region2 := utils_test.CreateRegion(ctx, GinkgoTB(), infraAPIClient, utils_test.Region2Request)
+			utils_test.Region2Request.ParentId = &region1ResourceID
+			region2ResourceID, err := utils_test.CreateRegionAPI(ctx, httpClient, cfg, &utils_test.Region2Request)
 			utils_test.Region2Request.ParentId = nil
+			Expect(err).To(BeNil())
 
 			siteReq := utils_test.Site1Request
-			siteReq.RegionId = region2.JSON201.ResourceId
+			siteReq.RegionId = &region2ResourceID
 
 			By("creating a site and assigning it to the region")
-			site1 := utils_test.CreateSite(ctx, GinkgoTB(), infraAPIClient, siteReq)
-			site = site1.JSON201
-			err = utils_test.ConfigureHostsbyID(ctx, infraAPIClient, hostIDs, *site1.JSON201.ResourceId)
+			site1ResourceID, err := utils_test.CreateSiteAPI(ctx, httpClient, cfg, &siteReq)
+			Expect(err).To(BeNil())
+
+			err = utils_test.ConfigureHostsbyID(ctx, httpClient, hostIDs, site1ResourceID)
 			Expect(err).To(BeNil())
 
 			By("setting the region into maintenance state - single schedule")
-			utils_test.SetRegionSingleSched(ctx, GinkgoTB(), infraAPIClient, []string{*region1.JSON201.ResourceId})
+			utils_test.SetRegionSingleSched(ctx, GinkgoTB(), httpClient, []string{region1ResourceID})
 
 			time.Sleep(waitHostsMaintenance)
 			By("checking the root region 1 is in maintenance state")
-			utils_test.CheckRegionMaintenance(ctx, GinkgoTB(), infraAPIClient, *region1.JSON201.ResourceId)
+			utils_test.CheckRegionMaintenance(ctx, GinkgoTB(), httpClient, region1ResourceID)
 
 			By("checking the region 2 is in maintenance state")
-			utils_test.CheckRegionMaintenance(ctx, GinkgoTB(), infraAPIClient, *region2.JSON201.ResourceId)
+			utils_test.CheckRegionMaintenance(ctx, GinkgoTB(), httpClient, region2ResourceID)
 
 			By("checkint the site is in maintenance state")
-			utils_test.CheckSiteMaintenance(ctx, GinkgoTB(), infraAPIClient, *site.ResourceId)
+			utils_test.CheckSiteMaintenance(ctx, GinkgoTB(), httpClient, *site.ResourceId)
 
 			By("checking all hosts are in maintenance state")
 			Expect(err).To(BeNil())
-			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), infraAPIClient, hostIDs)
+			utils_test.CheckHostsMaintenance(ctx, GinkgoTB(), httpClient, hostIDs)
 
 			By("checking all hosts are unconfigured from site")
-			err = utils_test.UnconfigureAllHosts(ctx, infraAPIClient)
+			err = utils_test.UnconfigureAllHosts(ctx, httpClient)
 			Expect(err).To(BeNil())
 		})
 	})

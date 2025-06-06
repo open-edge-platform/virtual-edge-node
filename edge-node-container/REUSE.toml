@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+version = 1
+
+[[annotations]]
+path = [
+    "VERSION",
+    "go.sum",
+    "**.md",
+    "docs/*",
+    "EN_MANIFEST_VERSION",
+    "scripts/dmiTemplate/*",
+    "chart/bma_values.yaml",
+]
+
+precedence = "aggregate"
+SPDX-FileCopyrightText = "(C) 2025 Intel Corporation"
+SPDX-License-Identifier = "Apache-2.0"

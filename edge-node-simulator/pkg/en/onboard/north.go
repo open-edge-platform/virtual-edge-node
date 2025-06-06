@@ -15,7 +15,7 @@ import (
 
 	"github.com/google/uuid"
 
-	edgeinfraapi "github.com/open-edge-platform/infra-core/api/pkg/api/v0"
+	edgeinfraapi "github.com/open-edge-platform/infra-core/apiv2/v2/pkg/api/v2"
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/defs"
 	ensim_kc "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/keycloak"
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/utils"
@@ -145,15 +145,15 @@ func HTTPInfraOnboardGetHostAndInstance(ctx context.Context,
 		if err != nil {
 			return err
 		}
-		ps := &edgeinfraapi.HostsList{}
+		ps := &edgeinfraapi.ListHostsResponse{}
 		err = json.Unmarshal(b, &ps)
 		if err != nil {
 			return err
 		}
-		if ps.Hosts == nil || len(*ps.Hosts) == 0 {
+		if len(ps.Hosts) == 0 {
 			return fmt.Errorf("empty host result for uuid %s", uuid)
 		}
-		host := (*ps.Hosts)[0]
+		host := (ps.Hosts)[0]
 		hostID = *host.ResourceId
 		if host.Instance != nil && host.Instance.InstanceID != nil {
 			instanceID = *host.Instance.InstanceID
@@ -245,7 +245,7 @@ func HTTPInfraOnboardNewInstance(instanceURL, token, hostID, osID string, client
 	instKind := edgeinfraapi.INSTANCEKINDMETAL
 	instanceName := "test-instance"
 	sf := edgeinfraapi.SECURITYFEATURENONE
-	instance := edgeinfraapi.Instance{
+	instance := edgeinfraapi.InstanceResource{
 		HostID:          &hostID,
 		OsID:            &osID,
 		Kind:            &instKind,
@@ -282,15 +282,15 @@ func HTTPInfraOnboardGetOSID(ctx context.Context, url, token string, client *htt
 		if err != nil {
 			return err
 		}
-		os := &edgeinfraapi.OperatingSystemResourceList{}
+		os := &edgeinfraapi.ListOperatingSystemsResponse{}
 		err = json.Unmarshal(b, &os)
 		if err != nil {
 			return err
 		}
-		if os.OperatingSystemResources == nil || len(*os.OperatingSystemResources) == 0 {
+		if len(os.OperatingSystemResources) == 0 {
 			return fmt.Errorf("empty os resources")
 		}
-		for _, osr := range *os.OperatingSystemResources {
+		for _, osr := range os.OperatingSystemResources {
 			if *osr.ProfileName == "ubuntu-22.04-lts-generic" {
 				osID = *osr.ResourceId
 				zlog.Debug().Msgf("Found OS: %s", osID)
@@ -314,14 +314,15 @@ func HTTPInfraOnboardNewRegisterHost(
 	client *http.Client,
 	hostUUID uuid.UUID,
 	autoOnboard bool,
-) (*edgeinfraapi.Host, error) {
+) (*edgeinfraapi.HostResource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), waitTime)
 	defer cancel()
 
 	name := "host-" + hostUUID.String()[0:4]
-	hostRegisterInfo := &edgeinfraapi.HostRegisterInfo{
+	hostUUIDString := hostUUID.String()
+	hostRegisterInfo := &edgeinfraapi.HostRegister{
 		Name:        &name,
-		Uuid:        &hostUUID,
+		Uuid:        &hostUUIDString,
 		AutoOnboard: &autoOnboard,
 	}
 
@@ -331,7 +332,7 @@ func HTTPInfraOnboardNewRegisterHost(
 	}
 
 	zlog.Debug().Msgf("HostRegisterInfo %s", data)
-	var registeredHost edgeinfraapi.Host
+	var registeredHost edgeinfraapi.HostResource
 
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
@@ -365,16 +366,16 @@ func HTTPInfraOnboardGetHostID(ctx context.Context, url, token string, client *h
 		if err != nil {
 			return err
 		}
-		ps := &edgeinfraapi.HostsList{}
+		ps := &edgeinfraapi.ListHostsResponse{}
 		err = json.Unmarshal(b, &ps)
 		if err != nil {
 			return err
 		}
-		if ps.Hosts == nil || len(*ps.Hosts) == 0 {
+		if len(ps.Hosts) == 0 {
 			return fmt.Errorf("empty host result for uuid %s", uuid)
 		}
 		zlog.Debug().Msgf("HostResource %#v", ps)
-		hostID = *(*ps.Hosts)[0].ResourceId
+		hostID = *(ps.Hosts)[0].ResourceId
 		return nil
 	}
 	if err := httpGet(rCtx, client, fmt.Sprintf("%s?uuid=%s", url, uuid), token, responseHooker); err != nil {
