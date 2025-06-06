@@ -6,18 +6,14 @@ package infra_test
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/open-edge-platform/infra-core/api/pkg/api/v0"
 	"github.com/open-edge-platform/infra-core/inventory/v2/pkg/logging"
 	ensimapi "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/api/ensim/v1"
-	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/utils"
 	ensim "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/sim"
 	flags_test "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/test/flags"
-	utils_test "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/test/utils"
 )
 
 var zlog = logging.GetLogger("en-test")
@@ -55,33 +51,6 @@ func GenerateUUIDs(cfg *flags_test.TestConfig) []string {
 		enUUIDs = append(enUUIDs, enUUID)
 	}
 	return enUUIDs
-}
-
-func GetInfraAPIClient(ctx context.Context, cfg *flags_test.TestConfig) (*api.ClientWithResponses, error) {
-	// Set the environment variables - projectID
-	os.Setenv(utils.ProjectIDEnvVar, cfg.ProjectID)
-
-	certCA, err := utils_test.LoadFile(cfg.CAPath)
-	if err != nil {
-		return nil, err
-	}
-
-	err = utils_test.HelperJWTTokenRoutine(ctx, certCA, cfg.OrchFQDN, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
-	if err != nil {
-		return nil, err
-	}
-
-	httpClient, err := utils_test.GetClientWithCA(certCA)
-	if err != nil {
-		return nil, err
-	}
-
-	apiClient, err := api.NewClientWithResponses(cfg.InfraRESTAPIAddress, api.WithHTTPClient(httpClient))
-	if err != nil {
-		return nil, err
-	}
-
-	return apiClient, nil
 }
 
 func GetENSimClient(ctx context.Context, cfg *flags_test.TestConfig) (ensim.Client, error) {
