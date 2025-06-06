@@ -9,13 +9,13 @@ lint:
 	tflint --recursive
 
 dependency-check:
-	@# Help: Runs docker-build stage
+	@# Help: Runs dependency-check stage
 	@echo "---MAKEFILE BUILD---"
 	echo $@
 	@echo "---END MAKEFILE Build---"
 
 build:
-	@# Help: Runs docker-build stage
+	@# Help: Runs build stage
 	@echo "---MAKEFILE BUILD---"
 	echo $@
 	@echo "---END MAKEFILE Build---"
