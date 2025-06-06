@@ -9,13 +9,19 @@ lint:
 	tflint --recursive
 
 dependency-check:
-	@# Help: Does nothing.
-	@echo "Does nothing."
+	@# Help: Runs docker-build stage
+	@echo "---MAKEFILE BUILD---"
+	echo $@
+	@echo "---END MAKEFILE Build---"
 
 build:
-	@# Help: Does nothing.
-	@echo "Does nothing."
+	@# Help: Runs docker-build stage
+	@echo "---MAKEFILE BUILD---"
+	echo $@
+	@echo "---END MAKEFILE Build---"
 
 docker-build:
-	@# Help: Does nothing.
-	@echo "Does nothing."
+	@# Help: Runs docker-build stage
+	@echo "---MAKEFILE BUILD---"
+	echo $@
+	@echo "---END MAKEFILE Build---"
