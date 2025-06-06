@@ -11,4 +11,7 @@ lint:
 dependency-check:
 	@# Help: Does nothing.
 	@echo "Does nothing."
-	
+
+build:
+	@# Help: Does nothing.
+	@echo "Does nothing."
