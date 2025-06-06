@@ -2,27 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-terraform {
-  required_version = ">= 1.9.5"
-
-  required_providers {
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "1.19.0"
-    }
-
-    null = {
-      source  = "hashicorp/null"
-      version = "~> 3.2.3"
-    }
-
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.7.1"
-    }
-  }
-}
-
 resource "random_integer" "vm_name_suffix" {
   min = 1000
   max = 100000

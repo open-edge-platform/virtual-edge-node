@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 terraform {
+  required_version = ">= 1.9.5"
 
   required_providers {
 
@@ -14,6 +15,11 @@ terraform {
     null = {
       source  = "hashicorp/null"
       version = "~> 3.2.3"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.7.1"
     }
   }
 }
