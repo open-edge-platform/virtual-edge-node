@@ -16,12 +16,12 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/onsi/ginkgo/v2 v2.23.3
 	github.com/onsi/gomega v1.36.3
-	github.com/open-edge-platform/infra-core/apiv2/v2 v2.0.0
+	github.com/open-edge-platform/infra-core/apiv2/v2 v2.1.0
 	github.com/open-edge-platform/infra-core/inventory/v2 v2.26.1
-	github.com/open-edge-platform/infra-managers/host v1.21.0
-	github.com/open-edge-platform/infra-managers/maintenance v1.21.0
-	github.com/open-edge-platform/infra-managers/telemetry v1.21.0
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.33.0
+	github.com/open-edge-platform/infra-managers/host v1.22.1
+	github.com/open-edge-platform/infra-managers/maintenance v1.22.0
+	github.com/open-edge-platform/infra-managers/telemetry v1.22.0
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.36.0
 	github.com/open-edge-platform/orch-library/go v0.6.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.30.0
@@ -36,7 +36,7 @@ require (
 require (
 	ariga.io/atlas v0.33.0 // indirect
 	cel.dev/expr v0.23.1 // indirect
-	cloud.google.com/go/compute/metadata v0.6.0 // indirect
+	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	entgo.io/contrib v0.6.0 // indirect
 	entgo.io/ent v0.14.4 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -97,7 +97,7 @@ require (
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mennanov/fmutils v0.3.2 // indirect
+	github.com/mennanov/fmutils v0.3.3 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c // indirect
