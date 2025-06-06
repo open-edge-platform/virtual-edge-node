@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<xsl:stylesheet version="1.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output omit-xml-declaration="yes" indent="yes"/>
+
+  <!-- Template to copy all nodes and attributes as-is -->
+  <xsl:template match="node()|@*">
+    <xsl:copy>
+      <xsl:apply-templates select="node()|@*"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- Add SMBIOS information -->
+  <xsl:template match="os">
+    <xsl:copy>
+      <xsl:apply-templates select="*"/>
+      <smbios mode="sysinfo"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- Add sysinfo and devices elements to the domain -->
+  <xsl:template match="domain">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <sysinfo type="smbios">
+        <system>
+          <entry name="product">${smbios_product}</entry>
+          <entry name="version">VEN V1</entry>
+          <entry name="serial">${smbios_serial}</entry>
+          <entry name="uuid">${vm_uuid}</entry>
+        </system>
+      </sysinfo>
+      <devices>
+        <serial type='${vm_console}'>
+          <source path='/var/log/libvirt/qemu/${vm_name}-console.log'/>
+          <target port='0'/>
+        </serial>
+      </devices>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- Update disk type and device -->
+  <xsl:template match="disk[target/@bus='virtio']">
+    <xsl:copy>
+      <xsl:apply-templates select="@*"/>
+      <target dev="sda" bus="sata"/>
+      <address type="drive" controller="0" bus="0" target="0" unit="0"/>
+      <xsl:apply-templates select="node()[not(self::target)]"/>
+    </xsl:copy>
+    <controller type="sata" index="0">
+      <address type="pci" domain="0x0000" bus="0x00" slot="0x08" function="0x0"/>
+    </controller>
+  </xsl:template>
+
+</xsl:stylesheet>
