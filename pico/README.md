@@ -16,11 +16,10 @@ usage very quickly.
 ## Features
 
 - Lightweight: Designed for minimal resource usage 🪶
-- Fast: Provisions an Edge Node E2E with Tiber OS and all agents in minutes ⚡️
+- Fast: Provisions an Edge Node E2E with Microvisor and all agents in minutes ⚡️
 - Easy to use: Simple configuration with Terraform 🧘
 - Highly configurable: Customize CPU, memory, disk size, and more 🔧
 - Scalable: Easily scale up or down based on your needs 📈
-- Cross platform: Deploy from Linux and Mac OS 🖥️
 - Multiple onboarding options: Supports both interactive and non-interactive
 onboarding methods 🔄
 - All features of a hardware-backed Edge Node: Including dynamic OS
@@ -28,7 +27,7 @@ provisioning, agents, and Kubernetes 🚀
 
 ## Screenshots
 
-![Pico Node in Orchestrator UI](/static/node_details.png)
+![Pico Node in Orchestrator UI](static/node_details.png)
 
 ## Common Requirements
 
