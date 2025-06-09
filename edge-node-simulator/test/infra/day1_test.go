@@ -5,12 +5,12 @@ package infra_test
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-edge-platform/infra-core/api/pkg/api/v0"
 	ensimapi "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/api/ensim/v1"
 	ensim "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/sim"
 	flags_test "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/test/flags"
@@ -19,7 +19,7 @@ import (
 
 var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), func() {
 	var ensimClient ensim.Client
-	var infraAPIClient *api.ClientWithResponses
+	var httpClient *http.Client
 	var cancel context.CancelFunc
 	var ctx context.Context
 	var cfg *flags_test.TestConfig
@@ -35,18 +35,21 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		var err error
 		ctx, cancel = context.WithCancel(context.Background())
 
-		infraAPIClient, err = GetInfraAPIClient(ctx, cfg)
+		certCA, err := utils_test.LoadFile(cfg.CAPath)
+		Expect(err).To(BeNil())
+
+		httpClient, err = utils_test.GetClientWithCA(certCA)
 		Expect(err).To(BeNil())
 
 		ensimClient, err = GetENSimClient(ctx, cfg)
 		Expect(err).To(BeNil())
 
 		if cfg.Cleanup {
-			errCleanup := utils_test.HelperCleanupHosts(ctx, infraAPIClient)
+			errCleanup := utils_test.HelperCleanupHostsAPI(ctx, httpClient, cfg)
 			Expect(errCleanup).To(BeNil())
-			errCleanup = utils_test.HelperCleanupSchedules(ctx, infraAPIClient)
+			errCleanup = utils_test.HelperCleanupSchedulesAPI(ctx, httpClient, cfg)
 			Expect(errCleanup).To(BeNil())
-			errCleanup = utils_test.HelperCleanupLocations(ctx, infraAPIClient)
+			errCleanup = utils_test.HelperCleanupLocationsAPI(ctx, httpClient, cfg)
 			Expect(errCleanup).To(BeNil())
 		}
 
@@ -65,8 +68,9 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			"and Infrastructure Manager simulator", func(ctx SpecContext) {
 			By("checking all hosts in running status in Infrastructure Manager REST API")
 			time.Sleep(waitHostsRunning)
-			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 
 			By("should be able to list edge nodes state/status ok from Infrastructure Manager simulator")
 			listNodes, err := ensimClient.List(ctx)
@@ -95,8 +99,9 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			"Infrastructure Manager REST API and Infrastructure Manager simulator", func(ctx SpecContext) {
 			By("checking all hosts in running status")
 			time.Sleep(waitUntilHostsRunning)
-			err := utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 			By("should be able to list edge nodes state/status ok from Infrastructure Manager simulator")
 			listNodes, err := ensimClient.List(ctx)
 			Expect(err).To(BeNil())
@@ -150,11 +155,14 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 
 			By("checking waiting all hosts in no connection status")
 			time.Sleep(waitHostsConnectionLost)
-			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterNoConnection, cfg.AmountEdgeNodes)
-			Expect(err).To(BeNil())
 
-			err = utils_test.InfraAPICheckInstances(ctx, infraAPIClient, &filterInstanceStatusError, cfg.AmountEdgeNodes)
+			totalHosts, err = utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterNoConnection)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
+
+			totalHosts, err = utils_test.ListInstancesTotalAPI(ctx, httpClient, cfg, &filterInstanceStatusError)
+			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 
 			By("turning on all agents in all edge nodes")
 			// Stops all edge node agents
@@ -196,8 +204,9 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 
 			By("listing all hosts exist in running status")
 			time.Sleep(waitHostsRunning)
-			err = utils_test.InfraAPICheckHosts(ctx, infraAPIClient, &filterRunning, cfg.AmountEdgeNodes)
+			totalHosts, err = utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
+			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 		})
 	})
 })

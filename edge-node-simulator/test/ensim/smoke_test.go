@@ -6,7 +6,6 @@ package ensim_test
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"testing"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/open-edge-platform/infra-core/api/pkg/api/v0"
 	"github.com/open-edge-platform/infra-core/inventory/v2/pkg/logging"
 	ensimapi "github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/api/ensim/v1"
 	"github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/en/utils"
@@ -46,10 +44,7 @@ func TestENSim_NIO(t *testing.T) {
 	httpClient, err := utils_test.GetClientWithCA(certCA)
 	require.NoError(t, err)
 
-	apiClient, err := api.NewClientWithResponses(cfg.InfraRESTAPIAddress, api.WithHTTPClient(httpClient))
-	require.NoError(t, err)
-
-	err = utils_test.HelperCleanupHosts(ctx, apiClient)
+	err = utils_test.HelperCleanupHostsAPI(ctx, httpClient, cfg)
 	require.NoError(t, err)
 
 	simClient, err := ensim.NewClient(ctx, cfg.ENSimAddress)
@@ -62,17 +57,10 @@ func TestENSim_NIO(t *testing.T) {
 	assert.Equal(t, 0, len(listNodes))
 
 	filter := fmt.Sprintf(`%s = %q`, "host_status", "Running")
-	resList, err := apiClient.GetComputeHostsWithResponse(
-		ctx,
-		&api.GetComputeHostsParams{
-			Filter: &filter,
-		},
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
+
+	totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filter)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, resList.StatusCode())
-	require.Equal(t, 0, *resList.JSON200.TotalElements)
+	assert.Equal(t, 0, totalHosts)
 
 	// Host UUID
 	hostUUID := uuid.New()
@@ -97,17 +85,9 @@ func TestENSim_NIO(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(listNodes))
 
-	resList, err = apiClient.GetComputeHostsWithResponse(
-		ctx,
-		&api.GetComputeHostsParams{
-			Filter: &filter,
-		},
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
+	totalHosts, err = utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filter)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, resList.StatusCode())
-	require.Equal(t, 1, *resList.JSON200.TotalElements)
+	assert.Equal(t, 1, totalHosts)
 
 	// Get node from ENSIM and validate it
 	simNode, err := simClient.Get(ctx, enUUID)
@@ -177,17 +157,9 @@ func TestENSim_NIO(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 0, len(listNodes))
 
-	resList, err = apiClient.GetComputeHostsWithResponse(
-		ctx,
-		&api.GetComputeHostsParams{
-			Filter: &filter,
-		},
-		utils.AddJWTtoTheHeader,
-		utils.AddProjectIDtoTheHeader,
-	)
+	totalHosts, err = utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filter)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, resList.StatusCode())
-	require.Equal(t, 0, *resList.JSON200.TotalElements)
+	assert.Equal(t, 0, totalHosts)
 
 	zlog.Info().Msg("TestENSim_Case02_NIO Finished")
 }

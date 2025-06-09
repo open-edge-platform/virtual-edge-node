@@ -29,7 +29,7 @@ var zlog = logging.GetLogger("agents")
 const (
 	backoffRetries      = 3
 	backoffInterval     = time.Second * 10
-	backoffIntervalInit = time.Second * 2 // Sets agents initialization backoff interval to 2 seconds
+	backoffIntervalInit = time.Second * 5 // Sets agents initialization backoff interval to 2 seconds
 )
 
 var (
