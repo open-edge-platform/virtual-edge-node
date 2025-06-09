@@ -20,7 +20,6 @@ usage very quickly.
 - Easy to use: Simple configuration with Terraform 🧘
 - Highly configurable: Customize CPU, memory, disk size, and more 🔧
 - Scalable: Easily scale up or down based on your needs 📈
-- Cross platform: Deploy from Linux and Mac OS 🖥️
 - Multiple onboarding options: Supports both interactive and non-interactive
 onboarding methods 🔄
 - All features of a hardware-backed Edge Node: Including dynamic OS
