@@ -1,0 +1,41 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Post-Merge pico VEN
+
+on:
+  push:
+    branches:
+      - main
+      - release-*
+    paths:
+      - 'pico/**'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  post-merge-pipeline:
+    permissions:
+      contents: read
+      deployments: write
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@3bdd409ccf738472c6e1547d14628b51c70dbe99  # v0.1.21
+    with:
+      run_version_check: true
+      run_dep_version_check: true
+      run_build: false
+      run_docker_build: false
+      run_docker_push: false
+      run_helm_build: false
+      run_helm_push: false
+      run_version_tag: true
+      prefix_tag_separator: "/"
+      project_folder: "pico"
+    secrets:
+      SYS_ORCH_GITHUB: ${{ secrets.SYS_ORCH_GITHUB }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
+      NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
+      MSTEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
