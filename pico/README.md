@@ -193,6 +193,16 @@ Note: "tinkerbell_nginx_domain is a mandatory user input if other arguments are 
 - `vm_name`: The name of the created virtual machine
 - `vm_serial`: The SMBIOS serial number of the virtual machine
 
+#### Delete Libvirt VM
+
+After testing is complete, destroy the Libvirt VM resources using the following command:
+
+```shell
+# Destroy the resources when no longer needed
+terraform destroy
+```
+Note: `terraform destroy` only deletes the VM and its dependent resources. EdgeNode-related information on the orchestrator UI side must be deleted manually or through automation.
+
 ### To use the KubeVirt module
 
 #### Prerequisites for KubeVirt
