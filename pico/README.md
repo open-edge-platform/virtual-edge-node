@@ -104,6 +104,16 @@ module "pico_vm" {
 - `vm_uuid`: The SMBIOS UUID of the virtual machine
 - `tinkerbell_nginx_domain`: The Tinkerbell Nginx URL for the virtual machine
 
+#### Delete Proxmox VM
+
+After testing is complete, destroy the Libvirt VM resources using the following command:
+
+```shell
+# Destroy the resources when no longer needed
+terraform destroy
+```
+Note: `terraform destroy` only deletes the VM and its dependent resources. EdgeNode related information from Orchestrator UI side must be deleted manually or through automation.
+
 ### To use the Libvirt module
 
 #### Prerequisites for Libvirt
@@ -188,6 +198,7 @@ $
 
 ```
 Note: "tinkerbell_nginx_domain is a mandatory user input if other arguments are not provided; otherwise, the default values defined in variables.tf will be used.
+
 #### Libvirt module Outputs
 
 - `vm_name`: The name of the created virtual machine
@@ -201,7 +212,7 @@ After testing is complete, destroy the Libvirt VM resources using the following 
 # Destroy the resources when no longer needed
 terraform destroy
 ```
-Note: `terraform destroy` only deletes the VM and its dependent resources. EdgeNode-related information on the orchestrator UI side must be deleted manually or through automation.
+Note: `terraform destroy` only deletes the VM and its dependent resources. EdgeNode related information from Orchestrator UI side must be deleted manually or through automation.
 
 ### To use the KubeVirt module
 
