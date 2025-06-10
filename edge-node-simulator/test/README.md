@@ -48,7 +48,7 @@ kubectl port-forward svc/api -n orch-infra --address 0.0.0.0 8080:8080 &
 ```bash
 ginkgo -v -r --fail-fast --race --json-report infra-tests-day0.json --output-dir . --label-filter="infra-tests-day0" ./test/infra -- \
     -project=${PROJECT} -projectID=${PROJECTID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -orchFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${ORCH_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```
@@ -58,7 +58,7 @@ ginkgo -v -r --fail-fast --race --json-report infra-tests-day0.json --output-dir
 ```bash
 ginkgo -v -r --fail-fast --race --json-report infra-tests-day1.json --output-dir . --label-filter="infra-tests-day1" ./test/infra -- \
     -project=${PROJECT} -projectID=${PROJECTID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -orchFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${ORCH_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```
@@ -68,7 +68,7 @@ ginkgo -v -r --fail-fast --race --json-report infra-tests-day1.json --output-dir
 ```bash
 ginkgo -v -r --fail-fast --race --json-report infra-tests-day2.json --output-dir . --label-filter="infra-tests-day2" ./test/infra --  \
     -project=${PROJECT} -projectID=${PROJECTID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -orchFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${ORCH_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```
@@ -78,7 +78,7 @@ ginkgo -v -r --fail-fast --race --json-report infra-tests-day2.json --output-dir
 ```bash
 ginkgo -v -r --fail-fast --race --label-filter="cleanup" ./test/infra --  \
     -project=${PROJECT} -projectID=${PROJECTID} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -orchFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${ORCH_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```

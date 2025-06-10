@@ -47,7 +47,7 @@ var (
 	defaultCfg = GetDefaultConfig()
 
 	flagOrchestratorFQDN = flag.String(
-		"orchFQDN", defaultCfg.OrchFQDN,
+		"clusterFQDN", defaultCfg.OrchFQDN,
 		"The orch cluster FQDN",
 	)
 
