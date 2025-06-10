@@ -109,6 +109,7 @@ module "pico_vm" {
 After testing is complete, destroy the Libvirt VM resources using the following command:
 
 ```shell
+cd modules/pico-vm-proxmox
 # Destroy the resources when no longer needed
 terraform destroy
 ```
@@ -223,6 +224,7 @@ Escape character is ^] (Ctrl + ])
 After testing is complete, destroy the Libvirt VM resources using the following command:
 
 ```shell
+cd modules/pico-vm-libvirt
 # Destroy the resources when no longer needed
 terraform destroy
 ```
