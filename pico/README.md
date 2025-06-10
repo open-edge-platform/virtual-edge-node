@@ -204,6 +204,20 @@ Note: "tinkerbell_nginx_domain is a mandatory user input if other arguments are 
 - `vm_name`: The name of the created virtual machine
 - `vm_serial`: The SMBIOS serial number of the virtual machine
 
+#### Check Libvirt VM Console logs
+To check the libvirt VM and access its console, use the following commands:
+
+```shell
+$ virsh list --all
+ Id   Name              State
+---------------------------------
+ 2    libvirt-vm-demo   running
+
+$ virsh console libvirt-vm-demo
+Connected to domain 'libvirt-vm-demo'
+Escape character is ^] (Ctrl + ]) 
+```
+
 #### Delete Libvirt VM
 
 After testing is complete, destroy the Libvirt VM resources using the following command:
