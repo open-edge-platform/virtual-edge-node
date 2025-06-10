@@ -113,6 +113,14 @@ module "pico_vm" {
   - Linux: `apt install xsltproc`
   - Mac OS: `brew install libxslt`
 
+#### Install Prerequisites for Libvirt on Liux host
+```shell
+make libvirt-installer # Installs Libvirt and dependencies (required only for Libvirt VEN)
+```
+
+Note: After running libvirt-installer, log out and log back in, or open a new terminal session.
+
+
 #### Libvirt Interactive CLI
 
 ```shell
@@ -122,12 +130,17 @@ cd modules/pico-vm-libvirt
 # Initialize the module
 terraform init
 
-# Apply the configuration
+# Apply the configuration using interactive mode prompt
 terraform apply
+
+#Or Apply config using variable file terraform.tfvars
+terraform apply --var-file=terraform.tfvars -auto-approve
 ```
 
 This will prompt you for the required variables. You can also provide them
 via a `terraform.tfvars` file or as environment variables.
+
+Note: terraform.tfvars should kept at `modules/pico-vm-libvirt/`
 
 #### Libvirt module
 
@@ -147,13 +160,34 @@ module "pico_vm" {
     smbios_uuid      = "abcd-efgh-ijkl-mnop"
     smbios_product   = "PicoVM"
 
+    vm_console =     "pty"
+
     libvirt_pool_name     = "default"
     libvirt_network_name  = "default"
 
-    tinkerbell_nginx_domain = "your-nginx-url"
+    tinkerbell_nginx_domain = "tinkerbell-nginx.your-orch-url.io"
 }
 ```
 
+Example terrform.tfvar content:
+
+```shell
+
+$ cat terrform.tfvar
+vm_name = "libvirt-vm-demo"
+memory = 8192
+cpu_cores = 8
+disk_size = 128
+smbios_product   = "PicoVM"
+libvirt_pool_name = "default"
+libvirt_network_name = "default"
+vm_console = "pty"
+tinkerbell_nginx_domain = "tinkerbell-nginx.demo.abc.com"
+smbios_serial = "PICOVEN01"
+$
+
+```
+Note: "tinkerbell_nginx_domain is a mandatory user input if other arguments are not provided; otherwise, the default values defined in variables.tf will be used.
 #### Libvirt module Outputs
 
 - `vm_name`: The name of the created virtual machine
