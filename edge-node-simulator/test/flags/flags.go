@@ -21,6 +21,7 @@ type TestConfig struct {
 	ENSimAddress     string
 	Project          string
 	AmountEdgeNodes  int
+	BatchEdgeNodes   int
 	DeployEdgeNodes  bool
 	CreateOrgProject bool
 	Cleanup          bool
@@ -37,6 +38,7 @@ func GetDefaultConfig() *TestConfig {
 		ENSimAddress:     "localhost:5001",
 		Project:          "",
 		AmountEdgeNodes:  1,
+		BatchEdgeNodes:   1,
 		DeployEdgeNodes:  false,
 		CreateOrgProject: false,
 		Cleanup:          false,
@@ -91,6 +93,11 @@ var (
 		defaultCfg.AmountEdgeNodes, "The amount of edge nodes to be used in the tests",
 	)
 
+	batchEdgeNodes = flag.Int(
+		"batchEdgeNodes",
+		defaultCfg.BatchEdgeNodes, "The amount of edge nodes to be created in parallel in the tests",
+	)
+
 	deployEdgeNodes = flag.Bool(
 		"deployEdgeNodes",
 		defaultCfg.DeployEdgeNodes, "Flag to deploy edge nodes to execute tests",
@@ -120,6 +127,7 @@ func GetConfig() *TestConfig {
 		CAPath:           *caPath,
 		Project:          *project,
 		AmountEdgeNodes:  *amountEdgeNodes,
+		BatchEdgeNodes:   *batchEdgeNodes,
 		DeployEdgeNodes:  *deployEdgeNodes,
 		CreateOrgProject: *createOrgProject,
 		Cleanup:          *cleanup,
