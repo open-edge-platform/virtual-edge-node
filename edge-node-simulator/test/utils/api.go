@@ -523,7 +523,7 @@ func HelperCleanupLocationsAPI(_ context.Context, client *http.Client, cfg *flag
 	}
 
 	// List and delete all sites
-	sitesURL := fmt.Sprintf("https://api.%s/v1/projects/regions/region-12345678/%s/sites", cfg.OrchFQDN, cfg.Project)
+	sitesURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions/region-12345678/sites", cfg.OrchFQDN, cfg.Project)
 	sitesList, err := ListSitesAPI(context.Background(), client, sitesURL)
 	if err != nil {
 		return err
@@ -1154,7 +1154,7 @@ func CreateSiteAPI(ctx context.Context,
 	body *edgeinfraapi.SiteResource,
 ) (string, error) {
 	zlog.Info().Msg("CreateSiteAPI")
-	siteURL := fmt.Sprintf("https://api.%s/v1/projects/regions/region-12345678/%s/sites", cfg.OrchFQDN, cfg.Project)
+	siteURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions/region-12345678/sites", cfg.OrchFQDN, cfg.Project)
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
