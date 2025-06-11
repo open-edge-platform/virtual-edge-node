@@ -118,7 +118,7 @@ helm-push: ## @HELP Push helm charts.
 	fi
 
 
-PROJECT_ID              ?=      ""
+PROJECT                 ?=      ""
 CA_PATH                 ?=      ""
 SIM_ADDRESS             ?=      ""
 ORCH_FQDN               ?=      ""
@@ -128,16 +128,16 @@ int-test-day0:
 	ginkgo -v -r --fail-fast --race \
                 --label-filter="infra-tests-day0" \
                 ./test/infra \
-                -- -projectID=$(PROJECT_ID) -caFilepath=$(CA_PATH) -simAddress=$(SIM_ADDRESS) -orchFQDN=$(ORCH_FQDN)
+                -- -project=$(PROJECT) -caFilepath=$(CA_PATH) -simAddress=$(SIM_ADDRESS) -clusterFQDN=$(ORCH_FQDN)
 
 int-test-day1:
 	ginkgo -v -r \
                 --label-filter="infra-tests-day1" \
                 ./test/infra \
-                -- -projectID=$(PROJECT_ID) -caFilepath=$(CA_PATH) -simAddress=$(SIM_ADDRESS) -orchFQDN=$(ORCH_FQDN)
+                -- -project=$(PROJECT) -caFilepath=$(CA_PATH) -simAddress=$(SIM_ADDRESS) -clusterFQDN=$(ORCH_FQDN)
 
 int-test-day2:
 	ginkgo -v -r \
                 --label-filter="infra-tests-day2" \
                 ./test/infra \
-                -- -projectID=$(PROJECT_ID) -caFilepath=$(CA_PATH) -simAddress=$(SIM_ADDRESS) -orchFQDN=$(ORCH_FQDN)
+                -- -project=$(PROJECT) -caFilepath=$(CA_PATH) -simAddress=$(SIM_ADDRESS) -clusterFQDN=$(ORCH_FQDN)

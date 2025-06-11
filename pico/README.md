@@ -16,11 +16,10 @@ usage very quickly.
 ## Features
 
 - Lightweight: Designed for minimal resource usage 🪶
-- Fast: Provisions an Edge Node E2E with Tiber OS and all agents in minutes ⚡️
+- Fast: Provisions an Edge Node E2E with Microvisor and all agents in minutes ⚡️
 - Easy to use: Simple configuration with Terraform 🧘
 - Highly configurable: Customize CPU, memory, disk size, and more 🔧
 - Scalable: Easily scale up or down based on your needs 📈
-- Cross platform: Deploy from Linux and Mac OS 🖥️
 - Multiple onboarding options: Supports both interactive and non-interactive
 onboarding methods 🔄
 - All features of a hardware-backed Edge Node: Including dynamic OS
@@ -28,7 +27,7 @@ provisioning, agents, and Kubernetes 🚀
 
 ## Screenshots
 
-![Pico Node in Orchestrator UI](/static/node_details.png)
+![Pico Node in Orchestrator UI](static/node_details.png)
 
 ## Common Requirements
 
@@ -105,6 +104,17 @@ module "pico_vm" {
 - `vm_uuid`: The SMBIOS UUID of the virtual machine
 - `tinkerbell_nginx_domain`: The Tinkerbell Nginx URL for the virtual machine
 
+#### Delete Proxmox VM
+
+After testing is complete, destroy the Libvirt VM resources using the following command:
+
+```shell
+cd modules/pico-vm-proxmox
+# Destroy the resources when no longer needed
+terraform destroy
+```
+Note: `terraform destroy` only deletes the VM and its dependent resources. EdgeNode related information from Orchestrator UI side must be deleted manually or through automation.
+
 ### To use the Libvirt module
 
 #### Prerequisites for Libvirt
@@ -113,6 +123,14 @@ module "pico_vm" {
 - xsltproc
   - Linux: `apt install xsltproc`
   - Mac OS: `brew install libxslt`
+
+#### Install Prerequisites for Libvirt on Liux host
+```shell
+make libvirt-installer # Installs Libvirt and dependencies (required only for Libvirt VEN)
+```
+
+Note: After running libvirt-installer, log out and log back in, or open a new terminal session.
+
 
 #### Libvirt Interactive CLI
 
@@ -123,12 +141,17 @@ cd modules/pico-vm-libvirt
 # Initialize the module
 terraform init
 
-# Apply the configuration
+# Apply the configuration using interactive mode prompt
 terraform apply
+
+#Or Apply config using variable file terraform.tfvars
+terraform apply --var-file=terraform.tfvars -auto-approve
 ```
 
 This will prompt you for the required variables. You can also provide them
 via a `terraform.tfvars` file or as environment variables.
+
+Note: terraform.tfvars should kept at `modules/pico-vm-libvirt/`
 
 #### Libvirt module
 
@@ -148,17 +171,64 @@ module "pico_vm" {
     smbios_uuid      = "abcd-efgh-ijkl-mnop"
     smbios_product   = "PicoVM"
 
+    vm_console =     "pty"
+
     libvirt_pool_name     = "default"
     libvirt_network_name  = "default"
 
-    tinkerbell_nginx_domain = "your-nginx-url"
+    tinkerbell_nginx_domain = "tinkerbell-nginx.your-orch-url.io"
 }
 ```
+
+Example terrform.tfvar content:
+
+```shell
+
+$ cat terrform.tfvar
+vm_name = "libvirt-vm-demo"
+memory = 8192
+cpu_cores = 8
+disk_size = 128
+smbios_product   = "PicoVM"
+libvirt_pool_name = "default"
+libvirt_network_name = "default"
+vm_console = "pty"
+tinkerbell_nginx_domain = "tinkerbell-nginx.demo.abc.com"
+smbios_serial = "PICOVEN01"
+$
+
+```
+Note: "tinkerbell_nginx_domain is a mandatory user input if other arguments are not provided; otherwise, the default values defined in variables.tf will be used.
 
 #### Libvirt module Outputs
 
 - `vm_name`: The name of the created virtual machine
 - `vm_serial`: The SMBIOS serial number of the virtual machine
+
+#### Check Libvirt VM Console logs
+To check the libvirt VM and access its console, use the following commands:
+
+```shell
+$ virsh list --all
+ Id   Name              State
+---------------------------------
+ 2    libvirt-vm-demo   running
+
+$ virsh console libvirt-vm-demo
+Connected to domain 'libvirt-vm-demo'
+Escape character is ^] (Ctrl + ]) 
+```
+
+#### Delete Libvirt VM
+
+After testing is complete, destroy the Libvirt VM resources using the following command:
+
+```shell
+cd modules/pico-vm-libvirt
+# Destroy the resources when no longer needed
+terraform destroy
+```
+Note: `terraform destroy` only deletes the VM and its dependent resources. EdgeNode related information from Orchestrator UI side must be deleted manually or through automation.
 
 ### To use the KubeVirt module
 

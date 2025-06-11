@@ -25,3 +25,6 @@ docker-build:
 	@echo "---MAKEFILE BUILD---"
 	echo $@
 	@echo "---END MAKEFILE Build---"
+libvirt-installer:
+	@echo "Installing Libvirt..."
+	bash ../vm-provisioning/install_packages.sh
