@@ -6,6 +6,7 @@ package utils_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -28,6 +29,8 @@ const (
 	// wait time for HTTP request.
 	waitTime = 60 * time.Second
 )
+
+var ErrListedAllSentinel = fmt.Errorf("all elements listed")
 
 var (
 	hostsURL     = "https://api.%s/v1/projects/%s/compute/hosts"
@@ -121,7 +124,6 @@ func ListHostsAPI(ctx context.Context, apiClient *http.Client,
 	zlog.Info().Msg("ListHosts")
 	hostsList := make(map[string]string)
 
-	allListed := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
 		if err != nil {
@@ -133,7 +135,7 @@ func ListHostsAPI(ctx context.Context, apiClient *http.Client,
 			return err
 		}
 		if len(ps.Hosts) == 0 {
-			return nil
+			return ErrListedAllSentinel
 		}
 		for _, host := range ps.Hosts {
 			hostsList[*host.ResourceId] = *host.Uuid
@@ -141,7 +143,7 @@ func ListHostsAPI(ctx context.Context, apiClient *http.Client,
 
 		if !ps.HasNext {
 			zlog.Info().Msgf("All listed %v", hostsList)
-			allListed = true
+			return ErrListedAllSentinel
 		}
 		return nil
 	}
@@ -155,13 +157,14 @@ func ListHostsAPI(ctx context.Context, apiClient *http.Client,
 		}
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+		err := httpGet(rCtx, apiClient, fmtURL, responseHooker)
+		if err != nil && !errors.Is(err, ErrListedAllSentinel) {
 			cancel()
 			return hostsList, err
 		}
 		cancel()
 
-		if allListed {
+		if errors.Is(err, ErrListedAllSentinel) {
 			zlog.Info().Msg("All listed")
 			break
 		}
@@ -178,7 +181,6 @@ func ListInstancesAPI(ctx context.Context, apiClient *http.Client,
 	zlog.Info().Msg("ListInstances")
 	resList := make(map[string]string)
 
-	allListed := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
 		if err != nil {
@@ -190,7 +192,7 @@ func ListInstancesAPI(ctx context.Context, apiClient *http.Client,
 			return err
 		}
 		if len(ps.Instances) == 0 {
-			return nil
+			return ErrListedAllSentinel
 		}
 		for _, res := range ps.Instances {
 			resList[*res.ResourceId] = *res.Host.ResourceId
@@ -198,7 +200,7 @@ func ListInstancesAPI(ctx context.Context, apiClient *http.Client,
 
 		if !ps.HasNext {
 			zlog.Info().Msgf("All listed %v", resList)
-			allListed = true
+			return ErrListedAllSentinel
 		}
 		return nil
 	}
@@ -212,13 +214,14 @@ func ListInstancesAPI(ctx context.Context, apiClient *http.Client,
 		}
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+		err := httpGet(rCtx, apiClient, fmtURL, responseHooker)
+		if err != nil && !errors.Is(err, ErrListedAllSentinel) {
 			cancel()
 			return resList, err
 		}
 		cancel()
 
-		if allListed {
+		if errors.Is(err, ErrListedAllSentinel) {
 			zlog.Info().Msg("All listed")
 			break
 		}
@@ -300,7 +303,6 @@ func ListSingleSchedulesAPI(ctx context.Context, apiClient *http.Client, url str
 	zlog.Info().Msg("ListSingleSchedules")
 	schedulesList := make(map[string]struct{})
 
-	allListed := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
 		if err != nil {
@@ -312,7 +314,7 @@ func ListSingleSchedulesAPI(ctx context.Context, apiClient *http.Client, url str
 			return err
 		}
 		if len(ps.SingleSchedules) == 0 {
-			return nil
+			return ErrListedAllSentinel
 		}
 		for _, schedule := range ps.SingleSchedules {
 			schedulesList[*schedule.ResourceId] = struct{}{}
@@ -320,7 +322,7 @@ func ListSingleSchedulesAPI(ctx context.Context, apiClient *http.Client, url str
 
 		if !ps.HasNext {
 			zlog.Info().Msgf("All listed %v", schedulesList)
-			allListed = true
+			return ErrListedAllSentinel
 		}
 		return nil
 	}
@@ -331,13 +333,14 @@ func ListSingleSchedulesAPI(ctx context.Context, apiClient *http.Client, url str
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+		err := httpGet(rCtx, apiClient, fmtURL, responseHooker)
+		if err != nil && !errors.Is(err, ErrListedAllSentinel) {
 			cancel()
 			return schedulesList, err
 		}
 		cancel()
 
-		if allListed {
+		if errors.Is(err, ErrListedAllSentinel) {
 			zlog.Info().Msg("All listed")
 			break
 		}
@@ -352,7 +355,6 @@ func ListRepeatedSchedulesAPI(ctx context.Context, apiClient *http.Client, url s
 	zlog.Info().Msg("ListRepeatedSchedules")
 	schedulesList := make(map[string]struct{})
 
-	allListed := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
 		if err != nil {
@@ -364,7 +366,7 @@ func ListRepeatedSchedulesAPI(ctx context.Context, apiClient *http.Client, url s
 			return err
 		}
 		if len(ps.RepeatedSchedules) == 0 {
-			return nil
+			return ErrListedAllSentinel
 		}
 		for _, schedule := range ps.RepeatedSchedules {
 			schedulesList[*schedule.ResourceId] = struct{}{}
@@ -372,7 +374,7 @@ func ListRepeatedSchedulesAPI(ctx context.Context, apiClient *http.Client, url s
 
 		if !ps.HasNext {
 			zlog.Info().Msgf("All listed %v", schedulesList)
-			allListed = true
+			return ErrListedAllSentinel
 		}
 		return nil
 	}
@@ -383,13 +385,14 @@ func ListRepeatedSchedulesAPI(ctx context.Context, apiClient *http.Client, url s
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+		err := httpGet(rCtx, apiClient, fmtURL, responseHooker)
+		if err != nil && !errors.Is(err, ErrListedAllSentinel) {
 			cancel()
 			return schedulesList, err
 		}
 		cancel()
 
-		if allListed {
+		if errors.Is(err, ErrListedAllSentinel) {
 			zlog.Info().Msg("All listed")
 			break
 		}
@@ -404,7 +407,6 @@ func ListRegionsAPI(ctx context.Context, apiClient *http.Client, url string) (ma
 	zlog.Info().Msg("ListRegions")
 	regionsList := make(map[string]struct{})
 
-	allListed := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
 		if err != nil {
@@ -416,7 +418,7 @@ func ListRegionsAPI(ctx context.Context, apiClient *http.Client, url string) (ma
 			return err
 		}
 		if len(ps.Regions) == 0 {
-			return nil
+			return ErrListedAllSentinel
 		}
 		for _, region := range ps.Regions {
 			regionsList[*region.ResourceId] = struct{}{}
@@ -424,7 +426,7 @@ func ListRegionsAPI(ctx context.Context, apiClient *http.Client, url string) (ma
 
 		if !ps.HasNext {
 			zlog.Info().Msgf("All listed %v", regionsList)
-			allListed = true
+			return ErrListedAllSentinel
 		}
 		return nil
 	}
@@ -435,13 +437,14 @@ func ListRegionsAPI(ctx context.Context, apiClient *http.Client, url string) (ma
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+		err := httpGet(rCtx, apiClient, fmtURL, responseHooker)
+		if err != nil && !errors.Is(err, ErrListedAllSentinel) {
 			cancel()
 			return regionsList, err
 		}
 		cancel()
 
-		if allListed {
+		if errors.Is(err, ErrListedAllSentinel) {
 			zlog.Info().Msg("All listed")
 			break
 		}
@@ -456,7 +459,6 @@ func ListSitesAPI(ctx context.Context, apiClient *http.Client, url string) (map[
 	zlog.Info().Msg("ListSites")
 	sitesList := make(map[string]struct{})
 
-	allListed := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
 		if err != nil {
@@ -468,7 +470,7 @@ func ListSitesAPI(ctx context.Context, apiClient *http.Client, url string) (map[
 			return err
 		}
 		if len(ps.Sites) == 0 {
-			return nil
+			return ErrListedAllSentinel
 		}
 		for _, site := range ps.Sites {
 			sitesList[*site.ResourceId] = struct{}{}
@@ -476,7 +478,7 @@ func ListSitesAPI(ctx context.Context, apiClient *http.Client, url string) (map[
 
 		if !ps.HasNext {
 			zlog.Info().Msgf("All listed %v", sitesList)
-			allListed = true
+			return ErrListedAllSentinel
 		}
 		return nil
 	}
@@ -487,13 +489,14 @@ func ListSitesAPI(ctx context.Context, apiClient *http.Client, url string) (map[
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
-		if err := httpGet(rCtx, apiClient, fmtURL, responseHooker); err != nil {
+		err := httpGet(rCtx, apiClient, fmtURL, responseHooker)
+		if err != nil && !errors.Is(err, ErrListedAllSentinel) {
 			cancel()
 			return sitesList, err
 		}
 		cancel()
 
-		if allListed {
+		if errors.Is(err, ErrListedAllSentinel) {
 			zlog.Info().Msg("All listed")
 			break
 		}
