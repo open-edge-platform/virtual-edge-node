@@ -153,7 +153,7 @@ func ListHostsAPI(ctx context.Context, apiClient *http.Client,
 	for {
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 		if filter != nil {
-			fmtURL = fmt.Sprintf("%s&filter='%s'", fmtURL, *filter)
+			fmtURL = fmt.Sprintf("%s&filter=%s", fmtURL, *filter)
 		}
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
@@ -210,7 +210,7 @@ func ListInstancesAPI(ctx context.Context, apiClient *http.Client,
 	for {
 		fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", url, offset, pageSize)
 		if filter != nil {
-			fmtURL = fmt.Sprintf("%s&filter='%s'", fmtURL, *filter)
+			fmtURL = fmt.Sprintf("%s&filter=%s", fmtURL, *filter)
 		}
 
 		rCtx, cancel := context.WithTimeout(ctx, waitTime)
@@ -593,7 +593,7 @@ func ListHostsTotalAPI(ctx context.Context, apiClient *http.Client,
 	pageSize := 100
 	fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", fmtHostsURL, offset, pageSize)
 	if filter != nil {
-		fmtURL = fmt.Sprintf("%s&filter='%s'", fmtURL, *filter)
+		fmtURL = fmt.Sprintf("%s&filter=%s", fmtURL, *filter)
 	}
 
 	rCtx, cancel := context.WithTimeout(ctx, waitTime)
@@ -631,7 +631,7 @@ func ListInstancesTotalAPI(ctx context.Context, apiClient *http.Client,
 	pageSize := 100
 	fmtURL := fmt.Sprintf("%s?offset=%d&pageSize=%d", fmtInstancesURL, offset, pageSize)
 	if filter != nil {
-		fmtURL = fmt.Sprintf("%s&filter='%s'", fmtURL, *filter)
+		fmtURL = fmt.Sprintf("%s&filter=%s", fmtURL, *filter)
 	}
 
 	rCtx, cancel := context.WithTimeout(ctx, waitTime)
