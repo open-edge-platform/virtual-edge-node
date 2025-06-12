@@ -291,14 +291,14 @@ func HTTPInfraOnboardGetOSID(ctx context.Context, url, token string, client *htt
 			return fmt.Errorf("empty os resources")
 		}
 		for _, osr := range os.OperatingSystemResources {
-			if *osr.ProfileName == "ubuntu-22.04-lts-generic" {
+			if *osr.ProfileName == "microvisor-nonrt" {
 				osID = *osr.ResourceId
 				zlog.Debug().Msgf("Found OS: %s", osID)
 				break
 			}
 		}
 		if osID == "" {
-			return fmt.Errorf("ubuntu-22.04-lts-generic profile not found")
+			return fmt.Errorf("microvisor-nonrt profile not found")
 		}
 		return nil
 	}

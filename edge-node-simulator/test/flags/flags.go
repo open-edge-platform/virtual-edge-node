@@ -12,7 +12,7 @@ import (
 var zlog = logging.GetLogger("flags")
 
 type TestConfig struct {
-	OrchFQDN         string
+	ClusterFQDN      string
 	EdgeAPIUser      string
 	EdgeAPIPass      string
 	EdgeOnboardUser  string
@@ -21,6 +21,7 @@ type TestConfig struct {
 	ENSimAddress     string
 	Project          string
 	AmountEdgeNodes  int
+	BatchEdgeNodes   int
 	DeployEdgeNodes  bool
 	CreateOrgProject bool
 	Cleanup          bool
@@ -28,7 +29,7 @@ type TestConfig struct {
 
 func GetDefaultConfig() *TestConfig {
 	return &TestConfig{
-		OrchFQDN:         "kind.internal",
+		ClusterFQDN:      "kind.internal",
 		EdgeAPIUser:      "", // update <api-user>
 		EdgeAPIPass:      "", // update <api-pass>
 		EdgeOnboardUser:  "", // update <onb-user>
@@ -37,6 +38,7 @@ func GetDefaultConfig() *TestConfig {
 		ENSimAddress:     "localhost:5001",
 		Project:          "",
 		AmountEdgeNodes:  1,
+		BatchEdgeNodes:   1,
 		DeployEdgeNodes:  false,
 		CreateOrgProject: false,
 		Cleanup:          false,
@@ -47,7 +49,7 @@ var (
 	defaultCfg = GetDefaultConfig()
 
 	flagOrchestratorFQDN = flag.String(
-		"clusterFQDN", defaultCfg.OrchFQDN,
+		"clusterFQDN", defaultCfg.ClusterFQDN,
 		"The orch cluster FQDN",
 	)
 
@@ -91,6 +93,11 @@ var (
 		defaultCfg.AmountEdgeNodes, "The amount of edge nodes to be used in the tests",
 	)
 
+	batchEdgeNodes = flag.Int(
+		"batchEdgeNodes",
+		defaultCfg.BatchEdgeNodes, "The amount of edge nodes to be created in parallel in the tests",
+	)
+
 	deployEdgeNodes = flag.Bool(
 		"deployEdgeNodes",
 		defaultCfg.DeployEdgeNodes, "Flag to deploy edge nodes to execute tests",
@@ -111,7 +118,7 @@ func GetConfig() *TestConfig {
 	flag.Parse()
 
 	cfg := &TestConfig{
-		OrchFQDN:         *flagOrchestratorFQDN,
+		ClusterFQDN:      *flagOrchestratorFQDN,
 		EdgeAPIUser:      *flagEdgeAPIUser,
 		EdgeAPIPass:      *flagEdgeAPIPass,
 		EdgeOnboardUser:  *flagEdgeOnboardUser,
@@ -120,6 +127,7 @@ func GetConfig() *TestConfig {
 		CAPath:           *caPath,
 		Project:          *project,
 		AmountEdgeNodes:  *amountEdgeNodes,
+		BatchEdgeNodes:   *batchEdgeNodes,
 		DeployEdgeNodes:  *deployEdgeNodes,
 		CreateOrgProject: *createOrgProject,
 		Cleanup:          *cleanup,

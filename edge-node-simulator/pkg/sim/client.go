@@ -15,6 +15,8 @@ import (
 
 type Client interface {
 	Create(context.Context, string, *ensimapi.NodeCredentials, bool) error
+	// CreateNodes creates a number of nodes with the given credentials and teardown option.
+	// number is the total number of nodes to create, and batch is the number of nodes to create in each batch.
 	CreateNodes(context.Context, uint32, uint32, *ensimapi.NodeCredentials, bool) error
 	DeleteNodes(context.Context, uint32) error
 	Update(context.Context, string, map[ensimapi.AgentType]ensimapi.AgentState) error

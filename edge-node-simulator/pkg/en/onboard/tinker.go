@@ -28,7 +28,7 @@ const (
 
 var (
 	ctxTimeout     = time.Second * 10
-	retryInterval  = time.Second * 10
+	retryInterval  = time.Second * 1
 	actionDuration = time.Millisecond * 10
 )
 

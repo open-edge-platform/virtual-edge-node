@@ -4,6 +4,7 @@
 package infra_test
 
 import (
+	"context"
 	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -16,6 +17,8 @@ import (
 var _ = Describe("Infrastructure Manager integration tests", Label(cleanupLabel), func() {
 	var cfg *flags_test.TestConfig
 	var httpClient *http.Client
+	var cancel context.CancelFunc
+	var ctx context.Context
 
 	BeforeEach(func() {
 		cfg = flags_test.GetConfig()
@@ -26,6 +29,17 @@ var _ = Describe("Infrastructure Manager integration tests", Label(cleanupLabel)
 
 		httpClient, err = utils_test.GetClientWithCA(certCA)
 		Expect(err).To(BeNil())
+
+		ctx, cancel = context.WithCancel(context.Background())
+		Expect(ctx).NotTo(BeNil())
+		Expect(cancel).NotTo(BeNil())
+
+		err = utils_test.HelperJWTTokenRoutine(ctx, certCA, cfg.ClusterFQDN, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
+		Expect(err).To(BeNil())
+	})
+
+	AfterEach(func() {
+		cancel()
 	})
 
 	Describe("Infrastructure Manager cleanup", Label(cleanupLabel), func() {
