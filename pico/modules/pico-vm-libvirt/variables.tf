@@ -80,5 +80,5 @@ variable "libvirt_network_name" {
 variable "libvirt_firmware" {
   description = "The firmware to use for the VM"
   type        = string
-  default     = "/usr/share/OVMF/OVMF_CODE.fd"
+  default     = "/usr/share/OVMF/OVMF_CODE_4M.fd"
 }
