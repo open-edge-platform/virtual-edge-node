@@ -114,6 +114,9 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			err = ensimClient.DeleteNodes(ctx, 0)
 			Expect(err).To(BeNil())
 
+			// Wait for the deletion to propagate
+			time.Sleep(waitUntilHostsDeleted)
+
 			By("checking no edge nodes exist in Infrastructure Manager simulator")
 			listNodes, err = ensimClient.List(ctx)
 			Expect(err).To(BeNil())

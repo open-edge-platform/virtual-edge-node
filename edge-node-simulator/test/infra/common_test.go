@@ -28,6 +28,7 @@ var (
 
 var (
 	waitUntilHostsRunning   = time.Second * 5
+	waitUntilHostsDeleted   = time.Second * 2
 	waitHostsRunning        = time.Minute * 5
 	waitHostsConnectionLost = time.Minute * 5
 	waitHostsMaintenance    = time.Minute * 1
