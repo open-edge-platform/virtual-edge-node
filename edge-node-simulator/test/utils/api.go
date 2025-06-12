@@ -685,7 +685,7 @@ func CheckHostStatusAPI(
 ) {
 	tb.Helper()
 	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.ClusterFQDN, cfg.Project)
-	filterUUID := fmt.Sprintf(`%s = %q`, "uuid", hostUUID)
+	filterUUID := fmt.Sprintf(`%s=%q`, "uuid", hostUUID)
 	hostIDs, err := ListHostsAPI(ctx, apiClient, fmtHostsURL, &filterUUID)
 	require.NoError(tb, err)
 
