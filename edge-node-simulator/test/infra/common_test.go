@@ -29,8 +29,8 @@ var (
 var (
 	waitUntilHostsRunning   = time.Second * 5
 	waitUntilHostsDeleted   = time.Second * 2
-	waitHostsRunning        = time.Minute * 5
-	waitHostsConnectionLost = time.Minute * 5
+	waitHostsRunning        = time.Minute * 1
+	waitHostsConnectionLost = time.Minute * 1
 	waitHostsMaintenance    = time.Minute * 1
 
 	TimeNow       = int(time.Now().UTC().Unix())
