@@ -43,6 +43,13 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 		httpClient, err = utils_test.GetClientWithCA(certCA)
 		Expect(err).To(BeNil())
 
+		ctx, cancel = context.WithCancel(context.Background())
+		Expect(ctx).NotTo(BeNil())
+		Expect(cancel).NotTo(BeNil())
+
+		err = utils_test.HelperJWTTokenRoutine(ctx, certCA, cfg.ClusterFQDN, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
+		Expect(err).To(BeNil())
+
 		if cfg.Cleanup {
 			errCleanup := utils_test.HelperCleanupHostsAPI(ctx, httpClient, cfg)
 			Expect(errCleanup).To(BeNil())
