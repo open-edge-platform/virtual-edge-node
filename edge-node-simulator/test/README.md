@@ -9,7 +9,7 @@ All test cases have descriptions in their respective files/definitions.
 For all the day0, day1 and day2 tests the following environment variables need to be defined.
 
 ```bash
-ORCH_FQDN="" # The FQDN of the target orchestrator cluster
+CLUSTER_FQDN="" # The FQDN of the target orchestrator cluster
 ENSIM_ADDR="localhost:3196" # The gRPC server address of the Edge Node simulator (if/when needed) - e.g., localhost:3196
 CA_PATH="" # The file path of the CA certificate of the target orchestrator cluster
 ONBUSER="" # The orch keycloak user - to retrieve token for Infrastructure Manager SBI interactions of ENSIM
@@ -48,7 +48,7 @@ kubectl port-forward svc/api -n orch-infra --address 0.0.0.0 8080:8080 &
 ```bash
 ginkgo -v -r --fail-fast --race --json-report infra-tests-day0.json --output-dir . --label-filter="infra-tests-day0" ./test/infra -- \
     -project=${PROJECT} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -clusterFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${CLUSTER_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```
@@ -58,7 +58,7 @@ ginkgo -v -r --fail-fast --race --json-report infra-tests-day0.json --output-dir
 ```bash
 ginkgo -v -r --fail-fast --race --json-report infra-tests-day1.json --output-dir . --label-filter="infra-tests-day1" ./test/infra -- \
     -project=${PROJECT} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -clusterFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${CLUSTER_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```
@@ -68,7 +68,7 @@ ginkgo -v -r --fail-fast --race --json-report infra-tests-day1.json --output-dir
 ```bash
 ginkgo -v -r --fail-fast --race --json-report infra-tests-day2.json --output-dir . --label-filter="infra-tests-day2" ./test/infra --  \
     -project=${PROJECT} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -clusterFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${CLUSTER_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```
@@ -78,7 +78,7 @@ ginkgo -v -r --fail-fast --race --json-report infra-tests-day2.json --output-dir
 ```bash
 ginkgo -v -r --fail-fast --race --label-filter="cleanup" ./test/infra --  \
     -project=${PROJECT} -caFilepath=${CA_PATH} -simAddress=${ENSIM_ADDR} \
-    -clusterFQDN=${ORCH_FQDN} \
+    -clusterFQDN=${CLUSTER_FQDN} \
     -edgeAPIUser=${APIUSER}  -edgeAPIPass=${APIPASS} \
     -edgeOnboardUser=${ONBUSER} -edgeOnboardPass=${ONBPASS}
 ```

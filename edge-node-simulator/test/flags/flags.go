@@ -12,7 +12,7 @@ import (
 var zlog = logging.GetLogger("flags")
 
 type TestConfig struct {
-	OrchFQDN         string
+	ClusterFQDN      string
 	EdgeAPIUser      string
 	EdgeAPIPass      string
 	EdgeOnboardUser  string
@@ -29,7 +29,7 @@ type TestConfig struct {
 
 func GetDefaultConfig() *TestConfig {
 	return &TestConfig{
-		OrchFQDN:         "kind.internal",
+		ClusterFQDN:      "kind.internal",
 		EdgeAPIUser:      "", // update <api-user>
 		EdgeAPIPass:      "", // update <api-pass>
 		EdgeOnboardUser:  "", // update <onb-user>
@@ -49,7 +49,7 @@ var (
 	defaultCfg = GetDefaultConfig()
 
 	flagOrchestratorFQDN = flag.String(
-		"clusterFQDN", defaultCfg.OrchFQDN,
+		"clusterFQDN", defaultCfg.ClusterFQDN,
 		"The orch cluster FQDN",
 	)
 
@@ -118,7 +118,7 @@ func GetConfig() *TestConfig {
 	flag.Parse()
 
 	cfg := &TestConfig{
-		OrchFQDN:         *flagOrchestratorFQDN,
+		ClusterFQDN:      *flagOrchestratorFQDN,
 		EdgeAPIUser:      *flagEdgeAPIUser,
 		EdgeAPIPass:      *flagEdgeAPIPass,
 		EdgeOnboardUser:  *flagEdgeOnboardUser,

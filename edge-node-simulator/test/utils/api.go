@@ -247,7 +247,7 @@ func DeleteResourceAPI(ctx context.Context,
 func DeleteAllHostsAPI(ctx context.Context, client *http.Client, cfg *flags_test.TestConfig, filter *string) error {
 	zlog.Info().Msg("DeleteAllHosts")
 
-	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.OrchFQDN, cfg.Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.ClusterFQDN, cfg.Project)
 	hostsList, err := ListHostsAPI(ctx, client, fmtHostsURL, filter)
 	if err != nil {
 		return err
@@ -267,7 +267,7 @@ func DeleteAllHostsAPI(ctx context.Context, client *http.Client, cfg *flags_test
 
 func DeleteAllInstancesAPI(ctx context.Context, client *http.Client, cfg *flags_test.TestConfig, filter *string) error {
 	zlog.Info().Msg("DeleteAllInstances")
-	fmtInstancesURL := fmt.Sprintf(instancesURL, cfg.OrchFQDN, cfg.Project)
+	fmtInstancesURL := fmt.Sprintf(instancesURL, cfg.ClusterFQDN, cfg.Project)
 	instList, err := ListInstancesAPI(ctx, client, fmtInstancesURL, filter)
 	if err != nil {
 		return err
@@ -510,7 +510,7 @@ func ListSitesAPI(ctx context.Context, apiClient *http.Client, url string) (map[
 // Lists all regions and sites and deletes them.
 func HelperCleanupLocationsAPI(_ context.Context, client *http.Client, cfg *flags_test.TestConfig) error {
 	// List and delete all regions
-	regionsURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions", cfg.OrchFQDN, cfg.Project)
+	regionsURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions", cfg.ClusterFQDN, cfg.Project)
 	regionsList, err := ListRegionsAPI(context.Background(), client, regionsURL)
 	if err != nil {
 		return err
@@ -523,7 +523,7 @@ func HelperCleanupLocationsAPI(_ context.Context, client *http.Client, cfg *flag
 	}
 
 	// List and delete all sites
-	sitesURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions/region-12345678/sites", cfg.OrchFQDN, cfg.Project)
+	sitesURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions/region-12345678/sites", cfg.ClusterFQDN, cfg.Project)
 	sitesList, err := ListSitesAPI(context.Background(), client, sitesURL)
 	if err != nil {
 		return err
@@ -541,7 +541,7 @@ func HelperCleanupLocationsAPI(_ context.Context, client *http.Client, cfg *flag
 // HelperCleanupSchedulesAPI cleans up all single and repeated schedules in the Infrastructure Manager.
 // Lists all single and repeated schedules and deletes them.
 func HelperCleanupSchedulesAPI(_ context.Context, client *http.Client, cfg *flags_test.TestConfig) error {
-	singleSchedulesURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.OrchFQDN, cfg.Project)
+	singleSchedulesURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.ClusterFQDN, cfg.Project)
 	singleSchedulesList, err := ListSingleSchedulesAPI(context.Background(), client, singleSchedulesURL)
 	if err != nil {
 		return err
@@ -553,7 +553,7 @@ func HelperCleanupSchedulesAPI(_ context.Context, client *http.Client, cfg *flag
 		}
 	}
 
-	repeatedSchedulesURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/repeated", cfg.OrchFQDN, cfg.Project)
+	repeatedSchedulesURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/repeated", cfg.ClusterFQDN, cfg.Project)
 	repeatedSchedulesList, err := ListRepeatedSchedulesAPI(context.Background(), client, repeatedSchedulesURL)
 	if err != nil {
 		return err
@@ -573,7 +573,7 @@ func ListHostsTotalAPI(ctx context.Context, apiClient *http.Client,
 	filter *string,
 ) (int, error) {
 	zlog.Info().Msg("ListHostsTotalAPI")
-	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.OrchFQDN, cfg.Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.ClusterFQDN, cfg.Project)
 	totalElements := 0
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
@@ -611,7 +611,7 @@ func ListInstancesTotalAPI(ctx context.Context, apiClient *http.Client,
 	filter *string,
 ) (int, error) {
 	zlog.Info().Msg("ListInstancesTotalAPI")
-	fmtInstancesURL := fmt.Sprintf(instancesURL, cfg.OrchFQDN, cfg.Project)
+	fmtInstancesURL := fmt.Sprintf(instancesURL, cfg.ClusterFQDN, cfg.Project)
 	totalElements := 0
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
@@ -649,7 +649,7 @@ func getHostAPI(ctx context.Context, apiClient *http.Client,
 	hostID string,
 ) (*edgeinfraapi.HostResource, error) {
 	zlog.Info().Msg("getHostAPI")
-	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.OrchFQDN, cfg.Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.ClusterFQDN, cfg.Project)
 	hostReply := &edgeinfraapi.HostResource{}
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
@@ -684,7 +684,7 @@ func CheckHostStatusAPI(
 	hostUUID string,
 ) {
 	tb.Helper()
-	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.OrchFQDN, cfg.Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.ClusterFQDN, cfg.Project)
 	filterUUID := fmt.Sprintf(`%s = %q`, "uuid", hostUUID)
 	hostIDs, err := ListHostsAPI(ctx, apiClient, fmtHostsURL, &filterUUID)
 	require.NoError(tb, err)
@@ -723,13 +723,13 @@ func CheckHostStatusAPI(
 
 // ListHosts returns a map of hostID to hostUUID using the HTTP API.
 func ListHosts(ctx context.Context, apiClient *http.Client, filter *string) (map[string]string, error) {
-	fmtHostsURL := fmt.Sprintf(hostsURL, flags_test.GetConfig().OrchFQDN, flags_test.GetConfig().Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, flags_test.GetConfig().ClusterFQDN, flags_test.GetConfig().Project)
 	return ListHostsAPI(ctx, apiClient, fmtHostsURL, filter)
 }
 
 // ListInstances returns a map of instanceID to hostID using the HTTP API.
 func ListInstances(ctx context.Context, apiClient *http.Client, filter *string) (map[string]string, error) {
-	fmtInstancesURL := fmt.Sprintf(instancesURL, flags_test.GetConfig().OrchFQDN, flags_test.GetConfig().Project)
+	fmtInstancesURL := fmt.Sprintf(instancesURL, flags_test.GetConfig().ClusterFQDN, flags_test.GetConfig().Project)
 	return ListInstancesAPI(ctx, apiClient, fmtInstancesURL, filter)
 }
 
@@ -741,7 +741,7 @@ func UpdateHostOS(ctx context.Context, tb testing.TB,
 ) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
-	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.OrchFQDN, cfg.Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, cfg.ClusterFQDN, cfg.Project)
 	getURL := fmt.Sprintf("%s/%s", fmtHostsURL, hostID)
 	var osID string
 	var osSHA *string
@@ -786,7 +786,7 @@ func UpdateHostOS(ctx context.Context, tb testing.TB,
 	if err != nil {
 		tb.Fatalf("failed to marshall patch request: %v", err)
 	}
-	osURL := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/os/%s", cfg.OrchFQDN, cfg.Project, osID)
+	osURL := fmt.Sprintf("https://api.%s/v1/projects/%s/compute/os/%s", cfg.ClusterFQDN, cfg.Project, osID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, osURL, io.NopCloser(strings.NewReader(string(osBodyBytes))))
 	if err != nil {
 		tb.Fatalf("failed to create patch request: %v", err)
@@ -811,7 +811,7 @@ func UpdateHostOS(ctx context.Context, tb testing.TB,
 func SetHostsSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Client, hostIDs []string) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
-	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.OrchFQDN, cfg.Project)
+	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.ClusterFQDN, cfg.Project)
 	for _, hostID := range hostIDs {
 		now := time.Now().Unix()
 		schedStart := int(now + DelayStart5) // DelayStart5
@@ -850,7 +850,7 @@ func SetHostsSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Cli
 func SetSitesSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Client, siteIDs []string) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
-	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.OrchFQDN, cfg.Project)
+	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.ClusterFQDN, cfg.Project)
 	for _, siteID := range siteIDs {
 		schedName := "schedSingle"
 		now := time.Now().Unix()
@@ -890,7 +890,7 @@ func SetSitesSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Cli
 func SetRegionSingleSched(ctx context.Context, tb testing.TB, apiClient *http.Client, regionIDs []string) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
-	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.OrchFQDN, cfg.Project)
+	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules/single", cfg.ClusterFQDN, cfg.Project)
 	for _, regionID := range regionIDs {
 		schedName := "schedSingle"
 		now := time.Now().Unix()
@@ -938,7 +938,7 @@ func CheckHostsMaintenance(ctx context.Context, tb testing.TB, apiClient *http.C
 func AssertHostInMaintenance(ctx context.Context, tb testing.TB, apiClient *http.Client, hostID string) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
-	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules?hostId=%s", cfg.OrchFQDN, cfg.Project, hostID)
+	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules?hostId=%s", cfg.ClusterFQDN, cfg.Project, hostID)
 	found := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
@@ -965,7 +965,7 @@ func AssertHostInMaintenance(ctx context.Context, tb testing.TB, apiClient *http
 func CheckSiteMaintenance(ctx context.Context, tb testing.TB, apiClient *http.Client, siteID string) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
-	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules?siteId=%s", cfg.OrchFQDN, cfg.Project, siteID)
+	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules?siteId=%s", cfg.ClusterFQDN, cfg.Project, siteID)
 	found := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
@@ -992,7 +992,7 @@ func CheckSiteMaintenance(ctx context.Context, tb testing.TB, apiClient *http.Cl
 func CheckRegionMaintenance(ctx context.Context, tb testing.TB, apiClient *http.Client, regionID string) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
-	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules?regionId=%s", cfg.OrchFQDN, cfg.Project, regionID)
+	schedURL := fmt.Sprintf("https://api.%s/v1/projects/%s/schedules?regionId=%s", cfg.ClusterFQDN, cfg.Project, regionID)
 	found := false
 	responseHooker := func(res *http.Response) error {
 		b, err := io.ReadAll(res.Body)
@@ -1017,7 +1017,7 @@ func CheckRegionMaintenance(ctx context.Context, tb testing.TB, apiClient *http.
 
 // ConfigureHostsbyID assigns a list of hosts to a site.
 func ConfigureHostsbyID(ctx context.Context, apiClient *http.Client, hostIDs []string, siteID string) error {
-	fmtHostsURL := fmt.Sprintf(hostsURL, flags_test.GetConfig().OrchFQDN, flags_test.GetConfig().Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, flags_test.GetConfig().ClusterFQDN, flags_test.GetConfig().Project)
 	for _, hostID := range hostIDs {
 		patchURL := fmt.Sprintf("%s/%s", fmtHostsURL, hostID)
 		body := edgeinfraapi.HostResource{
@@ -1058,7 +1058,7 @@ func UnconfigureAllHosts(ctx context.Context, apiClient *http.Client) error {
 	if err != nil {
 		return err
 	}
-	fmtHostsURL := fmt.Sprintf(hostsURL, flags_test.GetConfig().OrchFQDN, flags_test.GetConfig().Project)
+	fmtHostsURL := fmt.Sprintf(hostsURL, flags_test.GetConfig().ClusterFQDN, flags_test.GetConfig().Project)
 	for hostID := range hostsList {
 		patchURL := fmt.Sprintf("%s/%s", fmtHostsURL, hostID)
 		body := edgeinfraapi.HostResource{
@@ -1099,7 +1099,7 @@ func CreateRegionAPI(ctx context.Context,
 	body *edgeinfraapi.RegionResource,
 ) (string, error) {
 	zlog.Info().Msg("CreateRegionAPI")
-	regionURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions", cfg.OrchFQDN, cfg.Project)
+	regionURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions", cfg.ClusterFQDN, cfg.Project)
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
@@ -1154,7 +1154,7 @@ func CreateSiteAPI(ctx context.Context,
 	body *edgeinfraapi.SiteResource,
 ) (string, error) {
 	zlog.Info().Msg("CreateSiteAPI")
-	siteURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions/region-12345678/sites", cfg.OrchFQDN, cfg.Project)
+	siteURL := fmt.Sprintf("https://api.%s/v1/projects/%s/regions/region-12345678/sites", cfg.ClusterFQDN, cfg.Project)
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {

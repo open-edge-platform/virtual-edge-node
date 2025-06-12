@@ -43,7 +43,7 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 		Expect(ctx).NotTo(BeNil())
 		Expect(cancel).NotTo(BeNil())
 
-		err = utils_test.HelperJWTTokenRoutine(ctx, certCA, cfg.OrchFQDN, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
+		err = utils_test.HelperJWTTokenRoutine(ctx, certCA, cfg.ClusterFQDN, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
 		Expect(err).To(BeNil())
 
 		ensimClient, err = GetENSimClient(ctx, cfg)
