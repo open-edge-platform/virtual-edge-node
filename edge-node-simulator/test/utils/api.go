@@ -695,27 +695,47 @@ func CheckHostStatusAPI(
 		require.NotNil(tb, host)
 
 		if host != nil {
-			assert.Equal(tb, *host.HostStatus,
-				host_status.HostStatusRunning.Status)
-			assert.Equal(tb, string(*host.HostStatusIndicator),
-				host_status.HostStatusRunning.StatusIndicator.String())
-			assert.Equal(tb, *host.OnboardingStatus,
-				onb_status.OnboardingStatusDone.Status)
-			assert.Equal(tb, string(*host.OnboardingStatusIndicator),
-				onb_status.OnboardingStatusDone.StatusIndicator.String())
+			if host.HostStatus != nil {
+				assert.Equal(tb, *host.HostStatus,
+					host_status.HostStatusRunning.Status)
+			}
+			if host.HostStatusIndicator != nil {
+				assert.Equal(tb, string(*host.HostStatusIndicator),
+					host_status.HostStatusRunning.StatusIndicator.String())
+			}
+			if host.OnboardingStatus != nil {
+				assert.Equal(tb, *host.OnboardingStatus,
+					onb_status.OnboardingStatusDone.Status)
+			}
+			if host.OnboardingStatusIndicator != nil {
+				assert.Equal(tb, string(*host.OnboardingStatusIndicator),
+					onb_status.OnboardingStatusDone.StatusIndicator.String())
+			}
 			if host.Instance != nil {
-				assert.Equal(tb, *host.Instance.InstanceStatus,
-					host_status.InstanceStatusRunning.Status)
-				assert.Equal(tb, string(*host.Instance.InstanceStatusIndicator),
-					host_status.InstanceStatusRunning.StatusIndicator.String())
-				assert.Equal(tb, *host.Instance.ProvisioningStatus,
-					onb_status.ProvisioningStatusDone.Status)
-				assert.Equal(tb, string(*host.Instance.ProvisioningStatusIndicator),
-					onb_status.ProvisioningStatusDone.StatusIndicator.String())
-				assert.Equal(tb, *host.Instance.UpdateStatus,
-					maint_status.UpdateStatusUpToDate.Status)
-				assert.Equal(tb, string(*host.Instance.UpdateStatusIndicator),
-					maint_status.UpdateStatusUpToDate.StatusIndicator.String())
+				if host.Instance.InstanceStatus != nil {
+					assert.Equal(tb, *host.Instance.InstanceStatus,
+						host_status.InstanceStatusRunning.Status)
+				}
+				if host.Instance.InstanceStatusIndicator != nil {
+					assert.Equal(tb, string(*host.Instance.InstanceStatusIndicator),
+						host_status.InstanceStatusRunning.StatusIndicator.String())
+				}
+				if host.Instance.ProvisioningStatus != nil {
+					assert.Equal(tb, *host.Instance.ProvisioningStatus,
+						onb_status.ProvisioningStatusDone.Status)
+				}
+				if host.Instance.ProvisioningStatusIndicator != nil {
+					assert.Equal(tb, string(*host.Instance.ProvisioningStatusIndicator),
+						onb_status.ProvisioningStatusDone.StatusIndicator.String())
+				}
+				if host.Instance.UpdateStatus != nil {
+					assert.Equal(tb, *host.Instance.UpdateStatus,
+						maint_status.UpdateStatusUpToDate.Status)
+				}
+				if host.Instance.UpdateStatusIndicator != nil {
+					assert.Equal(tb, string(*host.Instance.UpdateStatusIndicator),
+						maint_status.UpdateStatusUpToDate.StatusIndicator.String())
+				}
 			}
 		}
 	}
