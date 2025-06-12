@@ -39,7 +39,7 @@ var (
 
 var (
 	filterRunning             = fmt.Sprintf(`%s=%q`, "host_status", "Running")
-	filterNoConnection        = fmt.Sprintf(`%s=%q`, "host_status", "No Connection")
+	filterNoConnection        = fmt.Sprintf(`%s=%q`, "host_status", "No%20Connection")
 	filterInstanceStatusError = fmt.Sprintf(`%s=%q`, "instance_status", "Error")
 )
 
