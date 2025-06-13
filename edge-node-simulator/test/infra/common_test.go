@@ -30,19 +30,20 @@ var (
 
 var (
 	waitUntilHostsRunning    = time.Second * 5
-	waitHostsRunning         = time.Minute * 5
-	waitHostsConnectionLost  = time.Minute * 5
+	waitUntilHostsDeleted    = time.Second * 2
+	waitHostsRunning         = time.Minute * 1
+	waitHostsConnectionLost  = time.Minute * 1
 	waitHostsMaintenance     = time.Minute * 1
-	waitUntilStatusAvailable = time.Second * 10
+  waitUntilStatusAvailable = time.Second * 10
 
 	TimeNow       = int(time.Now().UTC().Unix())
 	SafeTimeDelay = 600
 )
 
 var (
-	filterRunning             = fmt.Sprintf(`%s = %q`, "host_status", "Running")
-	filterNoConnection        = fmt.Sprintf(`%s = %q`, "host_status", "No Connection")
-	filterInstanceStatusError = fmt.Sprintf(`%s = %q`, "instance_status", "Error")
+	filterRunning             = fmt.Sprintf(`%s=%q`, "host_status", "Running")
+	filterNoConnection        = fmt.Sprintf(`%s=%q`, "host_status", "No%20Connection")
+	filterInstanceStatusError = fmt.Sprintf(`%s=%q`, "instance_status", "Error")
 )
 
 func GenerateUUIDs(cfg *flags_test.TestConfig) []string {
