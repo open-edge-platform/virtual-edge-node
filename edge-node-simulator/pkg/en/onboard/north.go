@@ -378,7 +378,7 @@ func HTTPInfraOnboardGetHostID(ctx context.Context, url, token string, client *h
 		hostID = *(ps.Hosts)[0].ResourceId
 		return nil
 	}
-	if err := httpGet(rCtx, client, fmt.Sprintf("%s?uuid=%s", url, uuid), token, responseHooker); err != nil {
+	if err := httpGet(rCtx, client, fmt.Sprintf("%s?filter=uuid=%s", url, uuid), token, responseHooker); err != nil {
 		return hostID, err
 	}
 
