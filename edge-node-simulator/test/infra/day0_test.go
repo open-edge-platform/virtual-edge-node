@@ -46,13 +46,6 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 		err = utils_test.HelperJWTTokenRoutine(ctx, certCA, cfg.ClusterFQDN, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
 		Expect(err).To(BeNil())
 
-		ctx, cancel = context.WithCancel(context.Background())
-		Expect(ctx).NotTo(BeNil())
-		Expect(cancel).NotTo(BeNil())
-
-		err = utils_test.HelperJWTTokenRoutine(ctx, certCA, cfg.ClusterFQDN, cfg.EdgeAPIUser, cfg.EdgeAPIPass)
-		Expect(err).To(BeNil())
-
 		ensimClient, err = GetENSimClient(ctx, cfg)
 		Expect(err).To(BeNil())
 
@@ -125,6 +118,9 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			err = ensimClient.DeleteNodes(ctx, 0)
 			Expect(err).To(BeNil())
 
+			// Wait for the deletion to propagate
+			time.Sleep(waitUntilHostsDeleted)
+
 			By("checking no edge nodes exist in Infrastructure Manager simulator")
 			listNodes, err = ensimClient.List(ctx)
 			Expect(err).To(BeNil())
@@ -136,12 +132,12 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			Expect(totalHosts).To(Equal(0))
 		})
 	})
-	Describe("day0 - Non Interactive Onboarding (NIO) - onboard only", Label(day0CreateLabel), func() {
+	Describe("day0 - Non Interactive Onboarding (NIO) - onboard and check only", Label(day0CreateLabel), func() {
 		BeforeEach(func() {
 			enUUIDs2 = GenerateUUIDs(cfg)
 			Expect(enUUIDs2).NotTo(BeNil())
 		})
-		It("should onboard edge nodes and verify they are up", func(ctx SpecContext) {
+		It("should do NIO by create/check edge nodes with Infrastructure Manager simulator", func(ctx SpecContext) {
 			By("creating edge nodes in Infrastructure Manager simulator")
 			enCredentals := &ensimapi.NodeCredentials{
 				Project:         cfg.Project,
@@ -187,12 +183,12 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 			}
 		})
 	})
-	Describe("day0 - Non Interactive Onboarding (NIO) - delete only", Label(day0DeleteLabel), func() {
+	Describe("day0 - Non Interactive Onboarding (NIO) - check and delete only", Label(day0DeleteLabel), func() {
 		BeforeEach(func() {
 			cfg.Cleanup = false
 			Expect(enUUIDs2).NotTo(BeNil())
 		})
-		It("should verify existing edge nodes are up and remove them", func(ctx SpecContext) {
+		It("should do NIO by check/delete/verify edge nodes with Infrastructure Manager simulator", func(ctx SpecContext) {
 			By("checking edge nodes state/status ok from Infrastructure Manager simulator")
 			listNodes, err := ensimClient.List(ctx)
 			Expect(err).To(BeNil())
