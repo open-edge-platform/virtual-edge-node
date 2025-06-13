@@ -172,6 +172,8 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 				}
 			}
 
+			time.Sleep(waitUntilHostsRunning)
+
 			By("checking all hosts in running status from Infrastructure Manager REST API")
 			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
 			Expect(err).To(BeNil())
@@ -209,6 +211,8 @@ var _ = Describe("Infrastructure Manager integration tests", Label(e2eLabel), fu
 						"Status mode is not OK for %v", status.Source.String())
 				}
 			}
+
+			time.Sleep(waitUntilHostsRunning)
 
 			By("checking all hosts in running status from Infrastructure Manager REST API")
 			totalHosts, err := utils_test.ListHostsTotalAPI(ctx, httpClient, cfg, &filterRunning)
