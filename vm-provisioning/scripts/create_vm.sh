@@ -465,17 +465,32 @@ function serial_and_switch() {
   i=$1
   local net_name=$2
   echo "os version: $VERSION_ID"
+
   if [ "$VERSION_ID" == "22.04" ]; then
      SER0_PORT_SOCK="/tmp/console0_${net_name}-vm$i.sock"
   else
      SER0_PORT_SOCK="/tmp/console1_${net_name}-vm$i.sock"
   fi
 
-  #for windows window mobxterm xterm is used
+  # ✅ Check and fix socket permissions
+  if [ -S "$SER0_PORT_SOCK" ]; then
+    if [ ! -r "$SER0_PORT_SOCK" ] || [ ! -w "$SER0_PORT_SOCK" ]; then
+      echo "🔧 Fixing permissions for $SER0_PORT_SOCK"
+      sudo chmod 666 "$SER0_PORT_SOCK"
+    else
+      echo "✅ Socket $SER0_PORT_SOCK has correct permissions."
+    fi
+  else
+    echo "❌ ERROR: $SER0_PORT_SOCK does not exist or is not a valid socket."
+    return 1
+  fi
+
+  # For Windows window mobxterm xterm is used
   if [ "$SUPPORT_GUI_XTERM" = "" ]; then
     wait_for_file "${SER0_PORT_SOCK}" &
     wait
   fi
+
   get_print_vnc_id "$i" "$network_xml_path"
 
   vm_name="$(basename "$PWD")_${net_name}-vm${i}"
@@ -488,7 +503,6 @@ function serial_and_switch() {
   time_taken_to_provision=$((end_time_vmN - start_time_vms))
   sleep 2
 
-
   if [ "$ret" = 120 ]; then
     log_with_timestamp "Finished provisioning $vm_name $time_taken_to_provision Sec"
   elif [ "$ret" -eq 102 ]; then
@@ -500,7 +514,7 @@ function serial_and_switch() {
   else
     log_with_timestamp "Error [$ret] ,Failed provisioning $vm_name $time_taken_to_provision Sec"
   fi
-  #  set +x
+
   return "$ret"
 }
 
