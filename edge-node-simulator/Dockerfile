@@ -17,7 +17,7 @@ COPY cmd/ /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-simu
 COPY pkg/ /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/pkg/
 COPY vendor/ /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-simulator/vendor/
 
-RUN apk add --no-cache make=4.4.1-r2
+RUN apk add --no-cache make=4.4.1-r3
 
 WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-simulator
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
