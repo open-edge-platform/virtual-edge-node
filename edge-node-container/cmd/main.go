@@ -83,11 +83,6 @@ var (
 		defaultAPIUser,
 		"default API username of orch keycloak",
 	)
-	enableNIO = flag.Bool(
-		"enableNIO",
-		false,
-		"enables NIO in edge node",
-	)
 )
 
 func setOAM(oamServerAddr string, termChan, readyChan chan bool, wg *sync.WaitGroup) {
