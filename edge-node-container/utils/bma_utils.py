@@ -20,7 +20,10 @@ def download(bmas):
     for deb in bmas:
         # oras pull debs from OCI repositories
         filename = "{package}:{version}".format(**deb)
-        command = f'oras pull "registry-rs.edgeorchestration.intel.com/edge-orch/en/deb/{filename}" -o {full_path}'
+        command = "oras pull registry-rs.edgeorchestration.intel.com/edge-orch/en/deb/{filename} -o {full_path}".format(
+            filename=filename,
+            full_path=full_path
+        )
         cmd_args = command.split(" ")
         process_wc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, shell=False)
         print(process_wc.communicate()[0])
