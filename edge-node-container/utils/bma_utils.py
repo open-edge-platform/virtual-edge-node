@@ -22,7 +22,7 @@ def download(bmas):
         filename = "{package}:{version}".format(**deb)
         command = f'oras pull "registry-rs.edgeorchestration.intel.com/edge-orch/en/deb/{filename}" -o {full_path}'
         cmd_args = command.split(" ")
-        process_wc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, shell=False, check=True)
+        process_wc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, shell=False)
         print(process_wc.communicate()[0])
 
 def bma_values(bmas):
