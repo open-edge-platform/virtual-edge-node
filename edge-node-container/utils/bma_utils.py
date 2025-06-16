@@ -3,10 +3,8 @@
 
 import yaml
 import sys
-import requests
 import argparse
 import os
-import json
 import subprocess
 
 def parse(string):
