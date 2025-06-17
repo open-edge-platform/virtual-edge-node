@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.24.1-bookworm AS build
+FROM golang:1.24.4-bookworm AS build
 
 ENV GO111MODULE=on
 ARG MAKE_TARGET=go-build
@@ -20,7 +20,7 @@ WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-contai
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
 
-FROM debian:12.9-slim@sha256:12c396bd585df7ec21d5679bb6a83d4878bc4415ce926c9e5ea6426d23c60bdc
+FROM debian:12.11-slim@sha256:e5865e6858dacc255bead044a7f2d0ad8c362433cfaa5acefb670c1edf54dfef
 
 ARG REPO_URL
 ARG VERSION

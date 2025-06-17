@@ -2,15 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # lint yaml
-yamllint~=1.35.1
+yamllint~=1.37.1
 
 # license check
 reuse~=5.0.2
 
 # utils
-certifi==2023.7.22
-charset-normalizer==3.3.0
-idna==3.4
-PyYAML==6.0.1
-requests==2.31.0
-urllib3==2.0.6
+certifi==2025.6.15
+charset-normalizer==3.4.2
+idna==3.10
+PyYAML==6.0.2
+urllib3==2.4.0

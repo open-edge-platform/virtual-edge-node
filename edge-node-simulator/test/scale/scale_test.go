@@ -28,7 +28,7 @@ const (
 var (
 	waitUntilHostsRunning = time.Second * 5
 	waitUntilHostsDeleted = time.Second * 10
-	filterRunning         = fmt.Sprintf(`%s = %q`, "host_status", "Running")
+	filterRunning         = fmt.Sprintf(`%s=%q`, "host_status", "Running")
 )
 
 var _ = Describe("Infrastructure Manager integration scale tests", Label(scaleLabel), func() {

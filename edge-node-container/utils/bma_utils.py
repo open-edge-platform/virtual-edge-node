@@ -3,10 +3,8 @@
 
 import yaml
 import sys
-import requests
 import argparse
 import os
-import json
 import subprocess
 
 def parse(string):
@@ -22,9 +20,13 @@ def download(bmas):
     for deb in bmas:
         # oras pull debs from OCI repositories
         filename = "{package}:{version}".format(**deb)
-        command = f'oras pull "registry-rs.edgeorchestration.intel.com/edge-orch/en/deb/{filename}" -o {full_path}'
-        subprocess.run(command, shell=True, check=True)
-    subprocess.run(command, shell=True, check=True)
+        command = "oras pull registry-rs.edgeorchestration.intel.com/edge-orch/en/deb/{filename} -o {full_path}".format(
+            filename=filename,
+            full_path=full_path
+        )
+        cmd_args = command.split(" ")
+        process_wc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, shell=False)
+        print(process_wc.communicate()[0])
 
 def bma_values(bmas):
     full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "chart", "bma_values.yaml")

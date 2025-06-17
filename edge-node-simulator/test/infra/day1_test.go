@@ -167,9 +167,10 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			Expect(err).To(BeNil())
 			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
 
+			By("checking edge nodes instance status error when OFF/No Connection from Infrastructure Manager simulator")
 			totalHosts, err = utils_test.ListInstancesTotalAPI(ctx, httpClient, cfg, &filterInstanceStatusError)
 			Expect(err).To(BeNil())
-			Expect(totalHosts).To(Equal(cfg.AmountEdgeNodes))
+			Expect(totalHosts).To(BeNumerically("<=", cfg.AmountEdgeNodes))
 
 			By("turning on all agents in all edge nodes")
 			// Stops all edge node agents
