@@ -58,6 +58,9 @@ function update_defaultOs_provider() {
     if [ "$1" = "microvisor" ]; then
         osResourceID1=$(jq -r ".OperatingSystemResources[] | select(.profileName == \"microvisor-nonrt\") | .osResourceID" os_profile.json)
         echo "microvisor-nonrt profile osResourceID=$osResourceID1"
+    elif [ "$1" = "microvisor-standalone" ]; then
+        osResourceID1=$(jq -r ".OperatingSystemResources[] | select(.profileName == \"microvisor-standalone\") | .osResourceID" os_profile.json)
+        echo "microvisor-standalone profile osResourceID=$osResourceID1"
     elif [ "$1" = "ubuntu" ]; then
         osResourceID1=$(jq -r ".OperatingSystemResources[] | select(.profileName == \"ubuntu-22.04-lts-generic-ext\") | .osResourceID" os_profile.json)
         echo "Ubuntu Profile ubuntu-22.04-lts-generic-ext osResourceID=$osResourceID1"
@@ -115,10 +118,11 @@ function update_defaultOs_provider() {
 # Execute functions based on os_type
 # print out a guide
 usage() {
-    echo "Usage: /bin/bash $0 [microvisor|ubuntu]" 1>&2;
+    echo "Usage: /bin/bash $0 [microvisor|microvisor-standalone|ubuntu]" 1>&2;
     echo "
-        ./scripts/update_provider_defaultos.sh microvisor  –> Create Microvisor DefaultOS Provider with SB Disable
-        ./scripts/update_provider_defaultos.sh ubuntu  –> Create Ubuntu DefaultOS Provider with SB Disable
+        ./scripts/update_provider_defaultos.sh microvisor             -> Create Microvisor DefaultOS Provider with SB Disable
+        ./scripts/update_provider_defaultos.sh microvisor-standalone  -> Create Microvisor Standalone DefaultOS Provider with SB Disable
+        ./scripts/update_provider_defaultos.sh ubuntu                 -> Create Ubuntu DefaultOS Provider with SB Disable
     "
     exit 0;
 }
@@ -129,6 +133,9 @@ case $os_type in
       ;;
     "microvisor")
        update_defaultOs_provider "microvisor"
+      ;;
+    "microvisor-standalone")
+       update_defaultOs_provider "microvisor-standalone"
       ;;
     "ubuntu")
       update_defaultOs_provider "ubuntu"
