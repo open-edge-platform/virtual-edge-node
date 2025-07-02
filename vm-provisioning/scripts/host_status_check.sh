@@ -5,7 +5,7 @@
 set -eu
 # Load configuration
 source "${PWD}/config"
-source "${PWD}/scripts/io_configs.sh"
+source "${PWD}/scripts/nio_configs.sh"
 
 # Function to display usage information
 usage() {
@@ -18,11 +18,11 @@ usage() {
 }
 
 # Check if serial number is provided
-# EN_SERIAL_NO=$1
-# if [ -z "$EN_SERIAL_NO" ]; then
-#     echo "ERROR: Serial number argument is required."
-#     usage
-# fi
+EN_SERIAL_NO=$1
+if [ -z "$EN_SERIAL_NO" ]; then
+    echo "ERROR: Serial number argument is required."
+    usage
+fi
 
 # Obtain JWT token
 JWT_TOKEN=$(curl -s -k -X POST \
@@ -52,7 +52,7 @@ function host_status() {
         index_len=$((index_len - 1))
         rm -rf host-list;touch host-list
         for i in $(seq 0 $index_len); do
-            if jq -r "[.hosts[]][${i}].serialNumber" host.json | grep -q ""; then
+            if jq -r "[.hosts[]][${i}].serialNumber" host.json | grep -q "$EN_SERIAL_NO"; then
                 host_id=$(jq -r "[.hosts[]][${i}].resourceId" host.json)
                 instance_id=$(jq -r "[.hosts[]][${i}].instance.instanceID" host.json)
                 get_guid=$(jq -r "[.hosts[]][${i}].uuid" host.json)
@@ -68,10 +68,10 @@ function host_status() {
         total_host=$(wc -l < host-list)
 
         if [ "$host_running" -eq 0 ]; then
-            # echo "ERROR: No hosts with 'Running' status found for serial no $EN_SERIAL_NO."
+            echo "ERROR: No hosts with 'Running' status found for serial no $EN_SERIAL_NO."
             cat host-list
         else
-            # echo "Total No of onboarded hosts starting with serial no $EN_SERIAL_NO = $total_host"
+            echo "Total No of onboarded hosts starting with serial no $EN_SERIAL_NO = $total_host"
             grep "Running" host-list || true
             grep -v "Running" host-list || true
              {
