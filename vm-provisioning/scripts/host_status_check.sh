@@ -18,11 +18,11 @@ usage() {
 }
 
 # Check if serial number is provided
-EN_SERIAL_NO=$1
-if [ -z "$EN_SERIAL_NO" ]; then
-    echo "ERROR: Serial number argument is required."
-    usage
-fi
+# EN_SERIAL_NO=$1
+# if [ -z "$EN_SERIAL_NO" ]; then
+#     echo "ERROR: Serial number argument is required."
+#     usage
+# fi
 
 # Obtain JWT token
 JWT_TOKEN=$(curl -s -k -X POST \
