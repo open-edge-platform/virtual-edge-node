@@ -68,10 +68,10 @@ function host_status() {
         total_host=$(wc -l < host-list)
 
         if [ "$host_running" -eq 0 ]; then
-            echo "ERROR: No hosts with 'Running' status found for serial no $EN_SERIAL_NO."
+            # echo "ERROR: No hosts with 'Running' status found for serial no $EN_SERIAL_NO."
             cat host-list
         else
-            echo "Total No of onboarded hosts starting with serial no $EN_SERIAL_NO = $total_host"
+            # echo "Total No of onboarded hosts starting with serial no $EN_SERIAL_NO = $total_host"
             grep "Running" host-list || true
             grep -v "Running" host-list || true
              {
