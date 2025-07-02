@@ -5,7 +5,7 @@
 set -eu
 # Load configuration
 source "${PWD}/config"
-source "${PWD}/scripts/nio_configs.sh"
+source "${PWD}/scripts/io_configs.sh"
 
 # Function to display usage information
 usage() {
