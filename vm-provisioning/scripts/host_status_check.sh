@@ -52,7 +52,7 @@ function host_status() {
         index_len=$((index_len - 1))
         rm -rf host-list;touch host-list
         for i in $(seq 0 $index_len); do
-            if jq -r "[.hosts[]][${i}].serialNumber" host.json | grep -q "$EN_SERIAL_NO"; then
+            if jq -r "[.hosts[]][${i}].serialNumber" host.json | grep -q ""; then
                 host_id=$(jq -r "[.hosts[]][${i}].resourceId" host.json)
                 instance_id=$(jq -r "[.hosts[]][${i}].instance.instanceID" host.json)
                 get_guid=$(jq -r "[.hosts[]][${i}].uuid" host.json)
