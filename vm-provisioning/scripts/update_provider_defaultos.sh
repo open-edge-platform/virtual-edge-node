@@ -6,10 +6,30 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+# Validate input arguments
+if [ $# -ne 1 ]; then
+    echo "Error: Exactly one argument required" >&2
+    exit 1
+fi
+
 # Load configuration variables
 os_type="$1"
 source "${PWD}/config"
 source "${PWD}/scripts/nio_configs.sh"
+
+# Define OS profile mappings
+declare -A OS_PROFILES=(
+    ["microvisor"]="microvisor-nonrt"
+    ["microvisor-standalone"]="microvisor-standalone"
+    ["ubuntu"]="ubuntu-22.04-lts-generic-ext"
+)
+
+# Validate OS type
+if [[ ! "${OS_PROFILES[$os_type]:-}" ]]; then
+    echo "Error: Invalid OS type '$os_type'" >&2
+    echo "Valid options: ${!OS_PROFILES[*]}" >&2
+    exit 1
+fi
 
 # Function to obtain JWT token
 get_jwt_token() {
@@ -46,94 +66,106 @@ fi
 
 echo "Successfully obtained JWT token"
 
+# Function to make API calls with error handling
+make_api_call() {
+    local method="$1"
+    local url="$2"
+    local data="${3:-}"
+    
+    local curl_cmd="curl -s -H 'Accept: application/json' -H 'Authorization: Bearer ${JWT_TOKEN}'"
+    
+    if [ "$method" = "POST" ]; then
+        curl_cmd="$curl_cmd -X POST -H 'Content-Type: application/json' --data '$data'"
+    elif [ "$method" = "DELETE" ]; then
+        curl_cmd="$curl_cmd -X DELETE"
+    fi
+    
+    eval "$curl_cmd '$url'"
+}
+
 # Function to update the defaultOs provider
 function update_defaultOs_provider() {
-    # Get OS Profile List
-    curl -s -H 'Accept: application/json' -H "Authorization: Bearer ${JWT_TOKEN}" \
-      "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/compute/os" | jq > os_profile.json
-    # Get Provider List
-    curl -s -H 'Accept: application/json' -H "Authorization: Bearer ${JWT_TOKEN}" \
-    "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" | jq > provider.json
+    local profile_name="${OS_PROFILES[$1]}"
+    echo "Processing OS profile: $profile_name"
+    
+    # Get OS Profile and Provider Lists
+    make_api_call "GET" "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/compute/os" | jq > os_profile.json
+    make_api_call "GET" "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" | jq > provider.json
+    
+    # Get OS Resource ID
     local osResourceID1
-    if [ "$1" = "microvisor" ]; then
-        osResourceID1=$(jq -r ".OperatingSystemResources[] | select(.profileName == \"microvisor-nonrt\") | .osResourceID" os_profile.json)
-        echo "microvisor-nonrt profile osResourceID=$osResourceID1"
-    elif [ "$1" = "ubuntu" ]; then
-        osResourceID1=$(jq -r ".OperatingSystemResources[] | select(.profileName == \"ubuntu-22.04-lts-generic-ext\") | .osResourceID" os_profile.json)
-        echo "Ubuntu Profile ubuntu-22.04-lts-generic-ext osResourceID=$osResourceID1"
-    else
-        echo "Wrong argument selected"
-        return
+    osResourceID1=$(jq -r --arg profile "$profile_name" '.OperatingSystemResources[] | select(.profileName == $profile) | .osResourceID' os_profile.json)
+    
+    if [ -z "$osResourceID1" ] || [ "$osResourceID1" = "null" ]; then
+        echo "Error: $profile_name OS Resource ID not found. Available profiles:" >&2
+        jq -r '.OperatingSystemResources[].profileName' os_profile.json >&2
+        exit 1
     fi
+    
+    echo "$profile_name profile osResourceID=$osResourceID1"
 
-    if [ -z "$osResourceID1" ]; then
-      echo "$1 OS Resource ID not detected. Exiting script."
-      cat os_profile.json  
-      exit 1
-    fi
-
-    # Check if a provider with the defaultOs set to osResourceID1 already exists
+    # Check if provider already exists
+    local existing_provider_id
     existing_provider_id=$(jq -r --arg osResourceID1 "$osResourceID1" '.providers[] | select(.config | fromjson? | .defaultOs == $osResourceID1) | .providerID' provider.json)
 
-    if [ -n "$existing_provider_id" ]; then
+    if [ -n "$existing_provider_id" ] && [ "$existing_provider_id" != "null" ]; then
         echo "Provider with defaultOs set to $osResourceID1 already exists with Provider ID: $existing_provider_id. Skipping creation."
-    else
-        # Get Providers
-        provider_id=$(jq -r '.providers[] | select(.config | fromjson? | has("defaultOs")) | .providerID' provider.json)
-        if [ -n "$provider_id" ]; then
-            echo "Deleting old Provider ID: $provider_id"
-            echo "The providerID for the provider with defaultOs is \"$provider_id\"."
-            curl -s -X DELETE -H 'Accept: application/json' -H "Authorization: Bearer ${JWT_TOKEN}" \
-            "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers/${provider_id}"
-        else
-            echo "No provider found with defaultOs."
-        fi
-        echo "Creating new provider with defaultOs=$osResourceID1"
-        # Update Default Provider
-        curl -s -X POST "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" \
-        -H "Accept: application/json" \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer ${JWT_TOKEN}" \
-        --data '{
-            "providerKind": "PROVIDER_KIND_BAREMETAL",
-            "name": "infra_onboarding",
-            "apiEndpoint": "xyz123",
-            "apiCredentials": ["abc123"],
-            "config": "{\"defaultOs\":\"'"${osResourceID1}"'\",\"autoProvision\":true}"
-        }'
+        return 0
     fi
 
-    # Refresh OS Profile List
-    curl -s -H 'Accept: application/json' -H "Authorization: Bearer ${JWT_TOKEN}" \
-    "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/compute/os" | jq
+    # Remove old provider if exists
+    local old_provider_id
+    old_provider_id=$(jq -r '.providers[] | select(.config | fromjson? | has("defaultOs")) | .providerID' provider.json)
+    
+    if [ -n "$old_provider_id" ] && [ "$old_provider_id" != "null" ]; then
+        echo "Deleting old Provider ID: $old_provider_id"
+        make_api_call "DELETE" "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers/${old_provider_id}"
+    fi
 
-    # Refresh Provider List
-    curl -s -H 'Accept: application/json' -H "Authorization: Bearer ${JWT_TOKEN}" \
-    "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" | jq
+    # Create new provider
+    echo "Creating new provider with defaultOs=$osResourceID1"
+    local provider_data='{
+        "providerKind": "PROVIDER_KIND_BAREMETAL",
+        "name": "infra_onboarding",
+        "apiEndpoint": "xyz123",
+        "apiCredentials": ["abc123"],
+        "config": "{\"defaultOs\":\"'"${osResourceID1}"'\",\"autoProvision\":true}"
+    }'
+    
+    make_api_call "POST" "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" "$provider_data"
+    echo "Provider created successfully"
+
+    # Display updated lists
+    echo -e "\n=== Updated OS Profiles ==="
+    make_api_call "GET" "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/compute/os" | jq
+    
+    echo -e "\n=== Updated Providers ==="
+    make_api_call "GET" "https://api.${CLUSTER}/v1/projects/${PROJECT_NAME}/providers" | jq
 }
 
-# Execute functions based on os_type
-# print out a guide
+# Usage function
 usage() {
-    echo "Usage: /bin/bash $0 [microvisor|ubuntu]" 1>&2;
-    echo "
-        ./scripts/update_provider_defaultos.sh microvisor  –> Create Microvisor DefaultOS Provider with SB Disable
-        ./scripts/update_provider_defaultos.sh ubuntu  –> Create Ubuntu DefaultOS Provider with SB Disable
-    "
-    exit 0;
+    echo "Usage: $0 [microvisor|microvisor-standalone|ubuntu]" >&2
+    echo ""
+    echo "Available options:"
+    for os_type in "${!OS_PROFILES[@]}"; do
+        printf "  %-20s -> Create %s DefaultOS Provider\n" "$os_type" "${OS_PROFILES[$os_type]}"
+    done
+    echo ""
+    exit 0
 }
 
+# Main execution
 case $os_type in
     "" | "-h" | "--help")
-      usage
-      ;;
-    "microvisor")
-       update_defaultOs_provider "microvisor"
-      ;;
-    "ubuntu")
-      update_defaultOs_provider "ubuntu"
-      ;;
+        usage
+        ;;
     *)
-      usage
-      ;;
+        if [[ "${OS_PROFILES[$os_type]:-}" ]]; then
+            update_defaultOs_provider "$os_type"
+        else
+            echo "Error: Invalid OS type '$os_type'" >&2
+            usage
+        fi
+        ;;
 esac
