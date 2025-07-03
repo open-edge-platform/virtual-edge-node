@@ -12,5 +12,5 @@ import (
 
 func TestScale(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Infrastructure Manager Scale E2E Integration Suite")
+	RunSpecs(t, "Infrastructure Manager Scale Integration Suite")
 }
