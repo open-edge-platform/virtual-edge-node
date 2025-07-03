@@ -57,23 +57,6 @@ type tinkWorker struct {
 	settings      *defs.Settings
 }
 
-// CloudInit represents the entire cloud-init configuration.
-type CloudInit struct {
-	Datasource Datasource `yaml:"datasource"`
-}
-
-// Datasource represents the NoCloud datasource configuration.
-type Datasource struct {
-	//nolint:tagliatelle // must match cloud-init specification
-	NoCloud NoCloud `yaml:"NoCloud"`
-}
-
-// NoCloud represents the NoCloud-specific fields.
-type NoCloud struct {
-	//nolint:tagliatelle // must match cloud-init specification
-	UserData string `yaml:"user-data"`
-}
-
 // UserData represents the cloud-config structure.
 type UserData struct {
 	Hostname           string      `yaml:"hostname,omitempty"`
@@ -452,14 +435,8 @@ func (t *tinkWorker) executeCloudInit(action *proto.WorkflowAction) (proto.State
 	}
 	contents = strings.Join(result, "\n")
 
-	var cloudInitData CloudInit
-	err = yaml.Unmarshal([]byte(contents), &cloudInitData)
-	if err != nil {
-		return proto.State_STATE_FAILED, err
-	}
-
 	var userData UserData
-	err = yaml.Unmarshal([]byte(cloudInitData.Datasource.NoCloud.UserData), &userData)
+	err = yaml.Unmarshal([]byte(contents), &userData)
 	if err != nil {
 		return proto.State_STATE_FAILED, err
 	}
