@@ -3,13 +3,13 @@
 
 module github.com/open-edge-platform/virtual-edge-node/edge-node-container
 
-go 1.24.4
+go 1.24.1
 
 replace github.com/open-edge-platform/virtual-edge-node/edge-node-simulator => ../edge-node-simulator
 
 require (
 	github.com/magefile/mage v1.15.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.28.0
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.26.1
 	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.6.8
 )
 
