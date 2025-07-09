@@ -68,7 +68,6 @@ param:
   orchProject: "sample-project"
   orchOrg: "sample-org"
   oamServerAddress: "0.0.0.0:5991"
-  enableNIO: false
 resources:
   requests:
     memory: "4Gi"
