@@ -20,6 +20,7 @@ module "common" {
 }
 
 resource "proxmox_virtual_environment_file" "upload_uefi_boot_image" {
+  count = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
   depends_on   = [module.common]
   content_type = "iso"
   datastore_id = var.datastore_id
@@ -33,7 +34,7 @@ resource "proxmox_virtual_environment_file" "upload_uefi_boot_image" {
 resource "proxmox_virtual_environment_vm" "node_vm" {
   depends_on = [
     random_integer.vm_name_suffix,
-    proxmox_virtual_environment_file.upload_uefi_boot_image,
+    module.common
   ]
 
   node_name = var.proxmox_node_name
@@ -41,21 +42,26 @@ resource "proxmox_virtual_environment_vm" "node_vm" {
   name        = local.full_vm_name
   description = var.vm_description
   tags        = var.vm_tags
+
   agent {
     enabled = false
   }
+
   stop_on_destroy = true
+
   startup {
     up_delay   = var.vm_startup.up_delay
     down_delay = var.vm_startup.down_delay
   }
 
   bios = "ovmf"
+
   smbios {
     serial  = var.smbios_serial
     uuid    = var.smbios_uuid
     product = var.smbios_product
   }
+
   operating_system {
     type = var.vm_operating_type
   }
@@ -78,7 +84,7 @@ resource "proxmox_virtual_environment_vm" "node_vm" {
 
   disk {
     datastore_id = var.vm_datastore_id
-    file_id      = proxmox_virtual_environment_file.upload_uefi_boot_image.id
+    file_id      = length(proxmox_virtual_environment_file.upload_uefi_boot_image) > 0 ? proxmox_virtual_environment_file.upload_uefi_boot_image[0].id : null
     interface    = var.disk_interface
     size         = var.disk_size
     aio          = var.disk_aio
@@ -114,3 +120,4 @@ resource "proxmox_virtual_environment_vm" "node_vm" {
 
   kvm_arguments = "-chardev file,id=char0,path=/tmp/serial.${var.vm_name}.log -serial chardev:char0"
 }
+
