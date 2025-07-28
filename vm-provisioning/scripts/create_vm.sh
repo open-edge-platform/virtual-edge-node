@@ -271,6 +271,12 @@ function create_random_virtbr_net_name() {
 
           sed -i '/<\/ip>/a\
            <dnsmasq:options>\
+           <dnsmasq:option value="dhcp-vendorclass=set:efi-x64,PXEClient:Arch:00007"/>\
+           <dnsmasq:option value="dhcp-vendorclass=set:efi-x64_alt,PXEClient:Arch:00009"/>\
+           <dnsmasq:option value="dhcp-vendorclass=set:bios,PXEClient:Arch:00000"/>\
+           <dnsmasq:option value="dhcp-boot=tag:efi-x64,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
+           <dnsmasq:option value="dhcp-boot=tag:efi-x64_alt,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
+           <dnsmasq:option value="dhcp-boot=tag:bios,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
            <dnsmasq:option value="dhcp-vendorclass=set:efi-http,HTTPClient:Arch:00016"/>\
            <dnsmasq:option value="dhcp-option-force=tag:efi-http,60,HTTPClient"/>\
            <dnsmasq:option value="dhcp-match=set:ipxe,175"/>\
@@ -292,17 +298,6 @@ function create_random_virtbr_net_name() {
         sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${network_xml_file}"
         # Use sed to replace the bridge-name  pattern in the file virbr-$random_number
         sed -i "s|virbr-[0-9]\{1,3\}|virbr-$random_number|g" "${network_xml_file}"
-        # Commented: Use sed to replace the IP range in the file  192.168.$random_number.1
-        sed -i "s|192\.168\.[0-9]\{1,3\}\.|192.168.$random_number\.|g" "${network_xml_file}"
-  
-        # replace the default interface
-        default_interface=$(ip route | grep '^default' | awk '{print $5}' | head -n 1)
-        sed -Ei "s|<interface dev='[0-9a-zA-Z]+'/>|<interface dev='$default_interface'/>|g" "${network_xml_file}"
-  
-        # replace the efi uri
-        search_pattern="https://[a-zA-Z0-9.-]+/tink-stack/signed_ipxe\.efi"
-        replace_pattern="$boot_efi_uri"
-        sed -Ei "s|$search_pattern|$replace_pattern|g" "${network_xml_file}"
         
 	echo "orchvm-net-$random_number"
         sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
@@ -544,6 +539,12 @@ function main() {
      	
   cp "${PWD}/templates/orch_network.xml" .
   cp "${PWD}/templates/Vagrantfile" .
+  
+  # Replace PXE server placeholder in network configuration
+  sed -i "s/PXE_SERVER_PLACEHOLDER/${PXE_SERVER}/g" "${network_xml_file}"
+  echo "PXE Server configured as: ${PXE_SERVER}"
+  echo "Network XML after PXE server replacement:"
+  grep -A3 -B3 "tftp-server" "${network_xml_file}" || echo "No tftp-server found in network XML"
   
   # Create the Vagrantfile
   echo "Creating Vagrantfile for $NUM_VMS $NAME $VERSION_ID VMs with custom SSH port forwarding starting at port $SSH_PORT..."

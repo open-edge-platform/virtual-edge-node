@@ -8,6 +8,9 @@ STANDALONE=1
 
 CLUSTER="kind.internal"
 
+# PXE/TFTP Server Configuration
+PXE_SERVER="192.168.160.37"
+
 # VM Resources
 RAM_SIZE=8192
 NO_OF_CPUS=4
