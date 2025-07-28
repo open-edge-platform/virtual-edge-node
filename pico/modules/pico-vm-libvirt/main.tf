@@ -18,6 +18,7 @@ module "common" {
   source                  = "../common"
   boot_image_name         = local.boot_image_name
   tinkerbell_nginx_domain = var.tinkerbell_nginx_domain
+  boot_order              = var.boot_order
 }
 
 # Ensure default storage pool exists before provisioning
@@ -71,7 +72,7 @@ resource "libvirt_domain" "node_vm" {
   }
 
   boot_device {
-    dev = ["hd"]
+    dev = var.boot_order
   }
 
   tpm {

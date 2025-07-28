@@ -82,3 +82,9 @@ variable "libvirt_firmware" {
   type        = string
   default     = "/usr/share/OVMF/OVMF_CODE_4M.fd"
 }
+
+variable "boot_order" {
+  type = list(string)
+  default = ["hd"]
+}
+
