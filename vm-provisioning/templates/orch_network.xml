@@ -5,5 +5,5 @@
 <network>
   <name>orchvm-net-000</name>
   <forward mode='bridge'/>
-  <bridge name='virbr-000'/>
+  <bridge name='br-000'/>
 </network>

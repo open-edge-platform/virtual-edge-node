@@ -34,6 +34,7 @@ BASE_DIR="${PWD}/scripts"
 # Number of VMs to create
 NUM_VMS=$1
 FLOW=$2
+bridge_name=""  # Global variable for bridge cleanup
 
 if [ "$FLOW" == "-io" ] || [ -z "$FLOW" ]; then
     # Source IO Flow Configurations
@@ -113,6 +114,11 @@ cleanup_trap() {
 
   # Kill all child processes of this script
   vagrant_in_docker destroy -f
+
+  # Cleanup bridge interface if created
+  if [ -n "$bridge_name" ]; then
+    cleanup_bridge_interface "$bridge_name" "enp138s0f3np3"
+  fi
 
   # destroy_network if not done
   network_name=$(grep "<name>" "$network_xml_file" | sed -n 's/.*<name>\(.*\)<\/name>.*/\1/p')
@@ -248,6 +254,81 @@ function create_default_storage_pool() {
   fi
 }
 
+function create_bridge_interface() {
+  local bridge_name=$1
+  local physical_interface=$2
+  
+  echo "Creating bridge interface $bridge_name with physical interface $physical_interface"
+  
+  # Check if bridge already exists
+  if ip link show "$bridge_name" &>/dev/null; then
+    echo "Bridge $bridge_name already exists"
+    return 0
+  fi
+  
+  # Create the bridge
+  sudo ip link add name "$bridge_name" type bridge
+  
+  # Get the IP configuration from the physical interface
+  local ip_addr=$(ip addr show "$physical_interface" | grep 'inet ' | awk '{print $2}' | head -n1)
+  local gateway=$(ip route show dev "$physical_interface" | grep default | awk '{print $3}' | head -n1)
+  
+  # Remove IP from physical interface
+  if [ -n "$ip_addr" ]; then
+    sudo ip addr del "$ip_addr" dev "$physical_interface"
+  fi
+  
+  # Add physical interface to bridge
+  sudo ip link set "$physical_interface" master "$bridge_name"
+  
+  # Set interfaces up
+  sudo ip link set "$physical_interface" up
+  sudo ip link set "$bridge_name" up
+  
+  # Configure IP on bridge if we had one on physical interface
+  if [ -n "$ip_addr" ]; then
+    sudo ip addr add "$ip_addr" dev "$bridge_name"
+  fi
+  
+  # Restore default route if we had one
+  if [ -n "$gateway" ]; then
+    sudo ip route add default via "$gateway" dev "$bridge_name"
+  fi
+  
+  echo "Bridge $bridge_name created successfully"
+}
+
+function cleanup_bridge_interface() {
+  local bridge_name=$1
+  local physical_interface=$2
+  
+  echo "Cleaning up bridge interface $bridge_name"
+  
+  if ip link show "$bridge_name" &>/dev/null; then
+    # Get bridge IP configuration
+    local ip_addr=$(ip addr show "$bridge_name" | grep 'inet ' | awk '{print $2}' | head -n1)
+    local gateway=$(ip route show dev "$bridge_name" | grep default | awk '{print $3}' | head -n1)
+    
+    # Remove physical interface from bridge
+    sudo ip link set "$physical_interface" nomaster
+    
+    # Delete bridge
+    sudo ip link delete "$bridge_name" type bridge
+    
+    # Restore IP to physical interface if we had one
+    if [ -n "$ip_addr" ]; then
+      sudo ip addr add "$ip_addr" dev "$physical_interface"
+    fi
+    
+    # Restore default route if we had one
+    if [ -n "$gateway" ]; then
+      sudo ip route add default via "$gateway" dev "$physical_interface"
+    fi
+    
+    echo "Bridge $bridge_name cleaned up successfully"
+  fi
+}
+
 #### create random vm-networkname , brige and other configs
 function create_random_virtbr_net_name() {
   boot_efi_uri=$1
@@ -259,10 +340,14 @@ function create_random_virtbr_net_name() {
     while true; do
       # Generate a random 3-digit number between 2 and 255
       random_number=$(shuf -i 100-220 -n 1)
-      virbr_interface="virbr-$random_number"
+      physical_interface="enp138s0f3np3"
+      bridge_name="br-$random_number"  # Set global variable
       
-      # Check if the virbr interface exists
-      if ! ip addr show "$virbr_interface" &>/dev/null; then
+      # Check if the physical interface exists
+      if ip addr show "$physical_interface" &>/dev/null; then
+
+      # Create the bridge interface
+      create_bridge_interface "$bridge_name" "$physical_interface"
 
       if [ -n "$BRIDGE_NAME" ]; then
         mgmt_intf_name="$BRIDGE_NAME-$random_number"
@@ -296,8 +381,8 @@ function create_random_virtbr_net_name() {
       else
         # Use sed to replace the network-name  pattern in the file orchvm-net$random_number
         sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${network_xml_file}"
-        # Use sed to replace the bridge-name  pattern in the file virbr-$random_number
-        sed -i "s|virbr-[0-9]\{1,3\}|virbr-$random_number|g" "${network_xml_file}"
+        # Use sed to replace the bridge-name  pattern with bridge interface
+        sed -i "s|br-[0-9]\{1,3\}|$bridge_name|g" "${network_xml_file}"
         
 	echo "orchvm-net-$random_number"
         sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
@@ -312,7 +397,12 @@ function create_random_virtbr_net_name() {
 	fi
         break
 
-      # If the interface exists, the loop will continue and generate a new number
+      else
+        echo "Physical interface $physical_interface not found"
+        exit 1
+      fi
+      
+      # If we reach here, break since we found the interface  
       if ((SECONDS >= timeout_duration)); then
         echo "NONE"
         break
