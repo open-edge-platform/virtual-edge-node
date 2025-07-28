@@ -15,17 +15,14 @@ resource "random_id" "vm_serial" {
 }
 
 module "common" {
-  count = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
   source                  = "../common"
   boot_image_name         = local.boot_image_name
-  tinkerbell_nginx_domain = var.tinkerbell_nginx_domain != "" ? var.tinkerbell_nginx_domain : "dummy.local"
+  tinkerbell_nginx_domain = var.tinkerbell_nginx_domain
   boot_order              = var.boot_order
 }
 
 # Ensure default storage pool exists before provisioning
 resource "null_resource" "ensure_libvirt_pool" {
-  count = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
-
   provisioner "local-exec" {
     command = <<-EOT
       set -e
@@ -43,7 +40,6 @@ resource "null_resource" "ensure_libvirt_pool" {
 }
 
 resource "libvirt_volume" "uefi_boot_image" {
-  count = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
   depends_on = [null_resource.ensure_libvirt_pool, module.common]
   name       = "${var.vm_name}-vol"
   pool       = var.libvirt_pool_name
@@ -63,11 +59,8 @@ resource "libvirt_domain" "node_vm" {
     mode = "host-model" # Use host-model to match the host CPU as closely as possible
   }
 
-  dynamic "disk" {
-    for_each = (contains(var.boot_order, "network")) && length(var.boot_order) == 1 ? [] : [1]
-    content {
-      volume_id = libvirt_volume.uefi_boot_image[0].id
-    }
+  disk {
+    volume_id = libvirt_volume.uefi_boot_image.id
   }
 
   network_interface {
@@ -100,7 +93,8 @@ resource "libvirt_domain" "node_vm" {
 resource "null_resource" "update_libvirtvm_and_restart" {
   provisioner "local-exec" {
     command = <<-EOT
-      ${(contains(var.boot_order, "network")) && length(var.boot_order) == 1 ? "" : "# Resize the boot disk\n      virsh vol-resize ${libvirt_volume.uefi_boot_image[0].name} --pool ${libvirt_volume.uefi_boot_image[0].pool} ${var.disk_size}G"}
+      # Resize the boot disk
+      virsh vol-resize ${libvirt_volume.uefi_boot_image.name} --pool ${libvirt_volume.uefi_boot_image.pool} ${var.disk_size}G
 
       # Start the VM
       virsh start "${libvirt_domain.node_vm.name}"

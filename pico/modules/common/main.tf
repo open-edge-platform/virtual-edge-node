@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 resource "null_resource" "generate_uefi_boot_image" {
-count = (length(var.boot_order) == 1 && contains(["network", "net0"], var.boot_order[0])) ? 0 : 1
+count = var.boot_order == "network" ? 0 : 1
   provisioner "local-exec" {
     command = <<EOT
 set -o errexit
