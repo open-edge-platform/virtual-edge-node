@@ -53,7 +53,7 @@ case "$OSTYPE" in
     sudo mount $${loop_device}p1 ${path.module}/mnt ;;
 esac
 
-if [ "$PXE_BOOT" = "true" ]; then
+if [ "$PXE_BOOT" != "true" ]; then
 
   # Create EFI directory structure
   sudo mkdir -p ${path.module}/mnt/EFI/BOOT
