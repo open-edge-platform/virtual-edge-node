@@ -16,7 +16,7 @@ module "common" {
   source                  = "../common"
   boot_image_name         = local.boot_image_name
   tinkerbell_nginx_domain = var.tinkerbell_nginx_domain
-  boot_order              = var.boot_order
+  pxe_boot                = var.pxe_boot
 }
 
 resource "proxmox_virtual_environment_file" "upload_uefi_boot_image" {

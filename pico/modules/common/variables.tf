@@ -12,7 +12,7 @@ variable "boot_image_name" {
   type        = string
 }
 
-variable "boot_order" {
-  description = "Skip local image generation step if boot order network."
+variable "pxe_boot" {
+  description = "Skip local image generation step if pxe-boot enabled"
   type = list(string)
 }

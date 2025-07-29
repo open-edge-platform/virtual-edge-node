@@ -5,7 +5,7 @@
 resource "null_resource" "generate_uefi_boot_image" {
   provisioner "local-exec" {
     environment = {
-      BOOT_ORDER = var.boot_order[0]
+      PXE_BOOT = var.pxe_boot
     }
     command = <<EOT
 set -o errexit
@@ -53,7 +53,7 @@ case "$OSTYPE" in
     sudo mount $${loop_device}p1 ${path.module}/mnt ;;
 esac
 
-if [ "$BOOT_ORDER" != "network" ] && [ "$BOOT_ORDER" != "net0" ]; then
+if [ "$PXE_BOOT" = "true" ]; then
 
   # Create EFI directory structure
   sudo mkdir -p ${path.module}/mnt/EFI/BOOT

@@ -182,7 +182,7 @@ variable "vga_display_type" {
 variable "boot_order" {
   description = "Boot order for the VM"
   type        = list(string)
-  default     = ["scsi0"]
+  default     = ["scsi0","net0"]
 }
 
 variable "scsi_hardware" {
@@ -237,4 +237,10 @@ variable "tpm_version" {
   description = "TPM version for the VM"
   type        = string
   default     = "v2.0"
+}
+
+variable "pxe_boot" {
+  description = "Enable PXE boot"
+  type        = bool
+  default     = false
 }

@@ -85,6 +85,12 @@ variable "libvirt_firmware" {
 
 variable "boot_order" {
   type = list(string)
-  default = ["hd"]
+  default = ["hd","network"]
+}
+
+variable "pxe_boot" {
+  description = "Enable PXE boot"
+  type        = bool
+  default     = false
 }
 
