@@ -20,8 +20,6 @@ module "common" {
 }
 
 resource "proxmox_virtual_environment_file" "upload_uefi_boot_image" {
-  count = (length(var.boot_order) == 1 && (var.boot_order[0] == "network" || var.boot_order[0] == "net0")) ? 0 : 1
-
   depends_on   = [module.common]
   content_type = "iso"
   datastore_id = var.datastore_id
@@ -83,10 +81,7 @@ resource "proxmox_virtual_environment_vm" "node_vm" {
 
   scsi_hardware = var.scsi_hardware
 
-dynamic "disk" {
-  for_each = contains(var.boot_order, "net0") && length(var.boot_order) == 1 ? [] : [1]
-
-  content {
+  disk {
     datastore_id = var.vm_datastore_id
     file_id      = length(proxmox_virtual_environment_file.upload_uefi_boot_image) > 0 ? proxmox_virtual_environment_file.upload_uefi_boot_image[0].id : null
     interface    = var.disk_interface
@@ -97,7 +92,6 @@ dynamic "disk" {
     backup       = var.disk_backup
     replicate    = var.disk_replicate
   }
-}
 
   efi_disk {
     datastore_id      = var.vm_datastore_id
