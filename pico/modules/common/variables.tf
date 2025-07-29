@@ -14,5 +14,5 @@ variable "boot_image_name" {
 
 variable "pxe_boot" {
   description = "Skip local image generation step if pxe-boot enabled"
-  type = list(string)
+  type        = bool
 }
