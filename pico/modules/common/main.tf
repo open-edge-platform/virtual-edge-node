@@ -5,7 +5,7 @@
 resource "null_resource" "generate_uefi_boot_image" {
   provisioner "local-exec" {
     environment = {
-      BOOT_ORDER = var.boot_order[0]
+      BOOT_ORDER = length(var.boot_order) > 1 ? var.boot_order[1] : ""
     }
     command = <<EOT
 set -o errexit
