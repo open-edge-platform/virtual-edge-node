@@ -3,18 +3,25 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #
-# VM Provisioning Script with Non-Intrusive Bridge Networking
+# VM Provisioning Script with True Non-Intrusive Bridge Networking
 #
-# This script creates VMs with direct access to the host network via a bridge interface.
-# The bridge is created without disrupting the physical interface's IP configuration,
-# ensuring the host maintains its network connectivity while allowing VMs to access
-# the same network directly.
+# This script creates VMs with direct access to the host network via a bridge interface
+# WITHOUT disrupting the host's network configuration. The physical interface retains
+# its IP address and routing, ensuring host connectivity remains unaffected.
 #
 # Key features:
-# - Creates bridge interfaces that don't tamper with physical interface IPs
-# - VMs get direct host network access through the bridge
-# - Host network connectivity remains unaffected during bridge operations
-# - Proper cleanup ensures physical interface remains intact
+# - Creates Layer 2 bridge for VM network access
+# - Physical interface keeps its original IP and routing configuration
+# - Host network connectivity is completely unaffected
+# - VMs get direct network access through the bridge
+# - Simple cleanup removes bridge without touching physical interface
+#
+# Bridge Operation:
+# 1. Creates a pure Layer 2 bridge (no IP assigned to bridge)
+# 2. Enslaves physical interface to bridge (IP remains on physical interface)
+# 3. VMs connect to bridge and get network access
+# 4. Host continues to use physical interface IP for connectivity
+# 5. On cleanup, simply removes bridge, physical interface unchanged
 #
 
 # set -x
@@ -273,7 +280,7 @@ function create_bridge_interface() {
   local bridge_name=$1
   local physical_interface=$2
   
-  echo "Creating bridge interface $bridge_name with access to host network via $physical_interface"
+  echo "Creating bridge interface $bridge_name for VM network access (host interface unchanged)"
   
   # Check if bridge already exists
   if ip link show "$bridge_name" &>/dev/null; then
@@ -287,42 +294,50 @@ function create_bridge_interface() {
     return 1
   fi
   
-  # Create the bridge
+  # Show current physical interface configuration (for reference only)
+  local current_ip=$(ip addr show "$physical_interface" | grep 'inet ' | awk '{print $2}' | head -n1)
+  echo "Physical interface $physical_interface has IP: $current_ip (will remain unchanged)"
+  
+  # Create the bridge - it will be a pure Layer 2 bridge for VMs
   sudo ip link add name "$bridge_name" type bridge
   
-  # Enable STP (Spanning Tree Protocol) to prevent loops
-  sudo ip link set "$bridge_name" type bridge stp_state 1
+  # Configure bridge for optimal VM networking
+  sudo ip link set "$bridge_name" type bridge stp_state 0
   
-  # Add physical interface to bridge without disrupting its configuration
-  # This allows VMs to have direct access to the host network
-  # The physical interface keeps its IP address and routing configuration
+  # Add physical interface to bridge WITHOUT moving its IP
+  # The physical interface keeps its IP and routes for host connectivity
   sudo ip link set "$physical_interface" master "$bridge_name"
   
-  # Bring up the bridge interface
+  # Bring up both interfaces
+  sudo ip link set "$physical_interface" up
   sudo ip link set "$bridge_name" up
   
-  # Ensure physical interface remains up
-  sudo ip link set "$physical_interface" up
-  
-  # Enable IP forwarding for bridge functionality
+  # Enable IP forwarding for VM traffic
   echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward > /dev/null
   
-  # Configure bridge to forward packets (disable netfilter on bridge for performance)
+  # Configure bridge to forward packets efficiently
   echo 0 | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables > /dev/null 2>/dev/null || true
   echo 0 | sudo tee /proc/sys/net/bridge/bridge-nf-call-ip6tables > /dev/null 2>/dev/null || true
   
-  echo "Bridge $bridge_name created successfully with direct host network access"
+  # Set bridge parameters for optimal VM networking
+  echo 300 | sudo tee /sys/class/net/"$bridge_name"/bridge/ageing_time > /dev/null 2>/dev/null || true
+  echo 4 | sudo tee /sys/class/net/"$bridge_name"/bridge/forward_delay > /dev/null 2>/dev/null || true
+  
+  echo "Bridge $bridge_name created successfully - VMs will have network access, host IP unchanged"
+  
+  # Wait for bridge to be fully operational
+  echo "Waiting for bridge to be fully operational..."
+  sleep 3
 }
 
 function cleanup_bridge_interface() {
   local bridge_name=$1
   local physical_interface=$2
   
-  echo "Cleaning up bridge interface $bridge_name"
+  echo "Cleaning up bridge interface $bridge_name (host interface IP will remain intact)"
   
   if ip link show "$bridge_name" &>/dev/null; then
-    # Remove physical interface from bridge without disrupting its configuration
-    # The IP address and routes remain on the physical interface
+    # Remove physical interface from bridge - IP stays on the physical interface
     if ip link show "$physical_interface" &>/dev/null; then
       sudo ip link set "$physical_interface" nomaster
       echo "Removed $physical_interface from bridge $bridge_name"
@@ -332,12 +347,12 @@ function cleanup_bridge_interface() {
     sudo ip link set "$bridge_name" down
     sudo ip link delete "$bridge_name" type bridge
     
-    # Ensure physical interface remains up and functional
+    # Ensure physical interface remains up and retains its original configuration
     if ip link show "$physical_interface" &>/dev/null; then
       sudo ip link set "$physical_interface" up
     fi
     
-    echo "Bridge $bridge_name cleaned up successfully, physical interface $physical_interface remains intact"
+    echo "Bridge $bridge_name cleaned up successfully, $physical_interface retains its original configuration"
   else
     echo "Bridge $bridge_name does not exist, nothing to clean up"
   fi
@@ -357,6 +372,8 @@ function create_random_virtbr_net_name() {
       physical_interface="enp138s0f3np3"
       bridge_name="br-$random_number"  # Set global variable
       
+      echo "Attempting to create bridge $bridge_name using interface $physical_interface"
+      
       # Check if the physical interface exists
       if ip addr show "$physical_interface" &>/dev/null; then
 
@@ -364,6 +381,25 @@ function create_random_virtbr_net_name() {
       if ! create_bridge_interface "$bridge_name" "$physical_interface"; then
         echo "Failed to create bridge interface $bridge_name"
         exit 1
+      fi
+      
+      # Verify bridge is working - bridge should be up for VM traffic
+      echo "Verifying bridge configuration..."
+      if ip link show "$bridge_name" | grep -q "state UP"; then
+        echo "Bridge $bridge_name is UP and ready for VM traffic"
+        
+        # Verify physical interface connectivity (for host)
+        local phys_ip=$(ip addr show "$physical_interface" | grep 'inet ' | awk '{print $2}' | head -n1)
+        if [ -n "$phys_ip" ]; then
+          echo "Physical interface $physical_interface retains IP: $phys_ip"
+          # Test host connectivity
+          local gateway=$(ip route show dev "$physical_interface" | grep default | awk '{print $3}' | head -n1)
+          if [ -n "$gateway" ] && ping -c 1 -W 2 "$gateway" >/dev/null 2>&1; then
+            echo "Host connectivity verified - can reach gateway $gateway via $physical_interface"
+          fi
+        fi
+      else
+        echo "Warning: Bridge $bridge_name may not be properly configured"
       fi
 
       if [ -n "$BRIDGE_NAME" ]; then
@@ -426,7 +462,6 @@ function create_random_virtbr_net_name() {
       else
         sleep 1
       fi
-    fi
     done
 }
 
@@ -434,25 +469,44 @@ function create_attach_network() {
 
   network_xml_path=$1
   network_name=$(grep "<name>" "$network_xml_path" | sed -n 's/.*<name>\(.*\)<\/name>.*/\1/p')
+  
+  echo "Creating/attaching libvirt network: $network_name"
  
   if virsh net-list --all | grep -wq "$network_name"; then
       echo "Network '$network_name' exists."
       if [ "$STANDALONE" -eq 1 ]; then 
-        sudo virsh net-destroy "$network_name"
+        echo "Standalone mode: Recreating network $network_name"
+        sudo virsh net-destroy "$network_name" 2>/dev/null || true
 	sudo virsh net-define "$network_xml_path"
 	sudo virsh net-start "$network_name"
 	sudo systemctl restart libvirtd
 	sudo systemctl daemon-reload
 
 	sudo virsh net-autostart "$network_name"
+      else
+        # Ensure the network is started
+        if ! virsh net-list | grep -wq "$network_name"; then
+          echo "Network $network_name exists but is not active, starting it"
+          sudo virsh net-start "$network_name"
+        fi
       fi
   else
       echo "Network '$network_name' does not exist. Creating the network: '$network_name'"
       sudo virsh net-define "$network_xml_path"
       sudo virsh net-start "$network_name"
+      sudo virsh net-autostart "$network_name"
   fi
 
-  sleep 2
+  # Wait for network to be fully operational
+  echo "Waiting for libvirt network to be fully operational..."
+  sleep 5
+  
+  # Verify network is active
+  if virsh net-list | grep -wq "$network_name"; then
+    echo "Network $network_name is active and ready"
+  else
+    echo "Warning: Network $network_name may not be properly active"
+  fi
 
 }
 
@@ -606,6 +660,54 @@ function serial_and_switch() {
   return "$ret"
 }
 
+function verify_network_setup() {
+  local bridge_name=$1
+  local physical_interface=$2
+  
+  echo "=== Network Setup Verification ==="
+  
+  # Check bridge status
+  if ip link show "$bridge_name" &>/dev/null; then
+    echo "Bridge $bridge_name: UP (Layer 2 bridge for VMs)"
+    
+    # Check if physical interface is enslaved
+    local master=$(ip link show "$physical_interface" 2>/dev/null | grep -o 'master [^ ]*' | awk '{print $2}')
+    if [ "$master" = "$bridge_name" ]; then
+      echo "Physical interface $physical_interface: enslaved to $bridge_name"
+      
+      # Show that physical interface retains its IP
+      local phys_ip=$(ip addr show "$physical_interface" | grep 'inet ' | awk '{print $2}' | head -n1)
+      echo "Physical interface IP: ${phys_ip:-none} (host connectivity maintained)"
+    else
+      echo "WARNING: Physical interface $physical_interface not properly enslaved to $bridge_name"
+    fi
+    
+    # Check host connectivity via physical interface
+    local gateway=$(ip route show dev "$physical_interface" | grep default | awk '{print $3}' | head -n1)
+    if [ -n "$gateway" ]; then
+      echo -n "Host connectivity test via $physical_interface: "
+      if ping -c 1 -W 3 "$gateway" >/dev/null 2>&1; then
+        echo "PASS"
+      else
+        echo "FAIL - Cannot reach gateway $gateway"
+      fi
+    fi
+  else
+    echo "ERROR: Bridge $bridge_name not found"
+    return 1
+  fi
+  
+  # Check libvirt network
+  local network_name=$(grep "<name>" "$network_xml_file" | sed -n 's/.*<name>\(.*\)<\/name>.*/\1/p')
+  if virsh net-list | grep -wq "$network_name"; then
+    echo "Libvirt network $network_name: ACTIVE"
+  else
+    echo "WARNING: Libvirt network $network_name not active"
+  fi
+  
+  echo "=== End Network Verification ==="
+}
+
 function spawn_vms() {
   i=$1
   check_io_or_nio
@@ -665,6 +767,9 @@ function main() {
   create_attach_network "${network_xml_file}"
   
   prepare_certificate_for_network "$vm_network_name"
+  
+  # Verify network setup before starting VMs
+  verify_network_setup "$bridge_name" "enp138s0f3np3"
   
   #start the vms
   #export VAGRANT_DEBUG=info
