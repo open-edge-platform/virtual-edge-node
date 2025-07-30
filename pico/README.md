@@ -103,6 +103,7 @@ module "pico_vm" {
 - `vm_serial`: The SMBIOS serial number of the virtual machine
 - `vm_uuid`: The SMBIOS UUID of the virtual machine
 - `tinkerbell_nginx_domain`: The Tinkerbell Nginx URL for the virtual machine
+- `boot_order`: Set the boot order for the VM. Default tf variable it is configured as scsi0. For PXE boot, set as ["scsi0","net0"].
 
 #### Delete Proxmox VM
 
@@ -204,6 +205,7 @@ Note: "tinkerbell_nginx_domain is a mandatory user input if other arguments are 
 
 - `vm_name`: The name of the created virtual machine
 - `vm_serial`: The SMBIOS serial number of the virtual machine
+- `boot_order`: Set the boot order for the VM. Default tf variable it is configured as hd. For PXE boot, set as  ["hd","network"].
 
 #### Check Libvirt VM Console logs
 To check the libvirt VM and access its console, use the following commands:
