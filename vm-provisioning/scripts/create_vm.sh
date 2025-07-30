@@ -2,6 +2,21 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+#
+# VM Provisioning Script with Non-Intrusive Bridge Networking
+#
+# This script creates VMs with direct access to the host network via a bridge interface.
+# The bridge is created without disrupting the physical interface's IP configuration,
+# ensuring the host maintains its network connectivity while allowing VMs to access
+# the same network directly.
+#
+# Key features:
+# - Creates bridge interfaces that don't tamper with physical interface IPs
+# - VMs get direct host network access through the bridge
+# - Host network connectivity remains unaffected during bridge operations
+# - Proper cleanup ensures physical interface remains intact
+#
+
 # set -x
 
 # source variables from common variable file
@@ -258,7 +273,7 @@ function create_bridge_interface() {
   local bridge_name=$1
   local physical_interface=$2
   
-  echo "Creating bridge interface $bridge_name with physical interface $physical_interface"
+  echo "Creating bridge interface $bridge_name with access to host network via $physical_interface"
   
   # Check if bridge already exists
   if ip link show "$bridge_name" &>/dev/null; then
@@ -266,36 +281,37 @@ function create_bridge_interface() {
     return 0
   fi
   
+  # Verify physical interface exists
+  if ! ip link show "$physical_interface" &>/dev/null; then
+    echo "Error: Physical interface $physical_interface not found"
+    return 1
+  fi
+  
   # Create the bridge
   sudo ip link add name "$bridge_name" type bridge
   
-  # Get the IP configuration from the physical interface
-  local ip_addr=$(ip addr show "$physical_interface" | grep 'inet ' | awk '{print $2}' | head -n1)
-  local gateway=$(ip route show dev "$physical_interface" | grep default | awk '{print $3}' | head -n1)
+  # Enable STP (Spanning Tree Protocol) to prevent loops
+  sudo ip link set "$bridge_name" type bridge stp_state 1
   
-  # Remove IP from physical interface
-  if [ -n "$ip_addr" ]; then
-    sudo ip addr del "$ip_addr" dev "$physical_interface"
-  fi
-  
-  # Add physical interface to bridge
+  # Add physical interface to bridge without disrupting its configuration
+  # This allows VMs to have direct access to the host network
+  # The physical interface keeps its IP address and routing configuration
   sudo ip link set "$physical_interface" master "$bridge_name"
   
-  # Set interfaces up
-  sudo ip link set "$physical_interface" up
+  # Bring up the bridge interface
   sudo ip link set "$bridge_name" up
   
-  # Configure IP on bridge if we had one on physical interface
-  if [ -n "$ip_addr" ]; then
-    sudo ip addr add "$ip_addr" dev "$bridge_name"
-  fi
+  # Ensure physical interface remains up
+  sudo ip link set "$physical_interface" up
   
-  # Restore default route if we had one
-  if [ -n "$gateway" ]; then
-    sudo ip route add default via "$gateway" dev "$bridge_name"
-  fi
+  # Enable IP forwarding for bridge functionality
+  echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward > /dev/null
   
-  echo "Bridge $bridge_name created successfully"
+  # Configure bridge to forward packets (disable netfilter on bridge for performance)
+  echo 0 | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables > /dev/null 2>/dev/null || true
+  echo 0 | sudo tee /proc/sys/net/bridge/bridge-nf-call-ip6tables > /dev/null 2>/dev/null || true
+  
+  echo "Bridge $bridge_name created successfully with direct host network access"
 }
 
 function cleanup_bridge_interface() {
@@ -305,27 +321,25 @@ function cleanup_bridge_interface() {
   echo "Cleaning up bridge interface $bridge_name"
   
   if ip link show "$bridge_name" &>/dev/null; then
-    # Get bridge IP configuration
-    local ip_addr=$(ip addr show "$bridge_name" | grep 'inet ' | awk '{print $2}' | head -n1)
-    local gateway=$(ip route show dev "$bridge_name" | grep default | awk '{print $3}' | head -n1)
+    # Remove physical interface from bridge without disrupting its configuration
+    # The IP address and routes remain on the physical interface
+    if ip link show "$physical_interface" &>/dev/null; then
+      sudo ip link set "$physical_interface" nomaster
+      echo "Removed $physical_interface from bridge $bridge_name"
+    fi
     
-    # Remove physical interface from bridge
-    sudo ip link set "$physical_interface" nomaster
-    
-    # Delete bridge
+    # Bring down and delete bridge
+    sudo ip link set "$bridge_name" down
     sudo ip link delete "$bridge_name" type bridge
     
-    # Restore IP to physical interface if we had one
-    if [ -n "$ip_addr" ]; then
-      sudo ip addr add "$ip_addr" dev "$physical_interface"
+    # Ensure physical interface remains up and functional
+    if ip link show "$physical_interface" &>/dev/null; then
+      sudo ip link set "$physical_interface" up
     fi
     
-    # Restore default route if we had one
-    if [ -n "$gateway" ]; then
-      sudo ip route add default via "$gateway" dev "$physical_interface"
-    fi
-    
-    echo "Bridge $bridge_name cleaned up successfully"
+    echo "Bridge $bridge_name cleaned up successfully, physical interface $physical_interface remains intact"
+  else
+    echo "Bridge $bridge_name does not exist, nothing to clean up"
   fi
 }
 
@@ -347,7 +361,10 @@ function create_random_virtbr_net_name() {
       if ip addr show "$physical_interface" &>/dev/null; then
 
       # Create the bridge interface
-      create_bridge_interface "$bridge_name" "$physical_interface"
+      if ! create_bridge_interface "$bridge_name" "$physical_interface"; then
+        echo "Failed to create bridge interface $bridge_name"
+        exit 1
+      fi
 
       if [ -n "$BRIDGE_NAME" ]; then
         mgmt_intf_name="$BRIDGE_NAME-$random_number"
