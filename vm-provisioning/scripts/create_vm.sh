@@ -346,6 +346,15 @@ function create_attach_network() {
       fi
   else
       echo "Network '$network_name' does not exist. Creating the network: '$network_name'"
+      # Check if the network already exists before defining it
+      existing_network=$(virsh net-list --all | grep -w "$network_name")
+      if [ -n "$existing_network" ]; then
+        echo "Network '$network_name' already exists. Attempting to reuse it."
+        sudo virsh net-destroy "$network_name" || echo "Network '$network_name' is not active. Skipping destroy."
+        sudo virsh net-undefine "$network_name" || echo "Network '$network_name' is not defined. Skipping undefine."
+      fi
+
+      # Proceed to define the network
       sudo virsh net-define "$network_xml_path"
       sudo virsh net-start "$network_name"
   fi
