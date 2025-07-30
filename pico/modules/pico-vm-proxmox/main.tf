@@ -83,7 +83,7 @@ resource "proxmox_virtual_environment_vm" "node_vm" {
 
   disk {
     datastore_id = var.vm_datastore_id
-    file_id      = length(proxmox_virtual_environment_file.upload_uefi_boot_image) > 0 ? proxmox_virtual_environment_file.upload_uefi_boot_image[0].id : null
+    file_id      = proxmox_virtual_environment_file.upload_uefi_boot_image.id
     interface    = var.disk_interface
     size         = var.disk_size
     aio          = var.disk_aio
