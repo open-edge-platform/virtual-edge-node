@@ -12,9 +12,9 @@ Vagrant.configure("2") do |config|
   num_vms ||= orchvm-num-vms
   
   # Set a default management network name if not provided
-  BRIDGE_NAME ||= "orchvm-net-000"
+  BRIDGE_NAME ||= "NETWORK_NAME_PLACEHOLDER"
 
-  VM_NAME = "orchvm-net-000-vm" if VM_NAME.nil? || VM_NAME.empty?
+  VM_NAME = "VM_NAME_BASE_PLACEHOLDER" if VM_NAME.nil? || VM_NAME.empty?
 
   static_config_serials = ""
 
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
     config.vm.network :forwarded_port, guest: 22, host: (2200 + i - 1), host_ip: "0.0.0.0"
 
       vm_config.vm.provider "libvirt" do |libvirt|
-        libvirt.title = "orchvm-net-000-vm#{i}"
+        libvirt.title = "VM_NAME_PLACEHOLDER"
 
         if STANDALONE != 0
           libvirt.storage_pool_name = "default"
@@ -49,28 +49,28 @@ Vagrant.configure("2") do |config|
 
          libvirt.driver = LIBVIRT_DRIVER 
 
-	 # Network configuration to use the virbr0 bridge
-        libvirt.management_network_name = "orchvm-net-000"
+	 # Network configuration to use the dynamically created bridge
+        libvirt.management_network_name = "NETWORK_NAME_PLACEHOLDER"
         libvirt.tpm_model = "tpm-tis"
         libvirt.tpm_type = "emulator"
         libvirt.tpm_version = "2.0"
         libvirt.tpm_path = '/dev/tpm0'
         libvirt.memory = RAM_SIZE
         libvirt.cpus = NO_OF_CPUS
-        libvirt.loader = "/usr/share/OVMF/OVMF_CODE_orchvm-net-000-vm#{i}.fd"
-        libvirt.nvram = "/usr/share/OVMF/OVMF_VARS_orchvm-net-000-vm#{i}.fd"
+        libvirt.loader = "/usr/share/OVMF/OVMF_CODE_VM_NAME_PLACEHOLDER.fd"
+        libvirt.nvram = "/usr/share/OVMF/OVMF_VARS_VM_NAME_PLACEHOLDER.fd"
 
         libvirt.qemu_args = [
           { value: '-chardev' },
-          { value: "socket,id=serial0,path=/tmp/console0_orchvm-net-000-vm#{i}.sock,server=on,wait=off" },
+          { value: "socket,id=serial0,path=/tmp/console0_VM_NAME_PLACEHOLDER.sock,server=on,wait=off" },
           { value: '-serial' },
           { value: 'chardev:serial0' },
           { value: '-chardev' },
-          { value: "socket,id=serial1,path=/tmp/console1_orchvm-net-000-vm#{i}.sock,server=on,wait=off" },
+          { value: "socket,id=serial1,path=/tmp/console1_VM_NAME_PLACEHOLDER.sock,server=on,wait=off" },
           { value: '-serial' },
           { value: 'chardev:serial1' },
           { value: '-fw_cfg' },
-          { value: 'name=etc/edk2/https/cacerts,file=/var/lib/libvirt/boot/orchvm-net-000_ca.der'},
+          { value: 'name=etc/edk2/https/cacerts,file=/var/lib/libvirt/boot/NETWORK_NAME_PLACEHOLDER_ca.der'},
           { value: '-smbios' },
 	  { value: "type=1,serial=#{serialnum}"}
         ]

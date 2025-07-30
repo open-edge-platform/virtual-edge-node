@@ -284,6 +284,66 @@ function cleanup_host_bridge_network() {
   echo "Host network cleanup complete - no host interface changes made"
 }
 
+function cleanup_existing_resources() {
+  echo "Cleaning up existing VMs and networks..."
+  
+  # Force cleanup of all orchvm-net networks - more aggressive approach
+  echo "Force removing all orchvm-net networks..."
+  for net in $(virsh net-list --all 2>/dev/null | grep "orchvm-net-" | awk '{print $1}' || true); do
+    echo "Force removing network: $net"
+    sudo virsh net-destroy "$net" 2>/dev/null || true
+    sudo virsh net-undefine "$net" 2>/dev/null || true
+  done
+  
+  # Clean up any existing VMs from previous runs
+  echo "Cleaning up VMs..."
+  for vm in $(virsh list --all 2>/dev/null | grep "$(basename "$PWD").*orchvm-net-" | awk '{print $2}' || true); do
+    echo "Removing existing VM: $vm"
+    virsh destroy "$vm" 2>/dev/null || true
+    virsh undefine "$vm" --remove-all-storage 2>/dev/null || true
+  done
+  
+  # Also clean up any VMs that might have different naming patterns
+  for vm in $(virsh list --all 2>/dev/null | grep "orchvm-net-" | awk '{print $2}' || true); do
+    echo "Removing VM with orchvm-net pattern: $vm"
+    virsh destroy "$vm" 2>/dev/null || true
+    virsh undefine "$vm" --remove-all-storage 2>/dev/null || true
+  done
+  
+  # Clean up vagrant machines
+  echo "Cleaning up vagrant machines..."
+  vagrant_in_docker destroy -f 2>/dev/null || true
+  
+  # Remove any vagrant state files
+  rm -rf .vagrant 2>/dev/null || true
+  
+  # Clean up console sockets
+  sudo rm -f /tmp/console*_orchvm-net-*.sock 2>/dev/null || true
+  
+  # Wait for cleanup to complete
+  sleep 3
+  
+  echo "Cleanup completed"
+  
+  # Verify cleanup worked
+  echo "Verifying cleanup..."
+  remaining_nets=$(virsh net-list --all 2>/dev/null | grep "orchvm-net-" || true)
+  if [ -n "$remaining_nets" ]; then
+    echo "Warning: Some networks still exist:"
+    echo "$remaining_nets"
+  else
+    echo "All orchvm-net networks successfully removed"
+  fi
+  
+  remaining_vms=$(virsh list --all 2>/dev/null | grep "orchvm-net-" || true)
+  if [ -n "$remaining_vms" ]; then
+    echo "Warning: Some VMs still exist:"
+    echo "$remaining_vms"
+  else
+    echo "All orchvm-net VMs successfully removed"
+  fi
+}
+
 #### create random vm-networkname and configure for host bridge mode
 function create_random_virtbr_net_name() {
   boot_efi_uri=$1
@@ -346,8 +406,12 @@ function create_random_virtbr_net_name() {
       fi
       
       echo "$mgmt_intf_name"
-      sed -i "s/libvirt.management_network_name = \"orchvm-net-[0-9]\{1,3\}\"/libvirt.management_network_name = \"$BRIDGE_NAME\"/" "${PWD}/Vagrantfile"
-      sed -i "s|orchvm-net-[0-9]\{1,3\}|$mgmt_intf_name|g" "${PWD}/Vagrantfile"
+      # Replace network name placeholder
+      sed -i "s|NETWORK_NAME_PLACEHOLDER|$BRIDGE_NAME|g" "${PWD}/Vagrantfile"
+      # Replace VM name base placeholder (for VM_NAME variable)
+      sed -i "s|VM_NAME_BASE_PLACEHOLDER|$mgmt_intf_name-vm|g" "${PWD}/Vagrantfile"
+      # Replace VM name placeholder with VM name pattern (for title/paths)
+      sed -i "s|VM_NAME_PLACEHOLDER|$mgmt_intf_name-vm#{i}|g" "${PWD}/Vagrantfile"
 
     else
       # Configure for standard host bridge mode
@@ -361,7 +425,12 @@ function create_random_virtbr_net_name() {
       sed -i '/<ip address=/,/<\/ip>/d' "$network_xml_file"
       
       echo "orchvm-net-$random_number"
-      sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
+      # Replace network name placeholder  
+      sed -i "s|NETWORK_NAME_PLACEHOLDER|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
+      # Replace VM name base placeholder (for VM_NAME variable)
+      sed -i "s|VM_NAME_BASE_PLACEHOLDER|orchvm-net-$random_number-vm|g" "${PWD}/Vagrantfile"
+      # Replace VM name placeholder with VM name pattern (for title/paths)
+      sed -i "s|VM_NAME_PLACEHOLDER|orchvm-net-$random_number-vm#{i}|g" "${PWD}/Vagrantfile"
     fi
 
     sed -i "s|orchvm-num-vms|$NUM_VMS|g" "${PWD}/Vagrantfile"
@@ -390,22 +459,48 @@ function create_attach_network() {
   network_name=$(grep "<name>" "$network_xml_path" | sed -n 's/.*<name>\(.*\)<\/name>.*/\1/p')
  
   if virsh net-list --all | grep -wq "$network_name"; then
-      echo "Network '$network_name' exists."
+      echo "Network '$network_name' exists. Removing and recreating with new configuration."
+      
+      # Stop the network if it's active
+      if virsh net-list | grep -wq "$network_name"; then
+        echo "Stopping active network '$network_name'"
+        sudo virsh net-destroy "$network_name" 2>/dev/null || true
+      fi
+      
+      # Undefine the existing network
+      echo "Removing existing network definition for '$network_name'"
+      sudo virsh net-undefine "$network_name" 2>/dev/null || true
+      
+      # Wait a moment for cleanup
+      sleep 2
+      
+      # Define the new network
+      echo "Creating new network '$network_name' with updated configuration"
+      sudo virsh net-define "$network_xml_path"
+      sudo virsh net-start "$network_name"
+      
       if [ "$STANDALONE" -eq 1 ]; then 
-        sudo virsh net-destroy "$network_name"
-	sudo virsh net-define "$network_xml_path"
-	sudo virsh net-start "$network_name"
-	sudo systemctl restart libvirtd
-	sudo systemctl daemon-reload
-
-	sudo virsh net-autostart "$network_name"
+        sudo virsh net-autostart "$network_name"
       fi
   else
       echo "Network '$network_name' does not exist. Creating the network: '$network_name'"
       sudo virsh net-define "$network_xml_path"
       sudo virsh net-start "$network_name"
+      
+      if [ "$STANDALONE" -eq 1 ]; then 
+        sudo virsh net-autostart "$network_name"
+      fi
   fi
 
+  # Verify network is running
+  if ! virsh net-list | grep -wq "$network_name"; then
+    echo "Error: Failed to start network '$network_name'"
+    echo "Network status:"
+    virsh net-list --all | grep "$network_name" || echo "Network not found"
+    return 1
+  fi
+  
+  echo "Network '$network_name' is active and ready"
   sleep 2
 
 }
@@ -569,15 +664,76 @@ function spawn_vms() {
     network_name=$mgmt_intf_name
   fi
 
+  echo "Creating VM ${i} with network: $network_name"
+  
   if [ -z "$VM_NAME" ]; then 
-    vagrant_in_docker up "${network_name}-vm${i}" | tee -a "${LOG_FILE}"
+    vm_instance_name="${network_name}-vm${i}"
   else
-    vagrant_in_docker up "${VM_NAME}${i}" | tee -a "${LOG_FILE}"
+    vm_instance_name="${VM_NAME}${i}"
+  fi
+  
+  echo "Starting vagrant for VM instance: $vm_instance_name"
+  
+  # Check if network exists before creating VM
+  if ! virsh net-list | grep -wq "$network_name"; then
+    echo "Error: Network '$network_name' is not active!"
+    virsh net-list --all | grep "$network_name" || echo "Network not found at all"
+    return 1
+  fi
+  
+  # Create the VM with vagrant
+  echo "About to run: vagrant up $vm_instance_name"
+  echo "Current directory: $(pwd)"
+  echo "Vagrantfile exists: $([ -f Vagrantfile ] && echo "yes" || echo "no")"
+  
+  # Show the relevant part of the Vagrantfile for debugging
+  echo "Vagrantfile VM configuration:"
+  grep -A5 -B5 "config.vm.define.*$vm_instance_name" Vagrantfile || echo "VM definition not found in Vagrantfile"
+  
+  if ! vagrant_in_docker up "$vm_instance_name" 2>&1 | tee -a "${LOG_FILE}"; then
+    echo "Error: Vagrant up command failed for $vm_instance_name"
+    echo "Checking Vagrant status..."
+    vagrant_in_docker status 2>&1 || true
+    echo "Checking libvirt VMs..."
+    virsh list --all
+    return 1
   fi
  
-  echo "Vagrant is UPPP" 
+  echo "Vagrant VM creation completed for $vm_instance_name"
+  
+  # Verify VM was created - check multiple possible naming patterns
+  cur_folder=$(basename "$PWD")
+  possible_names=(
+    "${cur_folder}_${vm_instance_name}"
+    "${vm_instance_name}"
+    "${cur_folder}-${vm_instance_name}"
+  )
+  
+  vm_found=false
+  actual_vm_name=""
+  
+  for name in "${possible_names[@]}"; do
+    if virsh list --all | grep -q "$name"; then
+      vm_found=true
+      actual_vm_name="$name"
+      echo "Found VM with name: $actual_vm_name"
+      break
+    fi
+  done
+  
+  if [ "$vm_found" = false ]; then
+    echo "Error: VM was not created successfully. Checking all VMs:"
+    echo "All VMs currently defined:"
+    virsh list --all
+    echo "Expected VM names were:"
+    for name in "${possible_names[@]}"; do
+      echo "  - $name"
+    done
+    return 1
+  fi
+  
+  echo "VM $actual_vm_name created successfully"
   serial_and_switch "$i" "$network_name"
-  #  wait
 }
 
 function main() {
@@ -601,6 +757,9 @@ function main() {
   cp "${PWD}/templates/orch_network.xml" .
   cp "${PWD}/templates/Vagrantfile" .
   
+  # Clean up any existing resources that might conflict
+  cleanup_existing_resources
+  
   # Replace PXE server placeholder in network configuration
   sed -i "s/PXE_SERVER_PLACEHOLDER/${PXE_SERVER}/g" "${network_xml_file}"
   echo "PXE Server configured as: ${PXE_SERVER}"
@@ -615,6 +774,10 @@ function main() {
   echo "VM Network name will be used : $vm_network_name"
  
   echo "Network XML file: ${network_xml_file}"
+  echo "Network XML content:"
+  echo "===================="
+  cat "${network_xml_file}"
+  echo "===================="
 
   create_attach_network "${network_xml_file}"
   
@@ -637,9 +800,16 @@ function main() {
   start_time_vms=$(date +%s)
   log_with_timestamp "Starting $NUM_VMS vms with vm-networkname $vm_network_name"
   
+  # Determine the network name for OVMF file copying
+  if [ -z "$BRIDGE_NAME" ]; then 
+    actual_network_name=$(grep "<name>" "$network_xml_file" | sed -n 's/.*<name>\(.*\)<\/name>.*/\1/p')
+  else
+    actual_network_name=$mgmt_intf_name
+  fi
+  
   for i in $(seq 1 "$NUM_VMS"); do
-    sudo cp "${OVMF_PATH}/OVMF_CODE_4M.fd" "${OVMF_PATH}/OVMF_CODE_${network_name}-vm$i.fd"
-    sudo cp "${OVMF_PATH}/OVMF_VARS_4M.fd" "${OVMF_PATH}/OVMF_VARS_${network_name}-vm$i.fd"
+    sudo cp "${OVMF_PATH}/OVMF_CODE_4M.fd" "${OVMF_PATH}/OVMF_CODE_${actual_network_name}-vm$i.fd"
+    sudo cp "${OVMF_PATH}/OVMF_VARS_4M.fd" "${OVMF_PATH}/OVMF_VARS_${actual_network_name}-vm$i.fd"
     spawn_vms "$i" &
     pids[i]=$!
   done
