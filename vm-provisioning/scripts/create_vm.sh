@@ -34,7 +34,7 @@ BASE_DIR="${PWD}/scripts"
 # Number of VMs to create
 NUM_VMS=$1
 FLOW=$2
-bridge_name=""  # Global variable for bridge cleanup
+host_network_interface=""  # Global variable for host network interface
 
 if [ "$FLOW" == "-io" ] || [ -z "$FLOW" ]; then
     # Source IO Flow Configurations
@@ -115,9 +115,9 @@ cleanup_trap() {
   # Kill all child processes of this script
   vagrant_in_docker destroy -f
 
-  # Cleanup bridge interface if created
-  if [ -n "$bridge_name" ]; then
-    cleanup_bridge_interface "$bridge_name" "enp138s0f3np3"
+  # Cleanup host bridge network (no host interface changes)
+  if [ -n "$host_network_interface" ]; then
+    cleanup_host_bridge_network "libvirt-network" "$host_network_interface"
   fi
 
   # destroy_network if not done
@@ -254,82 +254,37 @@ function create_default_storage_pool() {
   fi
 }
 
-function create_bridge_interface() {
-  local bridge_name=$1
-  local physical_interface=$2
+function create_host_bridge_network() {
+  local network_name=$1
+  local host_interface=$2
   
-  echo "Creating bridge interface $bridge_name with physical interface $physical_interface"
+  echo "Configuring libvirt network '$network_name' for host bridge mode with interface '$host_interface'"
   
-  # Check if bridge already exists
-  if ip link show "$bridge_name" &>/dev/null; then
-    echo "Bridge $bridge_name already exists"
-    return 0
+  # This function now just validates the host interface exists
+  # The actual bridge configuration is handled by libvirt in the network XML
+  if ! ip link show "$host_interface" &>/dev/null; then
+    echo "Warning: Host interface '$host_interface' not found. VMs may not have network connectivity."
+    echo "Available interfaces:"
+    ip link show | grep -E '^[0-9]+:' | awk -F': ' '{print "  " $2}' | head -5
+    return 1
   fi
   
-  # Create the bridge
-  sudo ip link add name "$bridge_name" type bridge
-  
-  # Get the IP configuration from the physical interface
-  local ip_addr=$(ip addr show "$physical_interface" | grep 'inet ' | awk '{print $2}' | head -n1)
-  local gateway=$(ip route show dev "$physical_interface" | grep default | awk '{print $3}' | head -n1)
-  
-  # Remove IP from physical interface
-  if [ -n "$ip_addr" ]; then
-    sudo ip addr del "$ip_addr" dev "$physical_interface"
-  fi
-  
-  # Add physical interface to bridge
-  sudo ip link set "$physical_interface" master "$bridge_name"
-  
-  # Set interfaces up
-  sudo ip link set "$physical_interface" up
-  sudo ip link set "$bridge_name" up
-  
-  # Configure IP on bridge if we had one on physical interface
-  if [ -n "$ip_addr" ]; then
-    sudo ip addr add "$ip_addr" dev "$bridge_name"
-  fi
-  
-  # Restore default route if we had one
-  if [ -n "$gateway" ]; then
-    sudo ip route add default via "$gateway" dev "$bridge_name"
-  fi
-  
-  echo "Bridge $bridge_name created successfully"
+  echo "Host interface '$host_interface' is available for bridge mode"
+  return 0
 }
 
-function cleanup_bridge_interface() {
-  local bridge_name=$1
-  local physical_interface=$2
+function cleanup_host_bridge_network() {
+  local network_name=$1
+  local host_interface=$2
   
-  echo "Cleaning up bridge interface $bridge_name"
+  echo "Cleaning up libvirt network '$network_name' (host interface '$host_interface' remains untouched)"
   
-  if ip link show "$bridge_name" &>/dev/null; then
-    # Get bridge IP configuration
-    local ip_addr=$(ip addr show "$bridge_name" | grep 'inet ' | awk '{print $2}' | head -n1)
-    local gateway=$(ip route show dev "$bridge_name" | grep default | awk '{print $3}' | head -n1)
-    
-    # Remove physical interface from bridge
-    sudo ip link set "$physical_interface" nomaster
-    
-    # Delete bridge
-    sudo ip link delete "$bridge_name" type bridge
-    
-    # Restore IP to physical interface if we had one
-    if [ -n "$ip_addr" ]; then
-      sudo ip addr add "$ip_addr" dev "$physical_interface"
-    fi
-    
-    # Restore default route if we had one
-    if [ -n "$gateway" ]; then
-      sudo ip route add default via "$gateway" dev "$physical_interface"
-    fi
-    
-    echo "Bridge $bridge_name cleaned up successfully"
-  fi
+  # No manual bridge cleanup needed - libvirt handles everything
+  # Host interface remains completely intact
+  echo "Host network cleanup complete - no host interface changes made"
 }
 
-#### create random vm-networkname , brige and other configs
+#### create random vm-networkname and configure for host bridge mode
 function create_random_virtbr_net_name() {
   boot_efi_uri=$1
   timeout_duration=15
@@ -337,80 +292,96 @@ function create_random_virtbr_net_name() {
   # Reset the SECONDS variable to start counting from 0
   SECONDS=0
 
-    while true; do
-      # Generate a random 3-digit number between 2 and 255
-      random_number=$(shuf -i 100-220 -n 1)
-      physical_interface="enp138s0f3np3"
-      bridge_name="br-$random_number"  # Set global variable
-      
-      # Check if the physical interface exists
-      if ip addr show "$physical_interface" &>/dev/null; then
-
-      # Create the bridge interface
-      create_bridge_interface "$bridge_name" "$physical_interface"
-
-      if [ -n "$BRIDGE_NAME" ]; then
-        mgmt_intf_name="$BRIDGE_NAME-$random_number"
-
-	if [ "$STANDALONE" -eq 1 ]; then
-
-          sed -i '/<\/ip>/a\
-           <dnsmasq:options>\
-           <dnsmasq:option value="dhcp-vendorclass=set:efi-x64,PXEClient:Arch:00007"/>\
-           <dnsmasq:option value="dhcp-vendorclass=set:efi-x64_alt,PXEClient:Arch:00009"/>\
-           <dnsmasq:option value="dhcp-vendorclass=set:bios,PXEClient:Arch:00000"/>\
-           <dnsmasq:option value="dhcp-boot=tag:efi-x64,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
-           <dnsmasq:option value="dhcp-boot=tag:efi-x64_alt,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
-           <dnsmasq:option value="dhcp-boot=tag:bios,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
-           <dnsmasq:option value="dhcp-vendorclass=set:efi-http,HTTPClient:Arch:00016"/>\
-           <dnsmasq:option value="dhcp-option-force=tag:efi-http,60,HTTPClient"/>\
-           <dnsmasq:option value="dhcp-match=set:ipxe,175"/>\
-           <dnsmasq:option value="dhcp-boot=tag:efi-http,&quot;'"${boot_efi_uri}"'&quot;"/>\
-           <dnsmasq:option value="log-queries"/>\
-           <dnsmasq:option value="log-dhcp"/>\
-           <dnsmasq:option value="log-debug"/>\
-           </dnsmasq:options>' "$network_xml_file"
-      
-          sed -i "s|<network.*>|<network xmlns:dnsmasq='http://libvirt.org/schemas/network/dnsmasq/1.0'>|" "$network_xml_file"	
-	fi
-        
-	 echo "$mgmt_intf_name"
-	 sed -i "s/libvirt.management_network_name = \"orchvm-net-[0-9]\{1,3\}\"/libvirt.management_network_name = \"$BRIDGE_NAME\"/" "${PWD}/Vagrantfile"
-	 sed -i "s|orchvm-net-[0-9]\{1,3\}|$mgmt_intf_name|g" "${PWD}/Vagrantfile"
-
-      else
-        # Use sed to replace the network-name  pattern in the file orchvm-net$random_number
-        sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${network_xml_file}"
-        # Use sed to replace the bridge-name  pattern with bridge interface
-        sed -i "s|br-[0-9]\{1,3\}|$bridge_name|g" "${network_xml_file}"
-        
-	echo "orchvm-net-$random_number"
-        sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
-      fi
-  
-	sed -i "s|orchvm-num-vms|$NUM_VMS|g" "${PWD}/Vagrantfile"
-        octet_ip=${ip_to_connect##*.}
-        formatted_octet_ip=$(printf "%03d" "$octet_ip")
-        sed -i "s|VH[0-9]\{3\}N[0-9]\{3\}|VH${formatted_octet_ip}N${random_number}|g" "${PWD}/Vagrantfile"
-	if [ "$STATIC_CONFIG_SERIALS" != "" ]; then
-	   sed -Ei "s|static_config_serials = \"\"|static_config_serials = \"$STATIC_CONFIG_SERIALS\"|g" "$PWD/Vagrantfile"
-	fi
-        break
-
-      else
-        echo "Physical interface $physical_interface not found"
-        exit 1
-      fi
-      
-      # If we reach here, break since we found the interface  
-      if ((SECONDS >= timeout_duration)); then
-        echo "NONE"
-        break
-      else
-        sleep 1
-      fi
+  while true; do
+    # Generate a random 3-digit number between 100-220
+    random_number=$(shuf -i 100-220 -n 1)
+    
+    # Detect the default network interface automatically
+    host_interface=$(ip route | grep '^default' | awk '{print $5}' | head -n 1)
+    host_network_interface="$host_interface"  # Set global variable for cleanup
+    
+    if [ -z "$host_interface" ]; then
+      echo "Error: Could not detect default network interface"
+      exit 1
     fi
-    done
+    
+    echo "Using host network interface: $host_interface"
+    
+    # Validate that the interface exists and is up
+    if ! create_host_bridge_network "orchvm-net-$random_number" "$host_interface"; then
+      echo "Failed to validate host interface. Exiting..."
+      exit 1
+    fi
+
+    if [ -n "$BRIDGE_NAME" ]; then
+      mgmt_intf_name="$BRIDGE_NAME-$random_number"
+
+      if [ "$STANDALONE" -eq 1 ]; then
+        # Configure network XML for host bridge mode with PXE boot
+        sed -i "s|<forward mode='nat'>|<forward mode='bridge'>|" "$network_xml_file"
+        sed -i "s|<interface dev='[^']*'/>|<interface dev='$host_interface'/>|" "$network_xml_file"
+        
+        # Remove the isolated IP configuration since we're using host bridge
+        sed -i '/<ip address=/,/<\/ip>/d' "$network_xml_file"
+        
+        # Add PXE/HTTP boot configuration
+        sed -i '/<\/forward>/a\
+          <dnsmasq:options>\
+          <dnsmasq:option value="dhcp-vendorclass=set:efi-x64,PXEClient:Arch:00007"/>\
+          <dnsmasq:option value="dhcp-vendorclass=set:efi-x64_alt,PXEClient:Arch:00009"/>\
+          <dnsmasq:option value="dhcp-vendorclass=set:bios,PXEClient:Arch:00000"/>\
+          <dnsmasq:option value="dhcp-boot=tag:efi-x64,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
+          <dnsmasq:option value="dhcp-boot=tag:efi-x64_alt,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
+          <dnsmasq:option value="dhcp-boot=tag:bios,ipxe.efi,${PXE_SERVER},${PXE_SERVER}"/>\
+          <dnsmasq:option value="dhcp-vendorclass=set:efi-http,HTTPClient:Arch:00016"/>\
+          <dnsmasq:option value="dhcp-option-force=tag:efi-http,60,HTTPClient"/>\
+          <dnsmasq:option value="dhcp-match=set:ipxe,175"/>\
+          <dnsmasq:option value="dhcp-boot=tag:efi-http,&quot;'"${boot_efi_uri}"'&quot;"/>\
+          <dnsmasq:option value="log-queries"/>\
+          <dnsmasq:option value="log-dhcp"/>\
+          <dnsmasq:option value="log-debug"/>\
+          </dnsmasq:options>'
+
+        sed -i "s|<network.*>|<network xmlns:dnsmasq='http://libvirt.org/schemas/network/dnsmasq/1.0'>|" "$network_xml_file"
+      fi
+      
+      echo "$mgmt_intf_name"
+      sed -i "s/libvirt.management_network_name = \"orchvm-net-[0-9]\{1,3\}\"/libvirt.management_network_name = \"$BRIDGE_NAME\"/" "${PWD}/Vagrantfile"
+      sed -i "s|orchvm-net-[0-9]\{1,3\}|$mgmt_intf_name|g" "${PWD}/Vagrantfile"
+
+    else
+      # Configure for standard host bridge mode
+      sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${network_xml_file}"
+      
+      # Set up bridge mode in network XML
+      sed -i "s|<forward mode='nat'>|<forward mode='bridge'>|" "$network_xml_file"
+      sed -i "s|<interface dev='[^']*'/>|<interface dev='$host_interface'/>|" "$network_xml_file"
+      
+      # Remove isolated network configuration
+      sed -i '/<ip address=/,/<\/ip>/d' "$network_xml_file"
+      
+      echo "orchvm-net-$random_number"
+      sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
+    fi
+
+    sed -i "s|orchvm-num-vms|$NUM_VMS|g" "${PWD}/Vagrantfile"
+    octet_ip=${ip_to_connect##*.}
+    formatted_octet_ip=$(printf "%03d" "$octet_ip")
+    sed -i "s|VH[0-9]\{3\}N[0-9]\{3\}|VH${formatted_octet_ip}N${random_number}|g" "${PWD}/Vagrantfile"
+    
+    if [ "$STATIC_CONFIG_SERIALS" != "" ]; then
+      sed -Ei "s|static_config_serials = \"\"|static_config_serials = \"$STATIC_CONFIG_SERIALS\"|g" "$PWD/Vagrantfile"
+    fi
+    break
+
+    # Timeout check
+    if ((SECONDS >= timeout_duration)); then
+      echo "NONE"
+      break
+    else
+      sleep 1
+    fi
+  done
 }
 
 function create_attach_network() {

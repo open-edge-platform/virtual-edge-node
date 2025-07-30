@@ -2,8 +2,9 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 -->
-<network>
+<network xmlns:dnsmasq='http://libvirt.org/schemas/network/dnsmasq/1.0'>
   <name>orchvm-net-000</name>
-  <forward mode='bridge'/>
-  <bridge name='br-000'/>
+  <forward mode='bridge'>
+    <interface dev='enp1s0'/>
+  </forward>
 </network>
