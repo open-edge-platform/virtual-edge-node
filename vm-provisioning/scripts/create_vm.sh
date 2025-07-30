@@ -631,4 +631,17 @@ function main() {
   fi
 }
 
+# Detect the default network interface automatically
+host_interface=$(ip route | grep '^default' | awk '{print $5}' | head -n 1)
+if [ -z "$host_interface" ]; then
+  echo "Error: Could not detect default network interface"
+  exit 1
+fi
+
+# Replace the placeholder in the network XML
+sed -i "s|HOST_INTERFACE_PLACEHOLDER|$host_interface|g" "${PWD}/templates/orch_network.xml"
+
+# Log the detected interface
+echo "Using host network interface: $host_interface"
+
 main "$@"
