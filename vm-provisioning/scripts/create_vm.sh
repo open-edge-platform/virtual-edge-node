@@ -406,12 +406,8 @@ function create_random_virtbr_net_name() {
       fi
       
       echo "$mgmt_intf_name"
-      # Replace network name placeholder
-      sed -i "s|NETWORK_NAME_PLACEHOLDER|$BRIDGE_NAME|g" "${PWD}/Vagrantfile"
-      # Replace VM name base placeholder (for VM_NAME variable)
-      sed -i "s|VM_NAME_BASE_PLACEHOLDER|$mgmt_intf_name-vm|g" "${PWD}/Vagrantfile"
-      # Replace VM name placeholder with VM name pattern (for title/paths)
-      sed -i "s|VM_NAME_PLACEHOLDER|$mgmt_intf_name-vm#{i}|g" "${PWD}/Vagrantfile"
+      sed -i "s/libvirt.management_network_name = \"orchvm-net-[0-9]\{1,3\}\"/libvirt.management_network_name = \"$BRIDGE_NAME\"/" "${PWD}/Vagrantfile"
+      sed -i "s|orchvm-net-[0-9]\{1,3\}|$mgmt_intf_name|g" "${PWD}/Vagrantfile"
 
     else
       # Configure for standard host bridge mode
@@ -425,12 +421,7 @@ function create_random_virtbr_net_name() {
       sed -i '/<ip address=/,/<\/ip>/d' "$network_xml_file"
       
       echo "orchvm-net-$random_number"
-      # Replace network name placeholder  
-      sed -i "s|NETWORK_NAME_PLACEHOLDER|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
-      # Replace VM name base placeholder (for VM_NAME variable)
-      sed -i "s|VM_NAME_BASE_PLACEHOLDER|orchvm-net-$random_number-vm|g" "${PWD}/Vagrantfile"
-      # Replace VM name placeholder with VM name pattern (for title/paths)
-      sed -i "s|VM_NAME_PLACEHOLDER|orchvm-net-$random_number-vm#{i}|g" "${PWD}/Vagrantfile"
+      sed -i "s|orchvm-net-[0-9]\{1,3\}|orchvm-net-$random_number|g" "${PWD}/Vagrantfile"
     fi
 
     sed -i "s|orchvm-num-vms|$NUM_VMS|g" "${PWD}/Vagrantfile"
