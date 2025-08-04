@@ -16,6 +16,7 @@ module "common" {
   source                  = "../common"
   boot_image_name         = local.boot_image_name
   tinkerbell_nginx_domain = var.tinkerbell_nginx_domain
+  boot_order              = var.boot_order
 }
 
 resource "proxmox_virtual_environment_file" "upload_uefi_boot_image" {
@@ -32,7 +33,7 @@ resource "proxmox_virtual_environment_file" "upload_uefi_boot_image" {
 resource "proxmox_virtual_environment_vm" "node_vm" {
   depends_on = [
     random_integer.vm_name_suffix,
-    proxmox_virtual_environment_file.upload_uefi_boot_image,
+    module.common
   ]
 
   node_name = var.proxmox_node_name
@@ -40,21 +41,26 @@ resource "proxmox_virtual_environment_vm" "node_vm" {
   name        = local.full_vm_name
   description = var.vm_description
   tags        = var.vm_tags
+
   agent {
     enabled = false
   }
+
   stop_on_destroy = true
+
   startup {
     up_delay   = var.vm_startup.up_delay
     down_delay = var.vm_startup.down_delay
   }
 
   bios = "ovmf"
+
   smbios {
     serial  = var.smbios_serial
     uuid    = var.smbios_uuid
     product = var.smbios_product
   }
+
   operating_system {
     type = var.vm_operating_type
   }
