@@ -4,6 +4,9 @@
 
 resource "null_resource" "generate_uefi_boot_image" {
   provisioner "local-exec" {
+    environment = {
+      BOOT_ORDER = length(var.boot_order) > 1 ? var.boot_order[1] : ""
+    }
     command = <<EOT
 set -o errexit
 set -o nounset
@@ -50,26 +53,29 @@ case "$OSTYPE" in
     sudo mount $${loop_device}p1 ${path.module}/mnt ;;
 esac
 
-# Create EFI directory structure
-sudo mkdir -p ${path.module}/mnt/EFI/BOOT
+if [ "$BOOT_ORDER" != "network" ] && [ "$BOOT_ORDER" != "net0" ]; then
 
-# Fetch the iPXE binary and save it to the mounted disk image
-response_code=$(sudo -E curl \
-  --write-out "%%{http_code}" \
-  --verbose \
-  --output ${path.module}/mnt/EFI/BOOT/BOOTX64.EFI \
-  --insecure \
-  --location \
-  https://${var.tinkerbell_nginx_domain}/tink-stack/signed_ipxe.efi)
+  # Create EFI directory structure
+  sudo mkdir -p ${path.module}/mnt/EFI/BOOT
+  
+  # Fetch the iPXE binary and save it to the mounted disk image
+  response_code=$(sudo -E curl \
+    --write-out "%%{http_code}" \
+    --verbose \
+    --output ${path.module}/mnt/EFI/BOOT/BOOTX64.EFI \
+    --insecure \
+    --location \
+    https://${var.tinkerbell_nginx_domain}/tink-stack/signed_ipxe.efi)
+  
+  if [ "$${response_code}" -ne 200 ]; then
+    echo "Failed to download signed_ipxe.efi: Expected HTTP response code 200, got $response_code"
+    exit 1
+  fi
+  
+  # Create a startup script for UEFI to boot the iPXE binary
+  echo "fs0:\EFI\BOOT\BOOTX64.EFI" | sudo tee ${path.module}/mnt/startup.nsh > /dev/null
 
-if [ "$${response_code}" -ne 200 ]; then
-  echo "Failed to download signed_ipxe.efi: Expected HTTP response code 200, got $response_code"
-  exit 1
 fi
-
-# Create a startup script for UEFI to boot the iPXE binary
-echo "fs0:\EFI\BOOT\BOOTX64.EFI" | sudo tee ${path.module}/mnt/startup.nsh > /dev/null
-
 # Clean up
 case "$OSTYPE" in
   darwin*)

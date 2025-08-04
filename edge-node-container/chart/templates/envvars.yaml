@@ -25,7 +25,6 @@ data:
   _ORCH_PASS_: "{{ .Values.param.orchPass }}"
   _ORCH_ORG_: "{{ .Values.param.orchOrg }}"
   _ORCH_PROJECT_: "{{ .Values.param.orchProject }}"
-  _ENABLE_NIO_: "{{ .Values.param.enableNIO }}"
   _OAM_SERVER_ADDRESS_: "{{ .Values.param.oamServerAddress }}"
   _NODE_AGENT_VERSION_: "{{ .Values.bma_versions.node_agent_version }}"
   _CLUSTER_AGENT_VERSION_: "{{ .Values.bma_versions.cluster_agent_version }}"
