@@ -10,5 +10,5 @@ python-debian==0.1.44
 # license check
 reuse~=5.0.2
 
-PyYAML>=5.3
+PyYAML>=5.4
 
