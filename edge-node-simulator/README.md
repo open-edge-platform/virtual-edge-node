@@ -16,7 +16,7 @@ Additionally, the repo contains the Edge Infrastructure Manager End-to-End Integ
 which are used as sanity tests to evaluate a new release.
 
 > [!NOTE]
-> EN-SIM is intended solely for testing purposes and should not be used in a production environment. 
+> EN-SIM is intended solely for testing purposes and should not be used in a production environment.
 > Please ensure that it is used only in controlled, non-production scenarios.
 
 ## Features
