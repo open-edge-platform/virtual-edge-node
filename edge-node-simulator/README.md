@@ -15,6 +15,10 @@ This sub-repository contains the implementation of the Edge Node Simulator (EN-S
 Additionally, the repo contains the Edge Infrastructure Manager End-to-End Integration Tests
 which are used as sanity tests to evaluate a new release.
 
+> [!NOTE]
+> EN-SIM is intended solely for testing purposes and should not be used in a production environment.
+> Please ensure that it is used only in controlled, non-production scenarios.
+
 ## Features
 
 This sub-repository is designed to provide mechanisms to experiment with Infrastructure Manager
