@@ -23,8 +23,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     jq \
     lsb-release \
     sudo && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get upgrade libgnutls30=3.7.9-2+deb12u5
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
 RUN mkdir -p enic/bin
