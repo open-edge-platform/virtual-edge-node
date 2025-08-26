@@ -24,7 +24,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     lsb-release \
     sudo && \
     rm -rf /var/lib/apt/lists/* && \
-    apt install libgnutls30=3.7.9-2+deb12u5
+    apt-get upgrade libgnutls30=3.7.9-2+deb12u5
 
 WORKDIR /opt
 RUN mkdir -p enic/bin
