@@ -19,6 +19,9 @@ COPY vendor/ /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-c
 WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-container
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
+# POA requires yq to be installed in the machine
+RUN go install github.com/mikefarah/yq/v4@v4.45.1
+
 
 FROM debian:12.11-slim@sha256:6ac2c08566499cc2415926653cf2ed7c3aedac445675a013cc09469c9e118fdd
 
@@ -49,9 +52,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libtss2-esys-3.0.2-0 tpm2-tools cron procps sed gawk systemd-resolved && \
     rm -rf /var/lib/apt/lists/*
     
-# POA requires yq to be installed in the machine
-RUN go install github.com/mikefarah/yq/v4@v4.45.1 && \
-  mv /go/bin/yq /usr/bin/yq
+COPY --from=build /go/bin/yq /usr/local/bin/
 
 # Needed to track the installation progress
 RUN mkdir -p /var/edge_node/ && \
