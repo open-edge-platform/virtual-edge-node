@@ -20,4 +20,4 @@ CVE-2024-56406
 
 # CVE-2025-47907: PostgreSQL Scan Race Condition in Go database/sql
 # Mitigation: Will upgrade when official yq tag with Go 1.24.6+ is available
-CVE-2025-47907
+#CVE-2025-47907
