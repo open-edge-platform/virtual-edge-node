@@ -50,8 +50,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     rm -rf /var/lib/apt/lists/*
     
 # POA requires yq to be installed in the machine
-RUN wget --progress=dot:giga https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64.tar.gz -O - |\
-  tar xz && mv yq_linux_amd64 /usr/bin/yq
+RUN go install github.com/mikefarah/yq/v4@v4.45.1 && \
+  mv /go/bin/yq /usr/bin/yq
 
 # Needed to track the installation progress
 RUN mkdir -p /var/edge_node/ && \
