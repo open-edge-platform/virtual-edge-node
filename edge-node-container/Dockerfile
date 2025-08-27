@@ -19,8 +19,12 @@ COPY vendor/ /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-c
 WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-container
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
+# POA requires yq to be installed in the machine
+FROM golang:1.24.6-bookworm AS build-yq
+RUN go install github.com/mikefarah/yq/v4@v4.45.1
 
-FROM debian:12.11-slim@sha256:6ac2c08566499cc2415926653cf2ed7c3aedac445675a013cc09469c9e118fdd
+
+FROM debian:bookworm-slim@sha256:cea2634840f5a87503d8210e4df97b9f23a2acd67ff860a76c133d963032f866
 
 ARG REPO_URL
 ARG VERSION
@@ -49,9 +53,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libtss2-esys-3.0.2-0 tpm2-tools cron procps sed gawk systemd-resolved && \
     rm -rf /var/lib/apt/lists/*
     
-# POA requires yq to be installed in the machine
-RUN wget --progress=dot:giga https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64.tar.gz -O - |\
-  tar xz && mv yq_linux_amd64 /usr/bin/yq
+COPY --from=build-yq /go/bin/yq /usr/bin
 
 # Needed to track the installation progress
 RUN mkdir -p /var/edge_node/ && \
