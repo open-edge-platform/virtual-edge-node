@@ -8,7 +8,7 @@ go 1.24.6
 require (
 	github.com/magefile/mage v1.15.0
 	github.com/open-edge-platform/infra-core/inventory/v2 v2.28.0
-	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.7.1
+	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.7.2
 )
 
 require (
