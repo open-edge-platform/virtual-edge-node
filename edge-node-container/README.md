@@ -17,6 +17,10 @@ interfaces with the orchestrator.
 And it installs and run the actual Bare Metal Agents (BMAs) inside the container,
 enabling the execution of infrastructure, cluster and application use cases.
 
+> [!NOTE]
+> ENIC is intended solely for testing purposes and should not be used in a production environment.
+> Please ensure that it is used only in controlled, non-production scenarios.
+
 ## Features
 
 First and foremost, notice:
