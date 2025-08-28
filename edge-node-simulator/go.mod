@@ -3,7 +3,7 @@
 
 module github.com/open-edge-platform/virtual-edge-node/edge-node-simulator
 
-go 1.24.4
+go 1.24.6
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250425153114-8976f5be98c1.1
