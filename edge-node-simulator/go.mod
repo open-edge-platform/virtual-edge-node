@@ -6,7 +6,7 @@ module github.com/open-edge-platform/virtual-edge-node/edge-node-simulator
 go 1.24.6
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250613105001-9f2d3c737feb.1
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.8-20250717185734-6c6e0d3c608e.1
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-co-op/gocron v1.37.0
