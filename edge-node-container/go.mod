@@ -7,16 +7,16 @@ go 1.24.6
 
 require (
 	github.com/magefile/mage v1.15.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.29.1
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.30.0
 	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.7.4
 )
 
 require (
-	ariga.io/atlas v0.35.0 // indirect
+	ariga.io/atlas v0.36.1 // indirect
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250613105001-9f2d3c737feb.1 // indirect
 	cel.dev/expr v0.24.0 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
-	entgo.io/contrib v0.6.0 // indirect
+	entgo.io/contrib v0.7.0 // indirect
 	entgo.io/ent v0.14.4 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
@@ -37,7 +37,7 @@ require (
 	github.com/google/cel-go v0.25.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/labstack/echo/v4 v4.13.4 // indirect
@@ -53,22 +53,22 @@ require (
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/open-edge-platform/infra-core/apiv2/v2 v2.4.1 // indirect
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.37.7 // indirect
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.38.5 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
-	github.com/stoewer/go-strcase v1.3.0 // indirect
+	github.com/stoewer/go-strcase v1.3.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/zclconf/go-cty v1.16.3 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.61.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.61.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.62.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.62.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.36.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.36.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.36.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.37.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.37.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.37.0 // indirect
 	go.opentelemetry.io/otel/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
