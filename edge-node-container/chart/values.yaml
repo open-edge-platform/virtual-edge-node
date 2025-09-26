@@ -95,6 +95,6 @@ bma_versions:
   node_agent_version: 1.7.3
   platform_observability_agent_version: 1.9.0
   platform_telemetry_agent_version: 1.4.0
-  platform_update_agent_version: 1.5.2
+  platform_update_agent_version: 1.6.0
   tpm_provision_version: 4.2.8.6-1
   trtl_version: 4.2.8.6-1
