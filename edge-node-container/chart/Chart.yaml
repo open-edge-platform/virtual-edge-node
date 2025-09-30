@@ -5,8 +5,8 @@ apiVersion: v2
 name: enic
 description: Edge Node in a Container
 type: application
-version: 0.8.5
-appVersion: "0.8.5"
+version: 0.8.6
+appVersion: "0.8.6"
 home: edge-orchestrator.intel.com
 maintainers:
   - name: Edge Infrastructure Manager Team
