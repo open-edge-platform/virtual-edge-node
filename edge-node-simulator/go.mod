@@ -6,7 +6,7 @@ module github.com/open-edge-platform/virtual-edge-node/edge-node-simulator
 go 1.24.6
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250613105001-9f2d3c737feb.1
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.10-20250912141014-52f32327d4b0.1
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-co-op/gocron v1.37.0
@@ -14,7 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/magefile/mage v1.15.0
 	github.com/manifoldco/promptui v0.9.0
-	github.com/onsi/ginkgo/v2 v2.25.2
+	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.38.2
 	github.com/open-edge-platform/infra-core/apiv2/v2 v2.4.1
 	github.com/open-edge-platform/infra-core/inventory/v2 v2.29.1
@@ -24,11 +24,11 @@ require (
 	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.37.7
 	github.com/open-edge-platform/orch-library/go v0.6.1
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/oauth2 v0.30.0
-	golang.org/x/term v0.34.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250707201910-8d1bb00bc6a7
-	google.golang.org/grpc v1.75.0
-	google.golang.org/protobuf v1.36.8
+	golang.org/x/oauth2 v0.32.0
+	golang.org/x/term v0.36.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20250804133106-a7a43d27e69b
+	google.golang.org/grpc v1.76.0
+	google.golang.org/protobuf v1.36.10
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools v2.2.0+incompatible
 )
@@ -57,7 +57,7 @@ require (
 	github.com/getkin/kin-openapi v0.132.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.1 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.21.2 // indirect
@@ -154,10 +154,10 @@ require (
 	golang.org/x/mod v0.27.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.36.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250707201910-8d1bb00bc6a7 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250804133106-a7a43d27e69b // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
