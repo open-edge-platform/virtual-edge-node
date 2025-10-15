@@ -28,14 +28,14 @@ jobs:
       other_changed_projects: ${{ steps.filter-changes.outputs.other_changed_projects }}
       artifact_path: ${{ steps.arti-path.outputs.artifact_path }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8     # v5.0.0
         with:
           persist-credentials: false
       - name: "Verify Branch Name"
-        uses: open-edge-platform/orch-ci/verify-branch-name@66d088403f0e7afeaacefc44e8547be4d53d8323 # v0.1.50
+        uses: open-edge-platform/orch-ci/verify-branch-name@66d088403f0e7afeaacefc44e8547be4d53d8323     # v0.1.50
       - name: "Discover Changed Subfolders"
         id: discover-changes
-        uses: open-edge-platform/orch-ci/discover-changed-subfolders@66d088403f0e7afeaacefc44e8547be4d53d8323 # v0.1.50
+        uses: open-edge-platform/orch-ci/discover-changed-subfolders@66d088403f0e7afeaacefc44e8547be4d53d8323     # v0.1.50
       - name: "Filter Out Unwanted Changed Subfolders"
         id: filter-changes
         env:
@@ -65,21 +65,21 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8      # v5.0.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444     # v5.0.0
         with:
           node-version: '18'
       - run: |
           npm install -g \
           "markdownlint-cli@${{ env.MARKDOWNLINT_CLI_VER }}"
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c     # v6.0.0
         id: setup_python
         with:
           python-version: '3.13'
       - name: Restore cached virtualenv
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830     # v4.3.0
         with:
           key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
           path: venv_infra
@@ -95,7 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@66d088403f0e7afeaacefc44e8547be4d53d8323 # v0.1.50
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@66d088403f0e7afeaacefc44e8547be4d53d8323     # v0.1.50
     permissions:
       contents: read
       pull-requests: write
@@ -105,7 +105,7 @@ jobs:
       run_dep_version_check: true
       run_build: true
       run_lint: true
-      run_test: false # only for testing
+      run_test: false     # only for testing
       run_validate_clean_folder: true
       run_docker_build: true
       run_artifact: true
@@ -131,7 +131,7 @@ jobs:
         run: |
           results=("pre_merge_root_pipeline" "pre_merge_pipeline")
           status="OK"
-        
+
           for result in "${results[@]}"; do
             pipeline_result=$(eval echo \$$result)
             echo "${result} result: $pipeline_result"
@@ -139,7 +139,7 @@ jobs:
               status="KO"
             fi
           done
-        
+
           if [[ "$status" == "OK" ]]; then
             echo "Pre-merge check passed successfully."
           else
