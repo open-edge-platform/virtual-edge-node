@@ -21,7 +21,7 @@ jobs:
       contents: read
       security-events: write
       id-token: write
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@66d088403f0e7afeaacefc44e8547be4d53d8323  # v0.1.50
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@e4fa54613527cfaad83ba8b625fd845a4ab8409d  # v0.1.53
     with:
       run_version_check: true
       run_dep_version_check: true
