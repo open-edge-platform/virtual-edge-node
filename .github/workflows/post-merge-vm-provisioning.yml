@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@66d088403f0e7afeaacefc44e8547be4d53d8323  # v0.1.50
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@a7adb596be29b5b9f3a7053bed637d20875ef1df  # v0.1.54
     with:
       run_version_check: true
       run_dep_version_check: true
