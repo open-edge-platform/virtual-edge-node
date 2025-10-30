@@ -17,7 +17,7 @@ variable "memory" {
 variable "disk_size" {
   description = "Disk size for the VM in GB"
   type        = number
-  default     = 128
+  default     = 110
 }
 
 variable "smbios_serial" {
