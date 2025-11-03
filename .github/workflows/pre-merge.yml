@@ -100,6 +100,7 @@ jobs:
       contents: read
       pull-requests: write
     with:
+      orch_ci_repo_ref: cf81328e4c9526e579181efb1f609af06071889b  # 0.1.55 Pin bootstrap action and scripts
       run_security_scans: true
       run_version_check: true
       run_dep_version_check: true
