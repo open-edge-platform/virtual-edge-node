@@ -1,16 +1,16 @@
 caddy_version: 2.7.6
 cluster_agent_version: 1.8.0
 hardware_discovery_agent_version: 1.7.1
-inbc_program_version: 4.2.8.6-1
-inbm_cloudadapter_agent_version: 4.2.8.6-1
-inbm_configuration_agent_version: 4.2.8.6-1
-inbm_diagnostic_agent_version: 4.2.8.6-1
-inbm_dispatcher_agent_version: 4.2.8.6-1
-inbm_telemetry_agent_version: 4.2.8.6-1
-mqtt_version: 4.2.8.6-1
+inbc_program_version:-1
+inbm_cloudadapter_agent_version:-1
+inbm_configuration_agent_version:-1
+inbm_diagnostic_agent_version:-1
+inbm_dispatcher_agent_version:-1
+inbm_telemetry_agent_version:-1
+mqtt_version:-1
 node_agent_version: 1.8.1
 platform_observability_agent_version: 1.9.0
 platform_telemetry_agent_version: 1.4.0
-platform_update_agent_version: 1.5.2
-tpm_provision_version: 4.2.8.6-1
-trtl_version: 4.2.8.6-1
+platform_update_agent_version: 1.7.1
+tpm_provision_version:-1
+trtl_version:-1
