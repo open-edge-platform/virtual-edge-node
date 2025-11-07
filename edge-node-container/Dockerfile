@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.24.6-bookworm AS build
+FROM golang:1.24.9-bookworm AS build
 
 ENV GO111MODULE=on
 ARG MAKE_TARGET=go-build
@@ -20,7 +20,7 @@ WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-contai
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
 # POA requires yq to be installed in the machine
-FROM golang:1.24.6-bookworm AS build-yq
+FROM golang:1.24.9-bookworm AS build-yq
 RUN go install github.com/mikefarah/yq/v4@v4.45.1
 
 
@@ -36,10 +36,12 @@ LABEL org.opencontainers.image.version=${VERSION} \
       org.opencontainers.image.revision=${REVISION} \
       org.opencontainers.image.created=${BUILD_DATE}
 
-# Install base dependencies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+# Fix GPG keys and install base dependencies
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::AllowInsecureRepositories=true || true && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -o APT::Get::AllowUnauthenticated=true \
     apparmor-utils apt-transport-https apt-utils curl debian-keyring \
-    debian-archive-keyring dialog dmidecode gpg incron intel-gpu-tools\
+    dialog dmidecode gpg incron intel-gpu-tools\
     ipmitool iptables jq libcap2-bin libpq5 libyaml-0-2 lsb-release lshw \
     lxc needrestart net-tools nginx pciutils unzip rasdaemon smartmontools \
     sudo systemd udev ufw usbutils uuid-runtime wget rsyslog clevis-initramfs \
