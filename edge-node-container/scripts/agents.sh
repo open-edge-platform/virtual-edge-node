@@ -393,11 +393,6 @@ install-node-agent
 install-cluster-agent
 install-hda-agent
 install-poa-agent
-# install-trtl
-# install-inbm-components
-# install-inbc-program
-# install-mqtt
-# install-tpm-provision
 install-platform-update-agent
 install-platform-telemetry-agent
 
