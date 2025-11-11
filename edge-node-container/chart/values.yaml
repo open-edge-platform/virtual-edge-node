@@ -85,16 +85,8 @@ bma_versions:
   caddy_version: 2.7.6
   cluster_agent_version: 1.8.0
   hardware_discovery_agent_version: 1.7.1
-  inbc_program_version: "null"
-  inbm_cloudadapter_agent_version: "null"
-  inbm_configuration_agent_version: "null"
-  inbm_diagnostic_agent_version: "null"
-  inbm_dispatcher_agent_version: "null"
-  inbm_telemetry_agent_version: "null"
-  mqtt_version: "null"
+  in_band_manageability_version: 1.0.2
   node_agent_version: 1.8.1
   platform_observability_agent_version: 1.10.0
   platform_telemetry_agent_version: 1.4.0
   platform_update_agent_version: 1.7.1
-  tpm_provision_version: "null"
-  trtl_version: "null"
