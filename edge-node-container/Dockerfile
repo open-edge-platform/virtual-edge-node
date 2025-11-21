@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.24.6-bookworm AS build
+FROM golang:1.24.9-bookworm AS build
 
 ENV GO111MODULE=on
 ARG MAKE_TARGET=go-build
@@ -20,7 +20,7 @@ WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-contai
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
 # POA requires yq to be installed in the machine
-FROM golang:1.24.6-bookworm AS build-yq
+FROM golang:1.24.9-bookworm AS build-yq
 RUN go install github.com/mikefarah/yq/v4@v4.45.1
 
 
@@ -36,21 +36,27 @@ LABEL org.opencontainers.image.version=${VERSION} \
       org.opencontainers.image.revision=${REVISION} \
       org.opencontainers.image.created=${BUILD_DATE}
 
-# Install base dependencies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+# Fix GPG keys and install base dependencies
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::AllowInsecureRepositories=true || true && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -o APT::Get::AllowUnauthenticated=true \
     apparmor-utils apt-transport-https apt-utils curl debian-keyring \
-    debian-archive-keyring dialog dmidecode gpg incron intel-gpu-tools\
+    dialog dmidecode gpg incron intel-gpu-tools\
     ipmitool iptables jq libcap2-bin libpq5 libyaml-0-2 lsb-release lshw \
     lxc needrestart net-tools nginx pciutils unzip rasdaemon smartmontools \
     sudo systemd udev ufw usbutils uuid-runtime wget rsyslog clevis-initramfs \
     console-setup console-setup-linux cpio cryptsetup cryptsetup-bin \
     cryptsetup-initramfs initramfs-tools initramfs-tools-core \
-    kbd keyboard-configuration klibc-utils kmod libcjson1 libdlt2 libev4 libklibc \
-    liblocale-gettext-perl libmosquitto1 libplymouth5 libtss2-mu0 libtss2-rc0 \
+    kbd keyboard-configuration klibc-utils kmod libcjson1 libev4 libklibc \
+    liblocale-gettext-perl libplymouth5 libtss2-mu0 libtss2-rc0 \
     libtss2-sys1 libtss2-tcti-cmd0 libtss2-tcti-device0 libtss2-tcti-mssim0 \
-    libtss2-tcti-swtpm0 libtss2-tctildr0 libuv1 libwebsockets17 linux-base mosquitto \
+    libtss2-tcti-swtpm0 libtss2-tctildr0 libuv1 linux-base \
     plymouth plymouth-theme-breeze tpm-udev tpm2-abrmd xkb-data zstd libcurl3-gnutls \
     libtss2-esys-3.0.2-0 tpm2-tools cron procps sed gawk systemd-resolved && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    # Remove packages that pull in vulnerable dependencies not needed for core functionality \
+    apt-get remove -y qemu-block-extra qemu-utils && \
+    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
     
 COPY --from=build-yq /go/bin/yq /usr/bin

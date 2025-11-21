@@ -141,19 +141,11 @@ bma_versions: ##  Sets the currently downloaded BMA versions in the value file
 	yq eval -i '.bma_versions.caddy_version = "$(shell cat ./chart/bma_values.yaml | yq .caddy_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.cluster_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .cluster_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.hardware_discovery_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .hardware_discovery_agent_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.inbc_program_version = "$(shell cat ./chart/bma_values.yaml | yq .inbc_program_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.inbm_cloudadapter_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .inbm_cloudadapter_agent_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.inbm_configuration_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .inbm_configuration_agent_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.inbm_diagnostic_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .inbm_diagnostic_agent_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.inbm_dispatcher_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .inbm_dispatcher_agent_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.inbm_telemetry_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .inbm_telemetry_agent_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.mqtt_version = "$(shell cat ./chart/bma_values.yaml | yq .mqtt_version)"' ./chart/values.yaml
+	yq eval -i '.bma_versions.in_band_manageability_version = "$(shell cat ./chart/bma_values.yaml | yq .in_band_manageability_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.node_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .node_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.platform_observability_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .platform_observability_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.platform_telemetry_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .platform_telemetry_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.platform_update_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .platform_update_agent_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.tpm_provision_version = "$(shell cat ./chart/bma_values.yaml | yq .tpm_provision_version)"' ./chart/values.yaml
-	yq eval -i '.bma_versions.trtl_version = "$(shell cat ./chart/bma_values.yaml | yq .trtl_version)"' ./chart/values.yaml
 
 apply-version: ##helm-reset-annotations helm-annotate	bma_versions ## @HELP apply version from the top level package.json to all sub-projectsare the same across the different projects
 	yq eval -i '.version = "$(VERSION)"' $(HELM_CHART_ENIC)/Chart.yaml
