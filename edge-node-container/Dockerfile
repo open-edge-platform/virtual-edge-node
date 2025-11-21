@@ -43,7 +43,7 @@ RUN rm -rf /var/lib/apt/lists/* && \
     apparmor-utils apt-transport-https apt-utils curl debian-keyring \
     dialog dmidecode gpg incron intel-gpu-tools\
     ipmitool iptables jq libcap2-bin libpq5 libyaml-0-2 lsb-release lshw \
-    lxc needrestart net-tools nginx pciutils unzip smartmontools \
+    lxc needrestart net-tools nginx pciutils unzip rasdaemon smartmontools \
     sudo systemd udev ufw usbutils uuid-runtime wget rsyslog clevis-initramfs \
     console-setup console-setup-linux cpio cryptsetup cryptsetup-bin \
     cryptsetup-initramfs initramfs-tools initramfs-tools-core \
@@ -55,7 +55,7 @@ RUN rm -rf /var/lib/apt/lists/* && \
     libtss2-esys-3.0.2-0 tpm2-tools cron procps sed gawk systemd-resolved && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
     # Remove packages that pull in vulnerable dependencies not needed for core functionality \
-    apt-get remove -y qemu-block-extra qemu-utils rasdaemon sqlite3 && \
+    apt-get remove -y qemu-block-extra qemu-utils && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
     
