@@ -43,16 +43,20 @@ RUN rm -rf /var/lib/apt/lists/* && \
     apparmor-utils apt-transport-https apt-utils curl debian-keyring \
     dialog dmidecode gpg incron intel-gpu-tools\
     ipmitool iptables jq libcap2-bin libpq5 libyaml-0-2 lsb-release lshw \
-    lxc needrestart net-tools nginx pciutils unzip rasdaemon smartmontools \
+    lxc needrestart net-tools nginx pciutils unzip smartmontools \
     sudo systemd udev ufw usbutils uuid-runtime wget rsyslog clevis-initramfs \
     console-setup console-setup-linux cpio cryptsetup cryptsetup-bin \
     cryptsetup-initramfs initramfs-tools initramfs-tools-core \
-    kbd keyboard-configuration klibc-utils kmod libcjson1 libdlt2 libev4 libklibc \
-    liblocale-gettext-perl libmosquitto1 libplymouth5 libtss2-mu0 libtss2-rc0 \
+    kbd keyboard-configuration klibc-utils kmod libcjson1 libev4 libklibc \
+    liblocale-gettext-perl libplymouth5 libtss2-mu0 libtss2-rc0 \
     libtss2-sys1 libtss2-tcti-cmd0 libtss2-tcti-device0 libtss2-tcti-mssim0 \
-    libtss2-tcti-swtpm0 libtss2-tctildr0 libuv1 libwebsockets17 linux-base mosquitto \
+    libtss2-tcti-swtpm0 libtss2-tctildr0 libuv1 linux-base \
     plymouth plymouth-theme-breeze tpm-udev tpm2-abrmd xkb-data zstd libcurl3-gnutls \
     libtss2-esys-3.0.2-0 tpm2-tools cron procps sed gawk systemd-resolved && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    # Remove packages that pull in vulnerable dependencies not needed for core functionality \
+    apt-get remove -y qemu-block-extra qemu-utils rasdaemon sqlite3 && \
+    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
     
 COPY --from=build-yq /go/bin/yq /usr/bin

@@ -17,3 +17,18 @@ AVD-KSV-0118
 # enic-utils issues, will be addresses post-3.0
 CVE-2025-31115
 CVE-2024-56406
+
+# No fixes available in Debian 12 (bookworm)
+# These affect core system libraries that cannot be easily removed
+CVE-2023-2953    # openldap: no fix available (affected) - required by system auth
+CVE-2025-6020    # linux-pam: no fix available (affected) - core auth system
+CVE-2023-42465   # sudo: no fix available (affected) - required for privilege escalation
+CVE-2023-45853   # zlib: will_not_fix (CRITICAL) - core compression library used everywhere
+CVE-2025-12818   # libpq5: no fix available - PostgreSQL client library
+CVE-2025-8194    # python3.11: no fix available - core Python runtime
+CVE-2025-7458    # libsqlite3-0: no fix available (affected) (CRITICAL) - required by Python stdlib and gpg
+CVE-2024-29039   # tpm2-tools: no fix available (affected) - required for TPM provisioning
+
+# busybox-static: Required by cryptsetup-initramfs, no alternative available
+CVE-2022-48174   # busybox: fix_deferred (CRITICAL)
+CVE-2023-39810   # busybox: no fix available (affected)
