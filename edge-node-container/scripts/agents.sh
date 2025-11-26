@@ -333,6 +333,7 @@ function configure-node-agent() {
 
   DEVICE_GUID=$(dmidecode -s system-uuid)
   sed -i "s|GUID: '.*'|GUID: '$DEVICE_GUID'|" /etc/edge-node/node/confs/node-agent.yaml
+  sed -i 's/, platform-manageability-agent//g' /etc/edge-node/node/confs/node-agent.yaml
   systemctl restart node-agent
 
   echo "Wait for node agent and pua proxy to start"
@@ -392,11 +393,6 @@ install-node-agent
 install-cluster-agent
 install-hda-agent
 install-poa-agent
-install-trtl
-install-inbm-components
-install-inbc-program
-install-mqtt
-install-tpm-provision
 install-platform-update-agent
 install-platform-telemetry-agent
 
