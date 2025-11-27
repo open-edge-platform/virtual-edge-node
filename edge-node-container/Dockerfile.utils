@@ -13,7 +13,7 @@ LABEL org.opencontainers.image.version=${VERSION} \
       org.opencontainers.image.revision=${REVISION} \
       org.opencontainers.image.created=${BUILD_DATE}
 
-# Install base dependencies
+# Install base dependencies and security updates
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     --no-install-recommends \
     curl \
@@ -23,6 +23,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     jq \
     lsb-release \
     sudo && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
