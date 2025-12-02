@@ -12,6 +12,11 @@ path = [
     "EN_MANIFEST_VERSION",
     "scripts/dmiTemplate/*",
     "chart/bma_values.yaml",
+    "bma_packages/**",
+    "**.deb",
+    "common.mk",
+    "version.mk",
+    "vendor/**",
 ]
 
 precedence = "aggregate"
