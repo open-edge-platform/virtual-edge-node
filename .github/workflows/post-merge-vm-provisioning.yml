@@ -13,14 +13,15 @@ on:
       - 'vm-provisioning/**'
   workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   post-merge-pipeline:
     permissions:
       contents: read
       deployments: write
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@cf81328e4c9526e579181efb1f609af06071889b  # v0.1.55
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@d3fe218ea585fb390b73c87f9e482cbe1424829c  # v0.1.68
     with:
       run_version_check: true
       run_dep_version_check: true
@@ -34,8 +35,6 @@ jobs:
       project_folder: "vm-provisioning"
     secrets:
       SYS_ORCH_GITHUB: ${{ secrets.SYS_ORCH_GITHUB }}
-      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
       NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
       MSTEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}

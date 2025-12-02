@@ -14,4 +14,11 @@ out/*
 *.exe~
 *.dll
 *.so
+*.deb
+
+# Build artifacts
+bma_packages/
+common.mk
+version.mk
+vendor/
 
