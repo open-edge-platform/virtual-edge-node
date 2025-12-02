@@ -1,6 +1,11 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+# FIXED CVEs - Pinned to specific versions in Dockerfile
+# CVE-2025-4802: libc6 = 2.36-9+deb12u11, libc-bin = 2.36-9+deb12u11 (HIGH)
+# CVE-2023-31484: perl-base = 5.36.0-7+deb12u3 (HIGH)
+# These are explicitly installed with version pins in the RUN layer
+
 # Requires update of golang-jwt/jwt, will be done post-3.0
 CVE-2025-30204
 

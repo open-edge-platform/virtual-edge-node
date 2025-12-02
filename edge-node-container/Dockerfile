@@ -54,8 +54,16 @@ RUN rm -rf /var/lib/apt/lists/* && \
     plymouth plymouth-theme-breeze tpm-udev tpm2-abrmd xkb-data zstd libcurl3-gnutls \
     libtss2-esys-3.0.2-0 tpm2-tools cron procps sed gawk systemd-resolved && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
-    # Explicitly upgrade vulnerable packages to apply security patches \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --only-upgrade libc6 perl-base && \
+    # Explicitly pin vulnerable packages to fixed versions to resolve: \
+    # CVE-2025-4802 (libc6: 2.36-9+deb12u10 -> 2.36-9+deb12u11) \
+    # CVE-2023-31484 (perl-base: 5.36.0-7+deb12u2 -> 5.36.0-7+deb12u3) \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --only-upgrade \
+        libc6=2.36-9+deb12u11 \
+        libc-bin=2.36-9+deb12u11 \
+        perl-base=5.36.0-7+deb12u3 \
+        perl=5.36.0-7+deb12u3 \
+        libperl5.36=5.36.0-7+deb12u3 \
+        perl-modules-5.36=5.36.0-7+deb12u3 && \
     # Remove packages that pull in vulnerable dependencies not needed for core functionality \
     apt-get remove -y qemu-block-extra qemu-utils && \
     apt-get autoremove -y && \
