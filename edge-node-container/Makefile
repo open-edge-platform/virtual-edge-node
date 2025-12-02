@@ -133,7 +133,7 @@ kind-load: ##  Kind load ENiC docker image
 	kind load docker-image $(ENIC_DOCKER_TAG) --name=$(KIND_CLUSTER_NAME)
 	kind load docker-image $(UTILS_DOCKER_TAG) --name=$(KIND_CLUSTER_NAME)
 
-SH_FILES := $(shell find . -type f -name '*.sh')
+SH_FILES := $(shell find . -type f -name '*.sh' -not -path './vendor/*')
 lint: ##  Lint shell utils scripts
 	shellcheck $(SH_FILES)
 
