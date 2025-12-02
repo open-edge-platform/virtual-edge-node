@@ -54,6 +54,8 @@ RUN rm -rf /var/lib/apt/lists/* && \
     plymouth plymouth-theme-breeze tpm-udev tpm2-abrmd xkb-data zstd libcurl3-gnutls \
     libtss2-esys-3.0.2-0 tpm2-tools cron procps sed gawk systemd-resolved && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    # Explicitly upgrade vulnerable packages to apply security patches \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --only-upgrade libc6 perl-base && \
     # Remove packages that pull in vulnerable dependencies not needed for core functionality \
     apt-get remove -y qemu-block-extra qemu-utils && \
     apt-get autoremove -y && \
