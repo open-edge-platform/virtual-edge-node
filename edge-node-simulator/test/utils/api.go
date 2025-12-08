@@ -756,8 +756,7 @@ func ListInstances(ctx context.Context, apiClient *http.Client, filter *string) 
 // UpdateHostOS updates the OS of a host using PATCH request.
 func UpdateHostOS(ctx context.Context, tb testing.TB,
 	apiClient *http.Client, hostID string,
-	updateSources []string,
-	installedPkgs, kernelCmd string,
+	installedPkgs string,
 ) {
 	tb.Helper()
 	cfg := flags_test.GetConfig()
@@ -797,10 +796,8 @@ func UpdateHostOS(ctx context.Context, tb testing.TB,
 		sha = *osSHA
 	}
 	osBody := edgeinfraapi.OperatingSystemResource{
-		UpdateSources:     &updateSources,
 		InstalledPackages: &installedPkgs,
 		Sha256:            sha,
-		KernelCommand:     &kernelCmd,
 	}
 	osBodyBytes, err := json.Marshal(osBody)
 	if err != nil {

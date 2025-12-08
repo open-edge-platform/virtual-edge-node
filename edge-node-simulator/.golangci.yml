@@ -142,6 +142,12 @@ linters-settings:
           - "!$test"
         allow:
           - $gostd
+          - gopkg.in/yaml.v3
+          - golang.org/x/term
+          - gotest.tools/assert
+          - golang.org/x/oauth2
+          - google.golang.org/grpc
+          - google.golang.org/protobuf
           - github.com/open-edge-platform
           - github.com/magefile/mage/sh
           - github.com/goccy/go-json

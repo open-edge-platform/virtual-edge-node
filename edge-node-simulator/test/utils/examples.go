@@ -50,7 +50,6 @@ var (
 	}
 	OSResource = &os_v1.OperatingSystemResource{
 		Name:              "for unit testing purposes",
-		UpdateSources:     []string{"test entries"},
 		ImageUrl:          "Repo URL Test",
 		ProfileName:       inv_testing.GenerateRandomProfileName(),
 		Sha256:            inv_testing.GenerateRandomSha256(),

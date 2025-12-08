@@ -90,9 +90,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 				utils_test.UpdateHostOS(ctx, GinkgoTB(),
 					httpClient,
 					hostID,
-					utils_test.OSUpdateSources,
 					utils_test.OSInstalledPackages,
-					utils_test.OSKernelCmd,
 				)
 			}
 
