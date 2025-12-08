@@ -52,7 +52,11 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
+<<<<<<< HEAD
 	github.com/open-edge-platform/infra-core/apiv2/v2 v2.8.2 // indirect
+=======
+	github.com/open-edge-platform/infra-core/apiv2/v2 v2.8.1 // indirect
+>>>>>>> 152e9ad ([gomod] Bump the internal-dependencies group across 2 directories with 8 updates)
 	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.38.15 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
