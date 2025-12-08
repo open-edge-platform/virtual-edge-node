@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.24.9-bookworm AS build
+FROM golang:1.24.11-bookworm AS build
 
 ENV GO111MODULE=on
 ARG MAKE_TARGET=go-build
@@ -20,7 +20,7 @@ WORKDIR /go/src/github.com/open-edge-platform/virtual-edge-node/edge-node-contai
 RUN CGO_ENABLED=0 DOCKER_LABEL_REPO_URL=${REPO_URL} DOCKER_LABEL_VERSION=${VERSION} DOCKER_LABEL_REVISION=${REVISION} DOCKER_LABEL_BUILD_DATE=${BUILD_DATE} make ${MAKE_TARGET}
 
 # POA requires yq to be installed in the machine
-FROM golang:1.24.9-bookworm AS build-yq
+FROM golang:1.24.11-bookworm AS build-yq
 RUN go install github.com/mikefarah/yq/v4@v4.45.1
 
 
