@@ -36,9 +36,7 @@ func Test_PuaSched_Single(t *testing.T) {
 			SingleSchedule: &utils_test.MmSingleSchedule1,
 		},
 		UpdateSource: &pb.UpdateSource{
-			KernelCommand: utils_test.OSResource.GetKernelCommand(),
-			OsRepoUrl:     utils_test.OSResource.GetImageUrl(),
-			CustomRepos:   utils_test.OSResource.GetUpdateSources(),
+			OsRepoUrl: utils_test.OSResource.GetImageUrl(),
 		},
 		InstalledPackages: utils_test.OSResource.GetInstalledPackages(),
 	}
@@ -79,9 +77,7 @@ func Test_PuaSched_Repeated(t *testing.T) {
 			RepeatedSchedules: utils_test.MmRepeatedSchedule1,
 		},
 		UpdateSource: &pb.UpdateSource{
-			KernelCommand: utils_test.OSResource.GetKernelCommand(),
-			OsRepoUrl:     utils_test.OSResource.GetImageUrl(),
-			CustomRepos:   utils_test.OSResource.GetUpdateSources(),
+			OsRepoUrl: utils_test.OSResource.GetImageUrl(),
 		},
 		InstalledPackages: utils_test.OSResource.GetInstalledPackages(),
 	}
