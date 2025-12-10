@@ -19,10 +19,10 @@ require (
 	github.com/open-edge-platform/infra-core/apiv2/v2 v2.8.2
 	github.com/open-edge-platform/infra-core/inventory/v2 v2.33.4
 	github.com/open-edge-platform/infra-managers/host v1.24.1
-	github.com/open-edge-platform/infra-managers/maintenance v1.24.1
+	github.com/open-edge-platform/infra-managers/maintenance v1.24.3
 	github.com/open-edge-platform/infra-managers/telemetry v1.24.1
 	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.38.15
-	github.com/open-edge-platform/orch-library/go v0.6.2
+	github.com/open-edge-platform/orch-library/go v0.6.3
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.34.0
 	golang.org/x/term v0.38.0
