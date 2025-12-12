@@ -1,0 +1,131 @@
+# SPDX-FileCopyrightText: 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+name: Auto Bump Chart Version
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'edge-node-container/**'
+      - 'edge-node-simulator/**'
+
+permissions: read-all
+
+jobs:
+  bump-chart-and-app-versions:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0  # Needed to get diff info
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Get changed app directories
+        id: changed-apps
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Get the base branch for comparison
+          git fetch origin ${BASE_REF}
+
+          # Find all files that have been modified
+          changed_files=$(git diff --name-only origin/${BASE_REF}...HEAD)
+
+          # Check for specific app directory changes
+          changed_apps=""
+
+          if echo "$changed_files" | grep -q "^edge-node-container/"; then
+            changed_apps="$changed_apps edge-node-container"
+            echo "Found changes in edge-node-container"
+          fi
+
+          if echo "$changed_files" | grep -q "^edge-node-simulator/"; then
+            changed_apps="$changed_apps edge-node-simulator"
+            echo "Found changes in edge-node-simulator"
+          fi
+
+          echo "changed_apps=$changed_apps" >> $GITHUB_OUTPUT
+
+      - name: Bump Version
+        if: steps.changed-apps.outputs.changed_apps != ''
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          changed_apps="${{ steps.changed-apps.outputs.changed_apps }}"
+          updated_apps=""
+
+          for app_name in $changed_apps; do
+            CHART_FILE="$app_name/chart/Chart.yaml"
+
+            if [ -f "$CHART_FILE" ]; then
+              current_app_version=$(yq eval '.appVersion' "$CHART_FILE")
+              current_chart_version=$(yq eval '.version' "$CHART_FILE")
+
+              # Simple patch version bump for appVersion
+              IFS='.' read -ra VERSION_PARTS <<< "$current_app_version"
+              major=${VERSION_PARTS[0]}
+              minor=${VERSION_PARTS[1]}
+              patch=${VERSION_PARTS[2]}
+              new_patch=$((patch + 1))
+              new_app_version="${major}.${minor}.${new_patch}"
+
+              # Simple patch version bump for chart version
+              IFS='.' read -ra CHART_VERSION_PARTS <<< "$current_chart_version"
+              chart_major=${CHART_VERSION_PARTS[0]}
+              chart_minor=${CHART_VERSION_PARTS[1]}
+              chart_patch=${CHART_VERSION_PARTS[2]}
+              new_chart_patch=$((chart_patch + 1))
+              new_chart_version="${chart_major}.${chart_minor}.${new_chart_patch}"
+
+              echo "Bumping $app_name appVersion from $current_app_version to $new_app_version"
+              echo "Bumping $app_name version from $current_chart_version to $new_chart_version"
+
+              yq eval ".appVersion = \"$new_app_version\"" -i "$CHART_FILE"
+              yq eval ".version = \"$new_chart_version\"" -i "$CHART_FILE"
+
+              updated_apps="$updated_apps $app_name"
+            fi
+
+            VERSION_FILE="$app_name/VERSION"
+            if [ -f "$VERSION_FILE" ]; then
+              current_version=$(head -n 1 "$VERSION_FILE" | xargs)
+
+              IFS='.' read -ra VERSION_PARTS <<< "$current_version"
+              major=${VERSION_PARTS[0]}
+              minor=${VERSION_PARTS[1]}
+              patch=${VERSION_PARTS[2]}
+              new_patch=$((patch + 1))
+              new_version="${major}.${minor}.${new_patch}"
+
+              echo "Bumping $app_name VERSION from $current_version to $new_version"
+
+              sed -i "s/$current_version/$new_version/" "$VERSION_FILE"
+            fi
+          done
+
+          # Check if there are changes to commit
+          if git diff --quiet edge/; then
+            echo "No app version changes to commit"
+            exit 0
+          fi
+
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add charts/
+
+          # Create commit message with all updated apps
+          if [ -n "$updated_apps" ]; then
+            commit_msg="chore: bump app and chart versions for:$updated_apps"
+            git commit -m "$commit_msg"
+            git push origin $BRANCH_NAME
+          fi
