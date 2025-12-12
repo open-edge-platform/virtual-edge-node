@@ -32,10 +32,10 @@ jobs:
         with:
           persist-credentials: false
       - name: "Verify Branch Name"
-        uses: open-edge-platform/orch-ci/verify-branch-name@7d5bad2683575166a52b1000d8869c18d3e0e024  # 0.1.69
+        uses: open-edge-platform/orch-ci/verify-branch-name@7bf86d788223a2886c8b5b4bc3b418e0af0a9c96  # 0.1.69
       - name: "Discover Changed Subfolders"
         id: discover-changes
-        uses: open-edge-platform/orch-ci/discover-changed-subfolders@7d5bad2683575166a52b1000d8869c18d3e0e024  # 0.1.69
+        uses: open-edge-platform/orch-ci/discover-changed-subfolders@7bf86d788223a2886c8b5b4bc3b418e0af0a9c96  # 0.1.69
       - name: "Filter Out Unwanted Changed Subfolders"
         id: filter-changes
         env:
@@ -79,7 +79,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Restore cached virtualenv
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830     # v4.3.0
+        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0     # v5.0.0
         with:
           key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
           path: venv_infra
@@ -95,7 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@7d5bad2683575166a52b1000d8869c18d3e0e024  # 0.1.69
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@7bf86d788223a2886c8b5b4bc3b418e0af0a9c96  # 0.1.69
     permissions:
       contents: read
       pull-requests: write
