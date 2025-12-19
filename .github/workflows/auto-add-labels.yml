@@ -11,7 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions: {}
+permissions:
+  contents: read            # default, required to read repo content
+  pull-requests: write      # needed so the action can apply labels to PRs
+  issues: write             # needed so the action can apply labels to Issues
 
 jobs:
   label:
