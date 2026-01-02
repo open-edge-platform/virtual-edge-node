@@ -143,6 +143,7 @@ bma_versions: ##  Sets the currently downloaded BMA versions in the value file
 	yq eval -i '.bma_versions.hardware_discovery_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .hardware_discovery_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.in_band_manageability_version = "$(shell cat ./chart/bma_values.yaml | yq .in_band_manageability_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.node_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .node_agent_version)"' ./chart/values.yaml
+	yq eval -i '.bma_versions.remote_access_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .remote_access_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.platform_observability_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .platform_observability_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.platform_telemetry_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .platform_telemetry_agent_version)"' ./chart/values.yaml
 	yq eval -i '.bma_versions.platform_update_agent_version = "$(shell cat ./chart/bma_values.yaml | yq .platform_update_agent_version)"' ./chart/values.yaml

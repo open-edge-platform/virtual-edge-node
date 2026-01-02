@@ -27,6 +27,7 @@ var agentsNames = []string{
 	"platform-observability-agent",
 	"platform-telemetry-agent",
 	"platform-update-agent",
+	"remote-access-agent",
 	"caddy",
 	"inbc-program",
 	"inbm-configuration-agent",

@@ -27,6 +27,7 @@ data:
   _ORCH_PROJECT_: "{{ .Values.param.orchProject }}"
   _OAM_SERVER_ADDRESS_: "{{ .Values.param.oamServerAddress }}"
   _NODE_AGENT_VERSION_: "{{ .Values.bma_versions.node_agent_version }}"
+  _REMOTE_ACCESS_AGENT_VERSION_: "{{ .Values.bma_versions.remote_access_agent_version }}"
   _CLUSTER_AGENT_VERSION_: "{{ .Values.bma_versions.cluster_agent_version }}"
   _HDA_AGENT_VERSION_: "{{ .Values.bma_versions.hardware_discovery_agent_version }}"
   _POA_AGENT_VERSION_: "{{ .Values.bma_versions.platform_observability_agent_version }}"

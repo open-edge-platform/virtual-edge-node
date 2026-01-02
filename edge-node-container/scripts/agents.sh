@@ -196,6 +196,12 @@ function install-node-agent() {
   apt-get install -y -o Dpkg::Options::="--force-confnew" "/opt/bma_packages/node-agent_${NODE_AGENT_VERSION}_amd64.deb"
 }
 
+function install-remote-access-agent() {
+  echo "Install remote-access-agent"
+  echo "remote-access-agent remote-access-agent/remoteaccessmanager.serviceURL string ${ORCH_RA_URL}" | debconf-set-selections
+  apt install -y -o Dpkg::Options::="--force-confnew" "/opt/bma_packages/remote-access-agent_${REMOTE_ACCESS_AGENT_VERSION}_amd64.deb" remote-access-agent="${REMOTE_ACCESS_AGENT_VERSION}"
+}
+
 function install-cluster-agent() {
   echo "Install cluster-agent"
   echo "cluster-agent cluster-agent/cluster-orchestrator-url string ${ORCH_C_URL}" | debconf-set-selections
@@ -349,6 +355,20 @@ function configure-node-agent() {
   done
 }
 
+
+function configure-remote-access-agent() {
+  echo "Configure remote-access-agent"
+  # this is a hack to work around the fact that in kubernetes
+  # - cat /sys/class/dmi/id/product_uuid
+  # - dmidecode -s system-uuid
+  # return different values
+//TODO: is this the right way???
+  DEVICE_GUID=$(dmidecode -s system-uuid)
+  sed -i "s|GUID: '.*'|GUID: '$DEVICE_GUID'|" /etc/edge-node/node/confs/remote-access-agent.yaml
+  sed -i 's/, platform-manageability-agent//g' /etc/edge-node/node/confs/remote-access-agent.yaml
+  systemctl restart node-agent
+}
+
 function configure-credentials-permissions() {
   echo "Configure client-credentials permissions"
   chown -R node-agent:bm-agents /etc/intel_edge_node/client-credentials
@@ -374,6 +394,7 @@ function post-agents-configure() {
   configure-systemd-policy
   configure-credentials-permissions
   configure-node-agent
+  configure-remote-access-agent
   configure-cluster-agent
   systemctl restart hardware-discovery-agent
   configure-platform-observability-agent
@@ -390,6 +411,7 @@ echo "Install edge node agents"
 mkdir -p /etc/intel_edge_node/client-credentials
 
 install-node-agent
+install-remote-access-agent
 install-cluster-agent
 install-hda-agent
 install-poa-agent
