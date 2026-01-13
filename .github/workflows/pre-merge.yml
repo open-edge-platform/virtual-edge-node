@@ -105,6 +105,7 @@ jobs:
       run_dep_version_check: true
       run_build: true
       run_lint: true
+      bootstrap_tools: "buf,golangci-lint2,gotools,hadolint,nodejs,oras"
       run_test: false     # only for testing
       run_validate_clean_folder: true
       run_docker_build: true

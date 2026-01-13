@@ -84,7 +84,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
 			Expect(hosts).ToNot(BeNil())
-			hostIDs := []string{}
+			hostIDs := make([]string, 0, len(hosts))
 			for hostID := range hosts {
 				hostIDs = append(hostIDs, hostID)
 				utils_test.UpdateHostOS(ctx, GinkgoTB(),
@@ -116,7 +116,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 
 			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
-			hostIDs := []string{}
+			hostIDs := make([]string, 0, len(hosts))
 			for hostID := range hosts {
 				hostIDs = append(hostIDs, hostID)
 			}
@@ -154,7 +154,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 
 			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
-			hostIDs := []string{}
+			hostIDs := make([]string, 0, len(hosts))
 			for hostID := range hosts {
 				hostIDs = append(hostIDs, hostID)
 			}
@@ -202,7 +202,7 @@ var _ = Describe("Infrastructure Manager integration test", Label(e2eLabel), fun
 			hosts, err := utils_test.ListHosts(ctx, httpClient, nil)
 			Expect(err).To(BeNil())
 
-			hostIDs := []string{}
+			hostIDs := make([]string, 0, len(hosts))
 			for hostID := range hosts {
 				hostIDs = append(hostIDs, hostID)
 			}

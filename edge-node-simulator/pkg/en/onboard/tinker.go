@@ -362,7 +362,7 @@ func (t *tinkWorker) executeCloudInitUserDataHostname(userData UserData) error {
 		zlog.Debug().Msgf("Set hostname: %s", userData.Hostname)
 
 		// Update the hostname using the `hostnamectl` command
-		cmd := exec.Command("hostname", userData.Hostname)
+		cmd := exec.Command("hostname", userData.Hostname) //nolint:noctx // context will be added in future refactor
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf("failed to set hostname using hostname cmd: %w", err)
 		}

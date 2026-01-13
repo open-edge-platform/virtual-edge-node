@@ -133,7 +133,7 @@ func HTTPInfraOnboardDelResource(ctx context.Context,
 
 func HTTPInfraOnboardGetHostAndInstance(ctx context.Context,
 	client *http.Client,
-	url, token, uuid string,
+	url, token, hostUUID string,
 ) (string, string, error) {
 	rCtx, cancel := context.WithTimeout(ctx, waitTime)
 	defer cancel()
@@ -151,19 +151,19 @@ func HTTPInfraOnboardGetHostAndInstance(ctx context.Context,
 			return err
 		}
 		if len(ps.Hosts) == 0 {
-			return fmt.Errorf("empty host result for uuid %s", uuid)
+			return fmt.Errorf("empty host result for uuid %s", hostUUID)
 		}
 		host := (ps.Hosts)[0]
 		hostID = *host.ResourceId
 		if host.Instance != nil && host.Instance.InstanceID != nil {
 			instanceID = *host.Instance.InstanceID
 		} else {
-			return fmt.Errorf("instance not yet created for uuid %s", uuid)
+			return fmt.Errorf("instance not yet created for uuid %s", hostUUID)
 		}
 		return nil
 	}
 
-	filteruuid := fmt.Sprintf(`%s=%q`, "uuid", uuid)
+	filteruuid := fmt.Sprintf(`%s=%q`, "uuid", hostUUID)
 	if err := httpGet(rCtx, client, fmt.Sprintf("%s?filter=%s", url, filteruuid), token, responseHooker); err != nil {
 		return hostID, instanceID, err
 	}
@@ -357,7 +357,7 @@ func HTTPInfraOnboardNewRegisterHost(
 	return &registeredHost, nil
 }
 
-func HTTPInfraOnboardGetHostID(ctx context.Context, url, token string, client *http.Client, uuid string) (string, error) {
+func HTTPInfraOnboardGetHostID(ctx context.Context, url, token string, client *http.Client, hostUUID string) (string, error) {
 	rCtx, cancel := context.WithTimeout(ctx, waitTime)
 	defer cancel()
 
@@ -373,13 +373,13 @@ func HTTPInfraOnboardGetHostID(ctx context.Context, url, token string, client *h
 			return err
 		}
 		if len(ps.Hosts) == 0 {
-			return fmt.Errorf("empty host result for uuid %s", uuid)
+			return fmt.Errorf("empty host result for uuid %s", hostUUID)
 		}
 		zlog.Debug().Msgf("HostResource %#v", ps)
 		hostID = *(ps.Hosts)[0].ResourceId
 		return nil
 	}
-	filteruuid := fmt.Sprintf(`%s=%q`, "uuid", uuid)
+	filteruuid := fmt.Sprintf(`%s=%q`, "uuid", hostUUID)
 	if err := httpGet(rCtx, client, fmt.Sprintf("%s?filter=%s", url, filteruuid), token, responseHooker); err != nil {
 		return hostID, err
 	}

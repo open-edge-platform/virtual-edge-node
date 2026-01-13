@@ -119,7 +119,7 @@ func (p *Pua) handleSingleSchedule(schedule *pb.SingleSchedule) {
 		p.singleSchedule = nil
 		p.singleScheduleFinished = true
 
-	case !(proto.Equal(p.singleSchedule, schedule) && p.singleScheduleFinished):
+	case !(proto.Equal(p.singleSchedule, schedule) && p.singleScheduleFinished): //nolint:staticcheck // left for clarity
 		zlog.Debug().Msgf("'%v' has schedule/job %v", singleScheduleTag, schedule)
 		jobs, errJobs := p.scheduler.FindJobsByTag(
 			singleScheduleTag,

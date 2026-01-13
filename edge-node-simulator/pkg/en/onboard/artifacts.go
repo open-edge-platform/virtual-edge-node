@@ -87,7 +87,7 @@ type Package struct {
 
 // URLArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
 func URLArtifact(url string) error {
-	cmd := exec.Command("curl", "-k", "-o", "/dev/null", url)
+	cmd := exec.Command("curl", "-k", "-o", "/dev/null", url) //nolint:noctx // context will be added in future refactor
 	if err := cmd.Run(); err != nil {
 		zlog.Error().Err(err).Msgf("Failed to download artifact from URL %s", url)
 		return err
@@ -97,7 +97,7 @@ func URLArtifact(url string) error {
 
 // DownloadArtifact downloads an artifact from the given URL and forwards the output to /dev/null.
 func OrasArtifact(url, output string) error {
-	cmd := exec.Command("oras", "pull", "-o", output, url)
+	cmd := exec.Command("oras", "pull", "-o", output, url) //nolint:noctx // context will be added in future refactor
 	if err := cmd.Run(); err != nil {
 		zlog.Error().Err(err).Msgf("Failed to download oras artifact from URL %s", url)
 		return err
@@ -209,7 +209,7 @@ func artifactsManifestAgent(baseURL, manifestVersion string) (map[string]string,
 }
 
 func artifactsAgent(baseURL, outputDir string, agentsVersions map[string]string) []*Artifact {
-	artifacts := []*Artifact{}
+	artifacts := make([]*Artifact, 0, len(agentsNames))
 	for _, agentName := range agentsNames {
 		artifact := NewArtifact(agentName,
 			baseURL, "%s/edge-orch/en/deb/"+agentName+":%s",
@@ -222,7 +222,7 @@ func artifactsAgent(baseURL, outputDir string, agentsVersions map[string]string)
 }
 
 func artifactsTinker(baseURL string) []*Artifact {
-	artifacts := []*Artifact{}
+	artifacts := make([]*Artifact, 0, len(tinkStackArtifactNames))
 	for _, artifactName := range tinkStackArtifactNames {
 		artifact := NewArtifact(
 			artifactName,
@@ -263,7 +263,7 @@ func artifactsImage(baseURL, tiberOSVersion string) []*Artifact {
 }
 
 func artifactsTinkerAction(baseURL, tinkerVersion string) []*Artifact {
-	artifacts := []*Artifact{}
+	artifacts := make([]*Artifact, 0, len(tinkerActionNames))
 	for _, actionName := range tinkerActionNames {
 		artifact := NewArtifact(
 			actionName,
@@ -280,7 +280,7 @@ func artifactsTinkerAction(baseURL, tinkerVersion string) []*Artifact {
 }
 
 func NewArtifacts(cfg *defs.Settings, agentsVersions map[string]string) []*Artifact {
-	artifacts := []*Artifact{}
+	artifacts := []*Artifact{} //nolint:prealloc // to be fixed in future refactor
 	artifacts = append(artifacts, artifactsAgent(cfg.URLFilesRS, cfg.BaseFolder, agentsVersions)...)
 	artifacts = append(artifacts, artifactsTinker(cfg.OrchFQDN)...)
 	artifacts = append(artifacts, artifactsImage(cfg.URLFilesRS, cfg.TiberOSVersion)...)
@@ -291,7 +291,7 @@ func NewArtifacts(cfg *defs.Settings, agentsVersions map[string]string) []*Artif
 func cleanArtifacts(outputDirs []string) error {
 	for _, dir := range outputDirs {
 		zlog.Debug().Msgf("Cleaning artifact %s", dir)
-		if err := exec.Command("rm", "-rf", dir).Run(); err != nil {
+		if err := exec.Command("rm", "-rf", dir).Run(); err != nil { //nolint:noctx // context will be added in future refactor
 			zlog.Error().Err(err).Msgf("Failed to clean artifacts folder %s", dir)
 			return err
 		}

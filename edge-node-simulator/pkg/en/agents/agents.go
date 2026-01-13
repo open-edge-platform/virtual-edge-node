@@ -369,8 +369,9 @@ func connect(
 		MinVersion:         tls.VersionTLS12,
 	}
 	opts := []grpc.DialOption{
-		grpc.WithContextDialer(func(_ context.Context, _ string) (net.Conn, error) {
-			return net.Dial("tcp", address)
+		grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
+			dialer := &net.Dialer{}
+			return dialer.DialContext(ctx, "tcp", address)
 		}),
 		grpc.WithTransportCredentials(creds),
 		grpc.WithTransportCredentials(credentials.NewTLS(config)),
