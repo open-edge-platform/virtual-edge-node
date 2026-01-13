@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.24.11-alpine3.22 AS build
+FROM golang:1.25.5-alpine3.23 AS build
 
 ENV GO111MODULE=on
 ARG MAKE_TARGET=go-build

@@ -3,7 +3,7 @@
 
 module github.com/open-edge-platform/virtual-edge-node/edge-node-container
 
-go 1.24.11
+go 1.25.5
 
 require (
 	github.com/magefile/mage v1.15.0
