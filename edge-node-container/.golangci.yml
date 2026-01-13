@@ -225,7 +225,13 @@ output:
   # Example: "checkstyle:report.json,colored-line-number"
   #
   # Default: colored-line-number
-  formats: colored-line-number:stdout,html:out/golangci-lint.html,junit-xml:out/golangci-lint.xml
+  formats:
+    - format: colored-line-number
+      path: stdout
+    - format: html
+      path: out/golangci-lint.html
+    - format: junit-xml
+      path: out/golangci-lint.xml
 
   print-linter-name: true
 
