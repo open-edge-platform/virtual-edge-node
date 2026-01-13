@@ -1,6 +1,5 @@
 golangci-lint 2.8.0
 golang 1.25.5
-go-junit-report 2.1.0
 yq 4.34.2
 oras 1.2.0
 kind 0.17.0

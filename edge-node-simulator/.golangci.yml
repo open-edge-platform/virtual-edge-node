@@ -232,11 +232,12 @@ output:
   #
   # Default: colored-line-number
   formats:
-    - format: colored-line-number
+    text:
       path: stdout
-    - format: html
+      print-linter-name: true
+    html:
       path: out/golangci-lint.html
-    - format: junit-xml
+    junit-xml:
       path: out/golangci-lint.xml
 
   print-linter-name: true
