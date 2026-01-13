@@ -5,8 +5,8 @@ apiVersion: v2
 name: ensim
 description: Edge Infrastructure Manager - Edge Node Simulator
 type: application
-version: "0.7.9"
-appVersion: "0.7.9"
+version: "0.7.10"
+appVersion: "0.7.10"
 home: edge-orchestrator.intel.com
 maintainers:
   - name: Edge Infrastructure Manager Team
