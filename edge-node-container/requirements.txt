@@ -12,4 +12,4 @@ certifi==2025.6.15
 charset-normalizer==3.4.2
 idna==3.10
 PyYAML==6.0.2
-urllib3==2.6.0
+urllib3==2.6.3
