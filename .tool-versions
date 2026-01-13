@@ -1,4 +1,4 @@
-golangci-lint 1.64.7
+golangci-lint 2.4.0
 golang 1.25.5
 yq 4.34.2
 oras 1.2.0
