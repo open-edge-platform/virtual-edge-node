@@ -168,7 +168,7 @@ func (c *ifmsimClient) Update(
 	agentsStates map[ensimapi.AgentType]ensimapi.AgentState,
 ) error {
 	zlog.Info().Msg("Update")
-	agents := []*ensimapi.AgentsStates{}
+	agents := make([]*ensimapi.AgentsStates, 0, len(agentsStates))
 	for agentType, agentState := range agentsStates {
 		agents = append(agents, &ensimapi.AgentsStates{AgentType: agentType, DesiredState: agentState})
 	}

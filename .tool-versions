@@ -7,5 +7,3 @@ helm 3.11.1
 jq 1.6
 ginkgo 2.23.3
 gomega 1.36.2
-markdownlint-cli2 0.17.2
-

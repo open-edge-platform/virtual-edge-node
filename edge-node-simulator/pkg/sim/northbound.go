@@ -245,7 +245,7 @@ func helperAgentType(agentType ensim_agents.AgentType) ensimapi.AgentType {
 }
 
 func helperNodeStates(existingStates ensim_agents.StateMap) []*ensimapi.AgentsStates {
-	agents := []*ensimapi.AgentsStates{}
+	agents := make([]*ensimapi.AgentsStates, 0, len(existingStates.Current))
 	for agentType, currentState := range existingStates.Current {
 		agent := &ensimapi.AgentsStates{
 			AgentType:    helperAgentType(agentType),
@@ -259,7 +259,7 @@ func helperNodeStates(existingStates ensim_agents.StateMap) []*ensimapi.AgentsSt
 }
 
 func enToProto(en *EdgeNode) *ensimapi.Node {
-	enStatus := []*ensimapi.NodeStatus{}
+	enStatus := make([]*ensimapi.NodeStatus, 0, len(en.GetAgentsStatus()))
 	for _, stats := range en.GetAgentsStatus() {
 		enStatus = append(enStatus, stats)
 	}
