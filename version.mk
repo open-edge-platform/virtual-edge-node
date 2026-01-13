@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
  
 GOLINTVERSION_HAVE          := $(shell golangci-lint version | sed 's/.*version //' | sed 's/ .*//')
-GOLINTVERSION_REQ           := 1.64.5
+GOLINTVERSION_REQ           := 2.4.0
 GOJUNITREPORTVERSION_HAVE   := $(shell go-junit-report -version | sed s/.*" v"// | sed 's/ .*//')
 GOJUNITREPORTVERSION_REQ    := 2.1.0
 GOVERSION_REQ               := 1.25.5
