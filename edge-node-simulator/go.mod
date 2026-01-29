@@ -10,7 +10,7 @@ require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-co-op/gocron v1.37.0
-	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/magefile/mage v1.15.0
 	github.com/manifoldco/promptui v0.9.0
