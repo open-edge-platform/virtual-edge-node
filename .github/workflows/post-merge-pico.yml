@@ -34,6 +34,7 @@ jobs:
       run_version_tag: true
       prefix_tag_separator: "/"
       project_folder: "pico"
+      run_version_dev: true
     secrets:
       SYS_EMF_GH_TOKEN: ${{ secrets.SYS_EMF_GH_TOKEN }}
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
