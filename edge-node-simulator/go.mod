@@ -21,7 +21,7 @@ require (
 	github.com/open-edge-platform/infra-managers/host v1.24.1
 	github.com/open-edge-platform/infra-managers/maintenance v1.24.3
 	github.com/open-edge-platform/infra-managers/telemetry v1.24.1
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.0
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.1
 	github.com/open-edge-platform/orch-library/go v0.6.3
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.34.0

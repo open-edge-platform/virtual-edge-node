@@ -304,8 +304,8 @@ github.com/open-edge-platform/infra-managers/maintenance v1.24.3 h1:+q7bCT2i1YvL
 github.com/open-edge-platform/infra-managers/maintenance v1.24.3/go.mod h1:fuj4NXawGZxhzzKZmRaXm2EM5WwIqTVcbxfC054VjXM=
 github.com/open-edge-platform/infra-managers/telemetry v1.24.1 h1:iOM6UOOSYymDfkJeZ/G74DOenRS2Qnt2OHl9z047yrc=
 github.com/open-edge-platform/infra-managers/telemetry v1.24.1/go.mod h1:27MpI/Gy2jLsFnsDnAAwl0ZsXz0QFUskcFgN5bJP0k8=
-github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.0 h1:P9X+y6O4Vma6EGrF04YNi3+hEjn22AY4c/AwvvHeXGA=
-github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.0/go.mod h1:pRFMwuwXf0/Fy6upUUpeHLO0jbhpqrKP/KsuaeSbAZE=
+github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.1 h1:bd7SA9S101DMlkU9MQAR78CnggNe8PQ6t24375MLdqU=
+github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.1/go.mod h1:BpEsTCyKBV8zAgMEW9pWKVskhyQ7xyemo4GJCq6YYkE=
 github.com/open-edge-platform/orch-library/go v0.6.3 h1:zLdAtY5KuArT1D2xCvVLysD7r8GxqvkP8Vj1sO5ZJk8=
 github.com/open-edge-platform/orch-library/go v0.6.3/go.mod h1:mYhs/KbcXPQWM+2cHZXyzeIIzM7xKvnNgsnHlFkXH0g=
 github.com/open-edge-platform/orch-library/go/dazl v0.5.4 h1:Rx/bSAZiLjEEBjUiJEzBvT0fQv5huT5FQ2Ke3IMUhiE=
