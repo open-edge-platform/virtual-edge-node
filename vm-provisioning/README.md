@@ -239,7 +239,7 @@ Here's an example of how to download the file into the certs directory:
 
 ```bash
 source ./config
-wget https://"tinkerbell-nginx.${CLUSTER}"/tink-stack/keys/Full_server.crt --no-check-certificate -O certs/"Full_server.crt"
+wget https://"tinkerbell-haproxy.${CLUSTER}"/tink-stack/keys/Full_server.crt --no-check-certificate -O certs/"Full_server.crt"
 ```
 
 ### Step 7: OS Instance and Providers

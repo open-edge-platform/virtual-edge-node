@@ -24,7 +24,7 @@ create_resources() {
     <dnsmasq:option value='dhcp-vendorclass=set:efi-http,HTTPClient:Arch:00016'/>
     <dnsmasq:option value='dhcp-option-force=tag:efi-http,60,HTTPClient'/>
     <dnsmasq:option value='dhcp-match=set:ipxe,175'/>
-    <dnsmasq:option value='dhcp-boot=tag:efi-http,"https://tinkerbell-nginx.${CLUSTER}/tink-stack/signed_ipxe.efi"'/>
+    <dnsmasq:option value='dhcp-boot=tag:efi-http,"https://tinkerbell-haproxy.${CLUSTER}/tink-stack/signed_ipxe.efi"'/>
     <dnsmasq:option value='log-queries'/>
     <dnsmasq:option value='log-dhcp'/>
     <dnsmasq:option value='log-debug'/>

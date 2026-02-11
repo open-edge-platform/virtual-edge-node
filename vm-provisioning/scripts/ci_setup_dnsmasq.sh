@@ -83,7 +83,7 @@ fi
 #tinkerbell_lb=$ip_address
 #cluster_lb=$ip_address
 cat <<EOL | sudo tee /etc/dnsmasq.d/cluster-hosts-dns.conf
-address=/tinkerbell-nginx.$CLUSTER_FQDN/$tinkerbell_lb
+address=/tinkerbell-haproxy.$CLUSTER_FQDN/$tinkerbell_lb
 address=/argo.$CLUSTER_FQDN/$argocd_lb
 address=/$CLUSTER_FQDN/$cluster_lb
 address=/alerting-monitor.$CLUSTER_FQDN/$cluster_lb
