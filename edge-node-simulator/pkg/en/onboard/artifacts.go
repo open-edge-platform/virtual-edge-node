@@ -227,7 +227,7 @@ func artifactsTinker(baseURL string) []*Artifact {
 		artifact := NewArtifact(
 			artifactName,
 			baseURL,
-			"https://tinkerbell-nginx.%s/tink-stack/"+artifactName,
+			"https://tinkerbell-haproxy.%s/tink-stack/"+artifactName,
 			artifactName,
 			"",
 			"",

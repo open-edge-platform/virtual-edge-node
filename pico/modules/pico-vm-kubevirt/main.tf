@@ -13,9 +13,9 @@ locals {
 }
 
 module "common" {
-  source                  = "../common"
-  boot_image_name         = local.boot_image_name
-  tinkerbell_nginx_domain = var.tinkerbell_nginx_domain
+  source                    = "../common"
+  boot_image_name           = local.boot_image_name
+  tinkerbell_haproxy_domain = var.tinkerbell_haproxy_domain
 }
 
 resource "null_resource" "upload_uefi_boot_image" {

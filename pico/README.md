@@ -40,7 +40,7 @@ provisioning, agents, and Kubernetes 🚀
 - `asdf` version manager:
   - Install [asdf](https://asdf-vm.com/guide/getting-started.html)
   - Run `asdf install` to install the required versions of tools
-- An Open Edge Platform Orchestrator with a Tinkerbell Nginx URL
+- An Open Edge Platform Orchestrator with a Tinkerbell HAProxy URL
 - **Note:** Ensure that the `http_proxy`, `https_proxy` and `no_proxy` environment variables are set correctly
 for your network configuration. This variable should be set to include any necessary domains to bypass the proxy.
 
@@ -92,7 +92,7 @@ module "pico_vm" {
     network_bridge = "vmbr0"
     network_model  = "virtio"
 
-    tinkerbell_nginx_domain = "tinkerbell-nginx.your-orch-url.io"
+    tinkerbell_haproxy_domain = "tinkerbell-haproxy.your-orch-url.io"
 }
 ```
 
@@ -102,7 +102,7 @@ module "pico_vm" {
 - `vm_id`: The ID of the created virtual machine
 - `vm_serial`: The SMBIOS serial number of the virtual machine
 - `vm_uuid`: The SMBIOS UUID of the virtual machine
-- `tinkerbell_nginx_domain`: The Tinkerbell Nginx URL for the virtual machine
+- `tinkerbell_haproxy_domain`: The Tinkerbell HAProxy URL for the virtual machine
 - `boot_order`: Set the boot order for the VM. Default tf variable it is configured as scsi0. For PXE boot, set as ["scsi0","net0"].
 
 #### Delete Proxmox VM
@@ -177,7 +177,7 @@ module "pico_vm" {
     libvirt_pool_name     = "default"
     libvirt_network_name  = "default"
 
-    tinkerbell_nginx_domain = "tinkerbell-nginx.your-orch-url.io"
+    tinkerbell_haproxy_domain = "tinkerbell-haproxy.your-orch-url.io"
 }
 ```
 
@@ -194,12 +194,12 @@ smbios_product   = "PicoVM"
 libvirt_pool_name = "default"
 libvirt_network_name = "default"
 vm_console = "pty"
-tinkerbell_nginx_domain = "tinkerbell-nginx.demo.abc.com"
+tinkerbell_haproxy_domain = "tinkerbell-haproxy.demo.abc.com"
 smbios_serial = "PICOVEN01"
 $
 
 ```
-Note: "tinkerbell_nginx_domain is a mandatory user input if other arguments are not provided; otherwise, the default values defined in variables.tf will be used.
+Note: "tinkerbell_haproxy_domain" is a mandatory user input if other arguments are not provided; otherwise, the default values defined in variables.tf will be used.
 
 #### Libvirt module Outputs
 
@@ -273,7 +273,7 @@ module "pico_vm" {
 
     smbios_serial     = "1234-5678-9012"
 
-    tinkerbell_nginx_domain = "tinkerbell-nginx.your-orch-url.io"
+    tinkerbell_haproxy_domain = "tinkerbell-haproxy.your-orch-url.io"
 }
 ```
 
@@ -281,7 +281,7 @@ module "pico_vm" {
 
 - `vm_name`: The name of the created virtual machine
 - `data_volume_name`: The name of the data volume created for the VM
-- `tinkerbell_nginx_domain`: The Tinkerbell Nginx URL for the virtual machine
+- `tinkerbell_haproxy_domain`: The Tinkerbell HAProxy URL for the virtual machine
 
 ## Contributing
 

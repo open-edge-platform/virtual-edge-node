@@ -15,11 +15,11 @@ resource "random_id" "vm_serial" {
 }
 
 module "common" {
-  count = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
-  source                  = "../common"
-  boot_image_name         = local.boot_image_name
-  tinkerbell_nginx_domain = var.tinkerbell_nginx_domain != "" ? var.tinkerbell_nginx_domain : "dummy.local"
-  boot_order              = var.boot_order
+  count                     = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
+  source                    = "../common"
+  boot_image_name           = local.boot_image_name
+  tinkerbell_haproxy_domain = var.tinkerbell_haproxy_domain != "" ? var.tinkerbell_haproxy_domain : "dummy.local"
+  boot_order                = var.boot_order
 }
 
 # Ensure default storage pool exists before provisioning
@@ -43,7 +43,7 @@ resource "null_resource" "ensure_libvirt_pool" {
 }
 
 resource "libvirt_volume" "uefi_boot_image" {
-  count = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
+  count      = contains(var.boot_order, "network") && length(var.boot_order) == 1 ? 0 : 1
   depends_on = [null_resource.ensure_libvirt_pool, module.common]
   name       = "${var.vm_name}-vol"
   pool       = var.libvirt_pool_name

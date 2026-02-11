@@ -30,16 +30,16 @@ provider "proxmox" {
   insecure = var.proxmox_insecure
 
   random_vm_id_start = var.proxmox_random_vm_id_start
-  random_vm_id_end = var.proxmox_random_vm_id_end
-  random_vm_ids = var.proxmox_random_vm_ids
+  random_vm_id_end   = var.proxmox_random_vm_id_end
+  random_vm_ids      = var.proxmox_random_vm_ids
 
   ssh {
     agent = true
     dynamic "node" {
       for_each = var.proxmox_endpoint_ssh != "" ? [1] : []
       content {
-      name    = var.proxmox_node_name
-      address = var.proxmox_endpoint_ssh
+        name    = var.proxmox_node_name
+        address = var.proxmox_endpoint_ssh
       }
     }
   }

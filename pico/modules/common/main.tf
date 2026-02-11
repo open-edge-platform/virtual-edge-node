@@ -65,7 +65,7 @@ if [ "$BOOT_ORDER" != "network" ] && [ "$BOOT_ORDER" != "net0" ]; then
     --output ${path.module}/mnt/EFI/BOOT/BOOTX64.EFI \
     --insecure \
     --location \
-    https://${var.tinkerbell_nginx_domain}/tink-stack/signed_ipxe.efi)
+    https://${var.tinkerbell_haproxy_domain}/tink-stack/signed_ipxe.efi)
   
   if [ "$${response_code}" -ne 200 ]; then
     echo "Failed to download signed_ipxe.efi: Expected HTTP response code 200, got $response_code"
