@@ -54,8 +54,8 @@ variable "vm_console" {
   }
 }
 
-variable "tinkerbell_nginx_domain" {
-  description = "The domain of the Tinkerbell Nginx server"
+variable "tinkerbell_haproxy_domain" {
+  description = "The domain of the Tinkerbell HAProxy server"
   type        = string
 }
 
@@ -84,7 +84,7 @@ variable "libvirt_firmware" {
 }
 
 variable "boot_order" {
-  type = list(string)
+  type    = list(string)
   default = ["hd"]
 }
 

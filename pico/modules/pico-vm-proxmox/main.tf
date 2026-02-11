@@ -13,10 +13,10 @@ locals {
 }
 
 module "common" {
-  source                  = "../common"
-  boot_image_name         = local.boot_image_name
-  tinkerbell_nginx_domain = var.tinkerbell_nginx_domain
-  boot_order              = var.boot_order
+  source                    = "../common"
+  boot_image_name           = local.boot_image_name
+  tinkerbell_haproxy_domain = var.tinkerbell_haproxy_domain
+  boot_order                = var.boot_order
 }
 
 resource "proxmox_virtual_environment_file" "upload_uefi_boot_image" {

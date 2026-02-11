@@ -85,7 +85,7 @@ variable "tpm_enable" {
   default     = true
 }
 
-variable "tinkerbell_nginx_domain" {
-  description = "The domain of the Tinkerbell Nginx server"
+variable "tinkerbell_haproxy_domain" {
+  description = "The domain of the Tinkerbell HAProxy server"
   type        = string
 }

@@ -20,8 +20,8 @@ output "vm_name" {
   value       = local.full_vm_name
 }
 
-output "tinkerbell_nginx_domain" {
-  value = var.tinkerbell_nginx_domain
+output "tinkerbell_haproxy_domain" {
+  value = var.tinkerbell_haproxy_domain
 }
 
 output "data_volume_name" {

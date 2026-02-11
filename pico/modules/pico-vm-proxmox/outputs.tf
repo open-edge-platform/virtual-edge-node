@@ -18,6 +18,6 @@ output "vm_uuid" {
   value = proxmox_virtual_environment_vm.node_vm.smbios[0].uuid
 }
 
-output "tinkerbell_nginx_domain" {
-  value = var.tinkerbell_nginx_domain
+output "tinkerbell_haproxy_domain" {
+  value = var.tinkerbell_haproxy_domain
 }
