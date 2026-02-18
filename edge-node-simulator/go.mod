@@ -6,7 +6,7 @@ module github.com/open-edge-platform/virtual-edge-node/edge-node-simulator
 go 1.25.5
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20251209175733-2a1774d88802.1
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260209202127-80ab13bee0bf.1
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-co-op/gocron v1.37.0
@@ -24,8 +24,8 @@ require (
 	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.7
 	github.com/open-edge-platform/orch-library/go v0.6.4-0.20260211092341-cfad67ad247d
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/oauth2 v0.34.0
-	golang.org/x/term v0.39.0
+	golang.org/x/oauth2 v0.35.0
+	golang.org/x/term v0.40.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217
 	google.golang.org/grpc v1.80.0-dev
 	google.golang.org/protobuf v1.36.11
@@ -164,7 +164,7 @@ require (
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.13.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
