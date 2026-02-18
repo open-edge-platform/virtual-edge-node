@@ -7,7 +7,7 @@ go 1.25.5
 
 require (
 	github.com/magefile/mage v1.15.0
-	github.com/open-edge-platform/infra-core/inventory/v2 v2.34.2
+	github.com/open-edge-platform/infra-core/inventory/v2 v2.34.3
 	github.com/open-edge-platform/virtual-edge-node/edge-node-simulator v0.7.12
 )
 
@@ -53,8 +53,8 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
-	github.com/open-edge-platform/infra-core/apiv2/v2 v2.9.2 // indirect
-	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.1 // indirect
+	github.com/open-edge-platform/infra-core/apiv2/v2 v2.9.7 // indirect
+	github.com/open-edge-platform/infra-onboarding/onboarding-manager v1.39.7 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
