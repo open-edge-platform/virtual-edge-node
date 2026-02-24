@@ -15,6 +15,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  MARKDOWNLINT_CLI_VER: 0.44.0
+
 permissions: {}
 
 jobs:
