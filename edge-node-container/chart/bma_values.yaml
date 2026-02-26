@@ -1,9 +1,9 @@
 caddy_version: 2.7.6
-cluster_agent_version: 1.8.3
-hardware_discovery_agent_version: 1.8.1
+cluster_agent_version: 1.9.0
+hardware_discovery_agent_version: 1.9.1
 in_band_manageability_version: 1.0.2
-node_agent_version: 1.9.1
-platform_manageability_agent_version: 0.3.0
+node_agent_version: 1.10.1
+platform_manageability_agent_version: 0.4.1
 platform_observability_agent_version: 1.10.1
-platform_telemetry_agent_version: 1.6.1
-platform_update_agent_version: 1.8.1
+platform_telemetry_agent_version: 1.7.0
+platform_update_agent_version: 1.9.0
