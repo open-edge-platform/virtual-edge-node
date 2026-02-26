@@ -3,7 +3,7 @@ cluster_agent_version: 1.8.3
 hardware_discovery_agent_version: 1.8.1
 in_band_manageability_version: 1.0.2
 node_agent_version: 1.9.1
-platform_manageability_agent_version: 0.3.0
+platform_manageability_agent_version: 0.4.4
 platform_observability_agent_version: 1.10.1
 platform_telemetry_agent_version: 1.6.1
 platform_update_agent_version: 1.8.1
