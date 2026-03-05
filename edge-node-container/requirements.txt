@@ -5,7 +5,7 @@
 yamllint~=1.37.1
 
 # license check
-reuse~=5.0.2
+reuse~=6.0.0
 
 # utils
 certifi==2025.6.15
