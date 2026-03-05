@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-SUBPROJECTS := vm-provisioning edge-node-simulator edge-node-container
+SUBPROJECTS := vm-provisioning
 
 .DEFAULT_GOAL := help
 .PHONY: all clean clean-all help lint test build license

@@ -4,24 +4,6 @@
 ---
 version: 2
 updates:
-  - package-ecosystem: "gomod"
-    directories:
-      - "/edge-node-simulator"
-      - "/edge-node-container"
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 3
-    commit-message:
-      prefix: "[gomod] "
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-        exclude-patterns:  # Internal dependencies are update into separate PRs.
-          - "*open-edge-platform*"
-      internal-dependencies:
-        patterns:
-          - "*open-edge-platform*"
   - package-ecosystem: "github-actions"
     directories:
       - "/"  # this enables searching only in /.github/workflows directory

@@ -10,14 +10,6 @@ root:
   - changed-files:
       - any-glob-to-any-file: "*"
 
-edge-node-simulator:
-  - changed-files:
-    - any-glob-to-any-file: "edge-node-simulator/**"
-
-edge-node-container:
-  - changed-files:
-    - any-glob-to-any-file: "edge-node-container/**"
-
 vm-provisioning:
   - changed-files:
       - any-glob-to-any-file: "vm-provisioning/**"
