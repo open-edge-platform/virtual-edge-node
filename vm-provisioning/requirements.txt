@@ -5,10 +5,10 @@
 yamllint~=1.35.1
 
 # license checking
-python-debian==0.1.44
+python-debian==0.1.48
 
 # license check
-reuse~=5.0.2
+reuse~=6.0.0
 
 PyYAML>=5.4
 
