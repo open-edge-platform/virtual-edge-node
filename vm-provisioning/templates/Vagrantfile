@@ -71,6 +71,10 @@ Vagrant.configure("2") do |config|
           { value: 'chardev:serial1' },
           { value: '-fw_cfg' },
           { value: 'name=etc/edk2/https/cacerts,file=/var/lib/libvirt/boot/orchvm-net-000_ca.der'},
+          { value: '-fw_cfg' },
+          { value: 'name=opt/org.tianocore/IPv4PXESupport,string=no' },
+          { value: '-fw_cfg' },
+          { value: 'name=opt/org.tianocore/IPv6PXESupport,string=no' },
           { value: '-smbios' },
 	  { value: "type=1,serial=#{serialnum}"}
         ]
