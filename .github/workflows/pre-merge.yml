@@ -98,7 +98,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@d40dfda9598df896aa20cb1dc2c950d6444e8fa7  # 2026.0.19
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@7cfa607d4510b6462e2a7dc97ac722da89f0af2f  # 2026.1.0
     permissions:
       contents: read
       pull-requests: write
