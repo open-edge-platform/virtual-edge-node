@@ -1,6 +1,7 @@
 ---
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
+# temporary comment to trigger CI test
 
 name: Pre-Merge CI Pipeline
 
