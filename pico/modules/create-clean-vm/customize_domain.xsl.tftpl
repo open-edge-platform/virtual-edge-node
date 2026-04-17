@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<!-- SPDX-FileCopyrightText: 2026 Intel Corporation -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<xsl:stylesheet version="1.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output omit-xml-declaration="yes" indent="yes"/>
+
+  <!-- Template to copy all nodes and attributes as-is -->
+  <xsl:template match="node()|@*">
+    <xsl:copy>
+      <xsl:apply-templates select="node()|@*"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- Add SMBIOS information -->
+  <xsl:template match="os">
+    <xsl:copy>
+      <xsl:apply-templates select="*"/>
+      <smbios mode="sysinfo"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- Add sysinfo to the domain -->
+  <xsl:template match="domain">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <sysinfo type="smbios">
+        <system>
+          <entry name="product">${smbios_product}</entry>
+          <entry name="version">Ubuntu Server VM V1</entry>
+          <entry name="serial">${smbios_serial}</entry>
+          <entry name="uuid">${vm_uuid}</entry>
+        </system>
+      </sysinfo>
+    </xsl:copy>
+  </xsl:template>
+
+</xsl:stylesheet>

@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#cloud-config
+hostname: ${hostname}
+fqdn: ${hostname}.localdomain
+manage_etc_hosts: true
+
+users:
+  - name: ${username}
+    plain_text_passwd: ${password}
+    lock_passwd: false
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: sudo, adm
+%{ if length(ssh_authorized_keys) > 0 ~}
+    ssh_authorized_keys:
+%{ for key in ssh_authorized_keys ~}
+      - ${key}
+%{ endfor ~}
+%{ endif ~}
+
+%{ if ssh_enabled ~}
+ssh_pwauth: true
+
+packages:
+  - openssh-server
+
+runcmd:
+  - systemctl enable ssh
+  - systemctl start ssh
+%{ endif ~}
+
+growpart:
+  mode: auto
+  devices: ['/']
+  ignore_growroot_disabled: false
+
+power_state:
+  mode: reboot
+  condition: true
+  timeout: 30
+  message: "Rebooting after cloud-init completes"
