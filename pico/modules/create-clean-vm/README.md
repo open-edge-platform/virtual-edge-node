@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Intel Corporation -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Generate Ubuntu VM — Libvirt Terraform Module
 
 Terraform module to provision an **Ubuntu 24.04.4 Server** virtual machine on
@@ -34,45 +37,40 @@ cp terraform.tfvars.example terraform.tfvars
 
 # Initialize and apply
 terraform init
-terraform apply
+terraform apply --var-file=terraform.tfvars -auto-approve
 ```
 
 ## Variables
 
-| Name | Description | Type | Default |
-|------|-------------|------|---------|
-| `vm_name` | Name of the virtual machine | `string` | `ubuntu-server` |
-| `cpu_cores` | Number of CPU cores | `number` | `4` |
-| `memory` | Memory in MB | `number` | `4096` |
-| `disk_size` | Primary OS disk size in bytes | `number` | `42949672960` (40 GB) |
-| `additional_disks` | Extra data disks (`name`, `size`) | `list(object)` | `[]` |
-| `smbios_uuid` | SMBIOS UUID (auto-generated if blank) | `string` | `""` |
-| `smbios_serial` | SMBIOS serial number (auto-generated if blank) | `string` | `""` |
-| `smbios_product` | SMBIOS product name | `string` | `Ubuntu Server VM` |
-| `default_user` | Default login username | `string` | `user` |
-| `default_password` | Default login password | `string` | `user123` |
-| `ssh_enabled` | Install and enable SSH server | `bool` | `true` |
-| `ssh_authorized_keys` | SSH public keys for the default user | `list(string)` | `[]` |
-| `ubuntu_image_url` | URL to the Ubuntu 24.04 cloud image | `string` | Ubuntu official |
-| `libvirt_uri` | Libvirt connection URI | `string` | `qemu:///system` |
-| `libvirt_pool_name` | Libvirt storage pool | `string` | `default` |
-| `libvirt_network_name` | Libvirt network | `string` | `default` |
-| `libvirt_firmware` | UEFI firmware path (blank = BIOS) | `string` | `""` |
-| `vm_console` | Console type: `pty` or `file` | `string` | `pty` |
-| `vm_autostart` | Auto-start VM on host boot | `bool` | `false` |
+Refer to `terraform.tfvars` for the list of configurable variables and their default values.
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| `vm_name` | Name of the created VM |
-| `vm_uuid` | SMBIOS UUID |
-| `vm_serial` | SMBIOS serial number |
-| `vm_ip` | IP address(es) of the VM |
-| `vm_memory_mb` | Allocated memory in MB |
-| `vm_cpu_cores` | Allocated CPU cores |
-| `vm_disk_size_bytes` | Primary disk size in bytes |
-| `ssh_connection` | Ready-to-use SSH command |
+Refer to `outputs.tf` for the list of output values.
+
+## Update terraform.tfvars
+
+Edit `terraform.tfvars` to customize the VM configuration before applying:
+
+```hcl
+# VM Configuration
+vm_name   = "ubuntu-server-01"
+cpu_cores = 4
+memory    = 4096
+disk_size = 40
+
+smbios_serial  = "UBUNTUVM01"
+smbios_product = "Ubuntu Server VM"
+
+# User configuration
+default_user     = "user"
+default_password = "user"
+ssh_enabled      = true
+
+# Libvirt settings
+libvirt_pool_name    = "default"
+libvirt_network_name = "default"
+```
 
 ## Usage Examples
 
@@ -157,7 +155,7 @@ terraform destroy
 ## File Structure
 
 ```
-generate-ubuntu-vm/
+create-clean-vm/
 ├── terraform.tf                     # Provider configuration
 ├── variables.tf                     # Input variables
 ├── main.tf                          # VM, disk, cloud-init resources
@@ -165,6 +163,7 @@ generate-ubuntu-vm/
 ├── customize_domain.xsl.tftpl       # SMBIOS XML customization template
 ├── cloud_init_user.cfg.tftpl        # Cloud-init user-data template
 ├── cloud_init_network.cfg.tftpl     # Cloud-init network config template
+├── terraform.tfvars                 # Variable values for deployment
 ├── terraform.tfvars.example         # Example variable values
 └── README.md                        # This file
 ```

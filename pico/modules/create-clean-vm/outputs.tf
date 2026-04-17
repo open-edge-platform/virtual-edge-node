@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 output "vm_name" {
   description = "Name of the created virtual machine"
   value       = libvirt_domain.ubuntu_vm.name

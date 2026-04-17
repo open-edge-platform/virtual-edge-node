@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 locals {
   vm_uuid   = length(var.smbios_uuid) > 0 ? var.smbios_uuid : random_uuid.vm_uuid.result
   vm_serial = length(var.smbios_serial) > 0 ? var.smbios_serial : upper(random_id.vm_serial.hex)
