@@ -20,7 +20,7 @@
     </xsl:copy>
   </xsl:template>
 
-  <!-- Add sysinfo and devices elements to the domain -->
+  <!-- Add sysinfo to the domain -->
   <xsl:template match="domain">
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
@@ -32,12 +32,17 @@
           <entry name="uuid">${vm_uuid}</entry>
         </system>
       </sysinfo>
-      <devices>
-        <serial type='${vm_console}'>
-          <source path='/var/log/libvirt/qemu/${vm_name}-console.log'/>
-          <target port='0'/>
-        </serial>
-      </devices>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- Add serial device inside existing devices block -->
+  <xsl:template match="domain/devices">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+      <serial type='${vm_console}'>
+        <source path='/var/log/libvirt/qemu/${vm_name}-console.log'/>
+        <target port='0'/>
+      </serial>
     </xsl:copy>
   </xsl:template>
 

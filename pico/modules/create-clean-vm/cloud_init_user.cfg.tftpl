@@ -1,8 +1,7 @@
+#cloud-config
 # SPDX-FileCopyrightText: 2026 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
-
-#cloud-config
 hostname: ${hostname}
 fqdn: ${hostname}.localdomain
 manage_etc_hosts: true
@@ -25,7 +24,7 @@ users:
 ssh_pwauth: true
 
 write_files:
-  - path: /etc/ssh/sshd_config.d/50-allow-password.conf
+  - path: /etc/ssh/sshd_config.d/99-allow-password.conf
     content: |
       PasswordAuthentication yes
       KbdInteractiveAuthentication yes
