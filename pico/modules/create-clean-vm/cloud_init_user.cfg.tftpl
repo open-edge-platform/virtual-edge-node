@@ -24,12 +24,17 @@ users:
 %{ if ssh_enabled ~}
 ssh_pwauth: true
 
+write_files:
+  - path: /etc/ssh/sshd_config.d/50-allow-password.conf
+    content: |
+      PasswordAuthentication yes
+      KbdInteractiveAuthentication yes
+    permissions: '0644'
+
 packages:
   - openssh-server
 
 runcmd:
-  - sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-  - sed -i 's/^#*KbdInteractiveAuthentication.*/KbdInteractiveAuthentication yes/' /etc/ssh/sshd_config
   - rm -f /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
   - systemctl enable ssh
   - systemctl restart ssh
