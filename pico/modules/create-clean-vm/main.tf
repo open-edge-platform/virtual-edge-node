@@ -132,12 +132,6 @@ resource "libvirt_domain" "ubuntu_vm" {
     listen_type = "address"
   }
 
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
   xml {
     xslt = templatefile("${path.module}/customize_domain.xsl.tftpl", {
       smbios_product = var.smbios_product

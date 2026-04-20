@@ -1,8 +1,7 @@
+#cloud-config
 # SPDX-FileCopyrightText: 2026 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
-
-#cloud-config
 hostname: ${hostname}
 fqdn: ${hostname}.localdomain
 manage_etc_hosts: true
@@ -24,12 +23,20 @@ users:
 %{ if ssh_enabled ~}
 ssh_pwauth: true
 
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-allow-password.conf
+    content: |
+      PasswordAuthentication yes
+      KbdInteractiveAuthentication yes
+    permissions: '0644'
+
 packages:
   - openssh-server
 
 runcmd:
+  - rm -f /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
   - systemctl enable ssh
-  - systemctl start ssh
+  - systemctl restart ssh
 %{ endif ~}
 
 growpart:
