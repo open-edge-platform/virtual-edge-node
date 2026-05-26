@@ -19,13 +19,11 @@ jobs:
       security-events: write
       id-token: write
       actions: read
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@a95228137803b756aae327668c115db235802982  # 2026.1.3
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@e1be8f090e3bb60af180bfac5ca32638517f9d1f
     with:
       run_build: false
-      run_docker_build: false
-      run_docker_push: false
-      run_helm_build: false
-      run_helm_push: false
+      run_version_tag: false
+      run_repo_pipeline: false
     secrets:
       SYS_EMF_GH_TOKEN: ${{ secrets.SYS_EMF_GH_TOKEN }}
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
