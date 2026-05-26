@@ -6,9 +6,9 @@ name: Security scan on tag
 
 on:
   workflow_dispatch:
-  tags:
+  push:
+    tags:
       - '*'
-
 permissions:
   contents: read
 
