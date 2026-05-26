@@ -11,8 +11,6 @@ on:
       - release-*
     paths:
       - 'vm-provisioning/**'
-    tags:
-      - '*'
   workflow_dispatch:
 
 permissions:

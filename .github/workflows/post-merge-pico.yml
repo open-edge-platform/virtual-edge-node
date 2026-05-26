@@ -11,8 +11,6 @@ on:
       - release-*
     paths:
       - 'pico/**'
-    tags:
-      - '*'
   workflow_dispatch:
 
 permissions:
